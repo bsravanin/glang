@@ -12,7 +12,7 @@ import javax.tools.ToolProvider;
 
 public class MethodController {
 	
-	private static String rootPath = "/Users/mikefhsu/course/PLT/Javatest";
+	private static String rootPath = "/Path/Where/You/Want/To/Save/Method";
 	
 	/**
 	 * @param args
