@@ -1,0 +1,21 @@
+1. Set up multiple ssh config
+http://stackoverflow.com/questions/3225862/multiple-github-accounts-ssh-config
+http://sampreshan.svashishtha.com/2012/05/20/quicktip-github-multiple-accounts-access-with-ssh/
+
+2. Set up ssh key in github
+https://help.github.com/articles/generating-ssh-keys
+http://myprogrammingblog.com/2012/01/20/github-how-clone-github-repo-how-to-push-to-github-how-to-get-files-from-github-ubuntu/
+
+3. Git hub tutorial for setting up ssh key
+https://help.github.com/articles/generating-ssh-keys
+
+4. Git hub basic
+http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository
+
+5. Git hub on Eclipse
+http://eclipse.github.com/
+
+Temporary References
+[1] http://www.adrianwalker.org/2009/07/package-org.html
+[2] http://viralpatel.net/blogs/java-dynamic-class-loading-java-reflection-api/
+[3] http://stackoverflow.com/questions/2946338/how-do-i-programmatically-compile-and-instantiate-a-java-class
