@@ -2,12 +2,12 @@ package edu.columbia.plt.gramola.abstractdata;
 
 import java.util.Set;
 
-public interface GraphElement {
+public abstract class GraphElement {
 	
-	public void setId(int id);
+	public abstract void setId(int id);
 	
-	public int getId();
+	public abstract int getId();
 	
-	public Set<String> getVariables();
+	public abstract Set<String> getVariables();
 
 }

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
-public class Edge implements GraphElement{
+public class Edge extends GraphElement{
 	
 	private int id = -1;
 	

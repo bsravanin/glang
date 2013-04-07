@@ -9,15 +9,42 @@ import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
 public class Graph{
 	
-	private HashMap<Integer, Node> nodeMap;
-	
-	private ArrayList<Node> nodeList;
+	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	private int nodeId = 0;
 	
-	public void createNode(HashMap<String, Object> variableMap) {
+	public Node createNode(Object...vvlist) {
+		HashMap<String, Object> variableMap = createVariableMap(vvlist);
 		Node node = new Node(variableMap, nodeId++);
 		this.addNode(node);
+		
+		return node;
+	}
+	
+	public Edge createEdge(Node start, Node end, Object...vvlist) {
+		HashMap<String, Object> variableMap = createVariableMap(vvlist);
+		Edge edge = new Edge(start, end, variableMap);
+		start.setOutE(edge);
+		end.setInE(edge);
+		
+		return edge;
+	}
+	
+	private HashMap<String, Object> createVariableMap(Object vvlist[]) {
+		if (vvlist.length%2 != 0)
+			return null;
+		
+		HashMap<String, Object> variableMap = new HashMap<String, Object>();
+		String variable;
+		Object value;
+		for (int i = 0; i < vvlist.length; i += 2) {
+			variable = (String)vvlist[i];
+			value = vvlist[i + 1];
+			
+			variableMap.put(variable, value);
+		}
+		
+		return variableMap;
 	}
 	
 	public void addNode(Node n) {

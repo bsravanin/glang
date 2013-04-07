@@ -7,7 +7,7 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
-public class Node implements GraphElement{
+public class Node extends GraphElement{
 		
 	int id = -1;
 	
@@ -38,7 +38,7 @@ public class Node implements GraphElement{
 		return this.variableMap.get(variable);
 	}
 	
-	public void setVariabelValue(String variable, Object value) {
+	public void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
 	}
 	
@@ -66,6 +66,17 @@ public class Node implements GraphElement{
 		return this.incoming;
 	}
 	
+	public NodeSet in() {
+		NodeSet ret = new NodeSet();
+		Iterator<Edge> eIT = this.incoming.iterator();
+		
+		while(eIT.hasNext()) {
+			ret.add(eIT.next().inV());
+		}
+		
+		return ret;
+	}
+	
 	public NodeSet out() {
 		NodeSet ret = new NodeSet();
 		Iterator<Edge> eIT = this.outgoing.iterator();
@@ -77,5 +88,7 @@ public class Node implements GraphElement{
 		return ret;
 	}
 	
-
+	public void update(String variable, Object newValue) {		
+		this.variableMap.put(variable, newValue);
+	}
 }

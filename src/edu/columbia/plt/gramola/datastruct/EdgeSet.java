@@ -9,8 +9,8 @@ public class EdgeSet implements Set{
 	
 	private Set<Edge> edgeSet = new HashSet<Edge>();
 	
-	private HashSet<Edge> filter(String variable, Object value) {
-		HashSet<Edge> filterEdges = new HashSet<Edge>();
+	public EdgeSet filter(String variable, Object value) {
+		EdgeSet filterEdges = new EdgeSet();
 		Iterator<Edge> edgeIT = edgeSet.iterator();
 		Edge tmp;
 		while(edgeIT.hasNext()) {
@@ -70,7 +70,7 @@ public class EdgeSet implements Set{
 	}
 
 	@Override
-	public Iterator iterator() {
+	public Iterator<Edge> iterator() {
 		// TODO Auto-generated method stub
 		return this.edgeSet.iterator();
 	}

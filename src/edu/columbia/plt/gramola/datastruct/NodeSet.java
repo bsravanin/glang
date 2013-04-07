@@ -9,6 +9,18 @@ public class NodeSet implements Set{
 	
 	private HashSet<Node> nodeSet = new HashSet<Node>();
 	
+	public NodeSet filter(String variable, Object value) {
+		NodeSet filterNodes = new NodeSet();
+		Iterator<Node> nodeIT = nodeSet.iterator();
+		Node tmp;
+		while(nodeIT.hasNext()) {
+			tmp = nodeIT.next();
+			if (tmp.getVariableValue(variable).toString().equals(value.toString()))
+				filterNodes.add(tmp);
+		}
+		return filterNodes;
+	}
+	
 	@Override
 	public boolean add(Object e) {
 		// TODO Auto-generated method stub
