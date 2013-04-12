@@ -12,8 +12,8 @@
 # pylint: disable=C0103
 # "Invalid name...."
 
-from frontend.ply import lex
-from frontend.ply.lex import TOKEN
+from ply import lex
+from ply.lex import TOKEN
 
 
 class Error(Exception):
@@ -40,6 +40,7 @@ reserved = {
     'for': 'FOR',
     'from': 'FROM',
     'if': 'IF',
+	'import': 'IMPORT',
     'in': 'IN',
     'is': 'IS',
     'not': 'NOT',
@@ -47,6 +48,7 @@ reserved = {
     'print': 'PRINT',
     'return': 'RETURN',
     'while': 'WHILE',
+	'None': 'NONE',
 }
 
 
@@ -63,6 +65,7 @@ tokens = (
     'LPAREN', 'RPAREN',
     'LBRACKET', 'RBRACKET',
     'LBRACE', 'RBRACE',
+	'NEWLINE',
 
     # Indentation
     'INDENT', 'DEDENT', 'ENDMARKER',
@@ -177,7 +180,7 @@ def t_STRING(t):
 # - we're not at the start of the line.
 # For all other whitespace, including line-initial, see t_WS().
 newline = r'(\r?\n)'
-newline_equivalent = r'[ \t]*(#.*)?{0}+'.format(newline)
+newline_equivalent = r'[ \t]*(\#.*)?{0}+'.format(newline)
 @TOKEN(newline_equivalent)
 def t_NEWLINE(t):
     if not t.lexer.implicit_line_joining_level and find_column(t):
@@ -257,3 +260,19 @@ lexer.tab = ' ' * 4
 # Pushed when indenting, popped when dedenting
 lexer.indent_stack = [0]
 lexer.dedenting = False
+
+
+def lexer_test(filename):
+	'''To parse a file containing Gramola code and print all Lexical Tokens.'''
+	fd = open(filename, "r")
+	lexer.input(fd.read())
+	fd.close()
+
+	for tok in lexer:
+		# output = "@" + str(tok.lineno) + ":" + str(tok.lexpos) + "\t" \
+					# + str(tok.value) + "\t" + tok.type
+		# print output
+		print tok
+
+import sys
+lexer_test(sys.argv[1])
