@@ -1,6 +1,9 @@
 package edu.columbia.plt.gramola.testmain;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Stack;
 
 import edu.columbia.plt.gramola.datastruct.Edge;
 import edu.columbia.plt.gramola.datastruct.EdgeSet;
@@ -27,6 +30,9 @@ public class GraphApp {
 		
 		Node john = g.createNode("name", "john", "age", 32);
 		Edge jEdge = g.createEdge(marko, john, "type", "admires");
+		
+		Node joseph = g.createNode("name", "joseph", "age", 22);
+		Edge joEdge = g.createEdge(marko, joseph, "type", "hates");
 		
 		
 		/*Two nodes connect to marko*/
@@ -87,6 +93,16 @@ public class GraphApp {
 			tmpNode = tmpEdge.outV();
 			System.out.println("outV of filter result: " + tmpNode.getVariableValue("name"));
 			System.out.println("");
+		}
+
+		Stack<Edge> path = g.getPath(lisa, joseph, "type", "hates");
+		System.out.println("Path length: " + path.size());
+		
+		for (int i = path.size() - 1; i >= 0; i--) {
+			System.out.println("Path element: " + path.get(i).inV().getVariableValue("name"));
+			
+			if (i == 0)
+				System.out.println("Pathe element: " + path.get(i).outV().getVariableValue("name"));
 		}
 	}
 

@@ -14,6 +14,8 @@ public class Edge extends GraphElement{
 	
 	private Node end;
 	
+	private Edge pathParent;
+	
 	private HashMap<String, Object> variableMap;
 	
 	public Edge(Node start, Node end, HashMap<String, Object> variableMap) {
@@ -48,5 +50,13 @@ public class Edge extends GraphElement{
 	
 	public void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
+	}
+	
+	public void setParent(Edge pathParent) {
+		this.pathParent = pathParent;
+	}
+	
+	public Edge getParent() {
+		return this.pathParent;
 	}
 }
