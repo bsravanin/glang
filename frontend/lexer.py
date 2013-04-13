@@ -295,7 +295,7 @@ def p_content_list(p):
 def p_content(p):
 	'''content : NEWLINE
 			   | top_level_stmt'''
-	pass
+	p[0] = p[1]
 
 
 def p_function_def(p):
@@ -307,12 +307,16 @@ def p_function_def(p):
 def p_parameter_list(p):
 	'''parameter_list : param
 					  | parameter_list COMMA param'''
-	pass
+	if len(p) > 2:
+		p[0] = p[1], p[3]
+	else:
+		p[0] = p[1]
 
 
 def p_param(p):
 	'''param : NAME NAME'''
-	pass
+	p[0].type = p[1]
+	p[0] = p[2]
 
 
 def p_top_level_stmt(p):
@@ -325,13 +329,16 @@ def p_top_level_stmt(p):
 def p_stmt(p):
 	'''stmt : simple_stmt
 			| compound_stmt'''
-	pass
+	p[0] = p[1]
 
 
 def p_simple_stmt(p):
 	'''simple_stmt : small_stmt NEWLINE
 				   | declaration'''
-	pass
+	if len(p) > 2:
+		p[0] = p[1] + "\n"
+	else:
+		p[0] = p[1]
 
 
 def p_small_stmt(p):
@@ -339,19 +346,22 @@ def p_small_stmt(p):
 				  | assignment_stmt
 				  | print_stmt
 				  | flow_stmt'''
-	pass
+	p[0] = p[1]
 
 
 def p_assignment_stmt(p):
 	'''assignment_stmt : NAME target ASSIGN expr'''
-	pass
+	# p[0].type = p[1]
+	# p[0] = p[2]
+	# p[0].val = p[4]
+	print p[1], p[2], p[3], p[4]
 
 
 def p_target(p):
 	'''target : NAME
 			  | attribute_ref
 			  | subscription'''
-	pass
+	p[0] = p[1]
 
 
 
@@ -441,12 +451,15 @@ def p_stmt_list(p):
 def p_expr_list(p):
 	'''expr_list : expr
 				 | expr_list COMMA expr'''
-	pass
+	if len(p) > 2:
+		p[0] = p[1], p[3]
+	else:
+		p[0] = p[1]
 
 
 def p_expr(p):
 	'''expr : or_test''' 
-	pass
+	p[0] = p[1]
 
 
 def p_or_test(p):
@@ -483,51 +496,77 @@ def p_comp_op(p):
 			   | IN
 			   | NOT IN
 			   | IS
-			   | NOT IS'''
-	pass
+			   | IS NOT'''
+	if len(p) > 2:
+		p[0] = p[1] + " " + p[2]
+	else:
+		p[0] = p[1]
 
 
 def p_arith_expr(p):
 	'''arith_expr : mult_expr
 				  | arith_expr arith_op mult_expr'''
-	pass
+	if len(p) > 2:
+		if p[2] == "+":
+			p[0] = p[1] + p[3]
+		else:
+			p[0] = p[1] - p[3]
+	else:
+		p[0] = p[1]
 
 
 def p_arith_op(p):
 	'''arith_op : PLUS
 				| MINUS'''
-	pass
+	p[0] = p[1]
 
 
 def p_mult_expr(p):
 	'''mult_expr : unary_expr
 				 | mult_expr mult_op unary_expr'''
-	pass
+	if len(p) > 2:
+		if p[2] == "*":
+			p[0] = p[1] * p[3]
+		elif p[2] == "/":
+			p[0] = 0.0 + p[1] / p[3]
+		else:
+			p[0] = p[1] % p[3]
+	else:
+		p[0] = p[1]
 
 
 def p_mult_op(p):
 	'''mult_op : STAR
 			   | SLASH
 			   | PERCENT'''
-	pass
+	p[0] = p[1]
 
 
 def p_unary_expr(p):
 	'''unary_expr : power
 				  | unary_op unary_expr'''
-	pass
+	if len(p) > 2:
+		if p[1] == "+":
+			p[0] = p[2]
+		else:
+			p[0] = -p[2]
+	else:
+		p[0] = p[1]
 
 
 def p_unary_op(p):
 	'''unary_op : PLUS
 				| MINUS'''
-	pass
+	p[0] = p[1]
 
 
 def p_power(p):
 	'''power : primary
 			 | primary DOUBLESTAR unary_expr'''
-	pass
+	if len(p) > 2:
+		p[0] = p[1] ** p[3]
+	else:
+		p[0] = p[1]
 
 
 def p_primary(p):
@@ -548,7 +587,7 @@ def p_atom(p):
 def p_literal(p):
 	'''literal : string_list
 			   | NUMBER'''
-	pass
+	p[0] = p[1]
 
 
 def p_string_list(p):
@@ -638,10 +677,17 @@ def p_error(p):
 	print "Syntax error in", p
 
 
+def parser_test(filename):
+	'''To parse a file containing Gramola code.'''
+	fd = open(filename, "r")
+	prog = fd.read()
+	fd.close()
+
+	print parser.parse(prog)
+
+
 parser = yacc.yacc()
 
-
-'''
 import sys
-lexer_test(sys.argv[1])
-'''
+# lexer_test(sys.argv[1])
+parser_test(sys.argv[1])
