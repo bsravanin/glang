@@ -1,5 +1,6 @@
 package edu.columbia.plt.gramola.datastruct;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,14 +15,15 @@ public class Edge extends GraphElement{
 	
 	private Node end;
 	
-	private Edge pathParent;
+	private HashSet<Edge> pathParent = new HashSet<Edge>();
 	
 	private HashMap<String, Object> variableMap;
 	
-	public Edge(Node start, Node end, HashMap<String, Object> variableMap) {
+	public Edge(Node start, Node end, HashMap<String, Object> variableMap, int id) {
 		this.start = start;
 		this.end = end;
 		this.variableMap = variableMap;
+		this.id = id;
 	}
 	
 	public void setId(int id) {
@@ -52,11 +54,11 @@ public class Edge extends GraphElement{
 		this.variableMap.put(variable, value);
 	}
 	
-	public void setParent(Edge pathParent) {
-		this.pathParent = pathParent;
+	public void addParents(Edge pathParent) {
+		this.pathParent.add(pathParent);
 	}
 	
-	public Edge getParent() {
+	public HashSet<Edge> getParents() {
 		return this.pathParent;
 	}
 }

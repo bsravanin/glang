@@ -2,6 +2,7 @@ package edu.columbia.plt.gramola.datastruct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
@@ -12,7 +13,11 @@ public class Graph{
 	
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
+	private ArrayList<Edge> edgeList = new ArrayList<Edge>();
+	
 	private int nodeId = 0;
+	
+	private int edgeId = 0;
 	
 	public Node createNode(Object...vvlist) {
 		HashMap<String, Object> variableMap = createVariableMap(vvlist);
@@ -24,9 +29,10 @@ public class Graph{
 	
 	public Edge createEdge(Node start, Node end, Object...vvlist) {
 		HashMap<String, Object> variableMap = createVariableMap(vvlist);
-		Edge edge = new Edge(start, end, variableMap);
+		Edge edge = new Edge(start, end, variableMap, edgeId++);
 		start.setOutE(edge);
 		end.setInE(edge);
+		this.addEdge(edge);
 		
 		return edge;
 	}
@@ -102,8 +108,33 @@ public class Graph{
 		return this.nodeList.get(id);
 	}
 	
-	/*Only return the first path we find*/
-	public Stack<Edge> getPath(Node start, Node end, Object...vvlist) {
+	public ArrayList<Node> getAllNodes() {
+		return this.nodeList;
+	}
+
+	public void addEdge(Edge e) {
+		this.edgeList.add(e);
+	}
+	
+	public ArrayList<Edge> getAllEdges() {
+		return this.edgeList;
+	}
+	
+	public ArrayList<Edge> getShortestPath(Node start, Node end, Object...vvlist) {
+		int min = Integer.MAX_VALUE;
+		ArrayList<Edge> shortest = null;
+		ArrayList<ArrayList<Edge>> allPaths = this.getPaths(start, end, vvlist);
+		
+		for (ArrayList<Edge> tmp: allPaths) {
+			if (tmp.size() < min) {
+				shortest = tmp;
+			}
+		}
+		
+		return shortest;
+	}
+
+	public ArrayList<ArrayList<Edge>> getPaths(Node start, Node end, Object...vvlist) {
 		if (start.getId() == -1 || end.getId() == -1)
 			return null;
 		
@@ -127,28 +158,34 @@ public class Graph{
 			return null;
 		}
 		
-		Edge lastEdge = this.getPathImpl(start, end, variableMap, length);
-		Stack<Edge> pathStack = null;
-		if ( lastEdge != null) {
-			pathStack = this.constructPath(start, lastEdge);
+		ArrayList<ArrayList<Edge>> ret = new ArrayList<ArrayList<Edge>>();
+		HashSet<Edge> lastEdges = this.getPathImpl(start, end, variableMap, length);
+		Iterator<Edge> lastIT = lastEdges.iterator();
+		Edge tmpLast;
+		
+		while(lastIT.hasNext()) {
+			tmpLast = lastIT.next();
+			ret.addAll(constructPath(start, tmpLast));
 		}
 
-		return pathStack;
+		return ret;
 	}
 
-	/*DFS*/
-	private Edge getPathImpl(Node start, Node end,
+	private HashSet<Edge> getPathImpl(Node start, Node end,
 			HashMap<String, Object> variableMap, int length) {
+		
+		if (length == 0)
+			return null;
 		
 		EdgeSet startSet = start.outE();
 		
 		if (startSet == null) {
 			return null;
 		}
-		
-		/*Traverse EdgeSet of start Node*/
+
 		Iterator<Edge> sIT = startSet.iterator();
 		Edge tmpEdge;
+		HashSet<Edge> lastEdgeSet = new HashSet<Edge>();
 		while(sIT.hasNext()) {
 			tmpEdge = sIT.next();
 
@@ -156,13 +193,13 @@ public class Graph{
 				continue;
 			
 			if (tmpEdge.outV() == end) {
-				return tmpEdge;
+				lastEdgeSet.add(tmpEdge);
 			} else {
 				this.setPathParent(tmpEdge, tmpEdge.outV().outE());
-				return getPathImpl(tmpEdge.outV(), end, variableMap, length - 1);
+				lastEdgeSet.addAll(getPathImpl(tmpEdge.outV(), end, variableMap, length - 1));
 			}
 		}
-		return null;
+		return lastEdgeSet;
 	}
 	
 	private boolean checkEdgeValidity(Edge e, HashMap<String, Object> variableMap) {
@@ -184,34 +221,41 @@ public class Graph{
 	private void setPathParent(Edge parent, EdgeSet childSet) {
 		Iterator<Edge> cIT = childSet.iterator();
 		while(cIT.hasNext()) {
-			cIT.next().setParent(parent);
+			cIT.next().addParents(parent);
 		}
 	}
 	
-	private Stack<Edge> constructPath(Node start, Edge e) {
-		Stack<Edge> pathStack = new Stack<Edge>();
-		pathStack.push(e);
+	private ArrayList<ArrayList<Edge>> constructPath(Node start, Edge e) {
+		ArrayList<ArrayList<Edge>> paths = new ArrayList<ArrayList<Edge>>();
+		/*System.out.println("Test edge " + e.inV().getVariableValue("name") + " " 
+				+ e.getVariableValue("type") + " " + e.outV().getVariableValue("name"));*/
 		
-		Node tmpNode = e.inV();
-		EdgeSet tmpSet;
-		while(tmpNode != start) {
-			/*System.out.println("tmpNode name: " + tmpNode.getVariableValue("name"));*/
-			tmpSet = tmpNode.inE();
-			
-			Iterator<Edge> tmpEIT = tmpSet.iterator();
-			Edge tmpEdge;
-			while(tmpEIT.hasNext()) {
-				tmpEdge = tmpEIT.next();
-				/*System.out.println("Node name: " + tmpEdge.inV().getVariableValue("name"));
-				System.out.println("Test tmpEdge: " + tmpEdge);
-				System.out.println("Test e parent: " + e.getParent());*/
-				if (tmpEdge == e.getParent()) {
-					pathStack.push(tmpEdge);
-					tmpNode = tmpEdge.inV();
-					break;
-				}
-			}
+		if (e.inV() == start) {
+			ArrayList<Edge> pathList = new ArrayList<Edge>();
+			pathList.add(0, e);
+			paths.add(pathList);
 		}
-		return pathStack;
+		
+		HashSet<Edge> parents = e.getParents();
+		/*System.out.println("Test parent size: " + parents.size());*/
+		ArrayList<ArrayList<Edge>> subPaths;
+		
+		for (Edge tmp: parents) {
+			/*System.out.println("Test parent: " + tmp.inV().getVariableValue("name") + " "
+					+ tmp.outV().getVariableValue("name"));*/
+			subPaths = constructPath(start, tmp);
+			Iterator<ArrayList<Edge>> subPathIT = subPaths.iterator();
+			ArrayList<Edge> tmpList;
+			
+			while(subPathIT.hasNext()) {
+				ArrayList<Edge> pathList = new ArrayList<Edge>();
+				pathList.add(0, e);
+				
+				tmpList = subPathIT.next();
+				pathList.addAll(0, tmpList);
+				paths.add(pathList);
+			}	
+		}
+		return paths;
 	}
 }

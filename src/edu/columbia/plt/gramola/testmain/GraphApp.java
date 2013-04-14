@@ -94,16 +94,6 @@ public class GraphApp {
 			System.out.println("outV of filter result: " + tmpNode.getVariableValue("name"));
 			System.out.println("");
 		}
-
-		Stack<Edge> path = g.getPath(lisa, joseph, "type", "hates");
-		System.out.println("Path length: " + path.size());
-		
-		for (int i = path.size() - 1; i >= 0; i--) {
-			System.out.println("Path element: " + path.get(i).inV().getVariableValue("name"));
-			
-			if (i == 0)
-				System.out.println("Pathe element: " + path.get(i).outV().getVariableValue("name"));
-		}
 	}
 
 }
