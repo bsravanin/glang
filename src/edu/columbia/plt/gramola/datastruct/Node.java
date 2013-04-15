@@ -50,22 +50,43 @@ public class Node extends GraphElement{
 		return this.variableMap;
 	}
 	
+	/**
+	 * Set incoming Edge of the current Node
+	 * @param e incoming Edge object
+	 */
 	public void setInE(Edge e) {
 		this.incoming.add(e);
 	}
 	
+	/**
+	 * Set outgoing Edge from the current Node
+	 * @param e outgoing Edge object
+	 */
 	public void setOutE(Edge e) {
 		this.outgoing.add(e);
 	}
 	
+	/**
+	 * Get outgoing Edge(s) from the current Node
+	 * @return an EdgeSet containing all outgoing Edge objects
+	 */
 	public EdgeSet outE() {
 		return this.outgoing;
 	}
 	
+	/**
+	 * Get incoming Edge(s) of the current Node
+	 * @return an EdgeSet containing all incoming Edge objects
+	 */
 	public EdgeSet inE() {
 		return this.incoming;
 	}
 	
+	/**
+	 * Get all Nodes on the start side of incoming Edges
+	 * Current Node is on the end side
+	 * @return a NodeSet containing all Nodes on the start side of incoming Edges
+	 */
 	public NodeSet in() {
 		NodeSet ret = new NodeSet();
 		Iterator<Edge> eIT = this.incoming.iterator();
@@ -77,6 +98,11 @@ public class Node extends GraphElement{
 		return ret;
 	}
 	
+	/**
+	 * Get all Nodes on the end side of outgoing Edges
+	 * Current Node is on the start side
+	 * @return a NodeSet containing all Nodes on the end side of outgoing Edges
+	 */
 	public NodeSet out() {
 		NodeSet ret = new NodeSet();
 		Iterator<Edge> eIT = this.outgoing.iterator();
@@ -88,6 +114,11 @@ public class Node extends GraphElement{
 		return ret;
 	}
 	
+	/**
+	 * Update the value of a specific variable within the current Node
+	 * @param variable the name of the specific variable
+	 * @param newValue the new value of the specific variable
+	 */
 	public void update(String variable, Object newValue) {		
 		this.variableMap.put(variable, newValue);
 	}

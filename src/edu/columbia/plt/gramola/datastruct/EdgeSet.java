@@ -111,6 +111,10 @@ public class EdgeSet implements Set{
 		return this.edgeSet.toArray(a);
 	}
 	
+	/**
+	 * Return a NodeSet containing all Nodes on the end side of Edges in the EdgeSet
+	 * @return a NodeSet
+	 */
 	public NodeSet outV() {
 		NodeSet ret = new NodeSet();
 		Iterator<Edge> eIT = this.edgeSet.iterator();

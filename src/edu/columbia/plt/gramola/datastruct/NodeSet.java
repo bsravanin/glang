@@ -122,6 +122,10 @@ public class NodeSet implements Set{
 		return this.nodeSet.toArray(a);
 	}
 	
+	/**
+	 * Return an EdgeSet containing all outgoing Edges from Nodes in the NodeSet
+	 * @return an EdgeSet
+	 */
 	public EdgeSet outE() {
 		EdgeSet ret = new EdgeSet();
 		Iterator<Node> nIT = this.nodeSet.iterator();
