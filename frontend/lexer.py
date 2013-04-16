@@ -2,19 +2,17 @@
 # lexer.py
 #
 # Lexical analyzer for symbols in Gramola.
-#
-# TODO: wrap this lexer in a subclass of Lexer class, so that token()
-# method can be overridden to handle ENDMARKER, remaining DEDENTS,
-# and possible unmatched brackets.
-#
+##
 # ----------------------------------------------------------------------
 
 # pylint: disable=C0103
 # "Invalid name...."
 
+import sys
 from ply import lex
 from ply.lex import TOKEN
-from ply import yacc
+
+TAB_WIDTH = 4  # in spaces
 
 
 class Error(Exception):
@@ -29,665 +27,299 @@ class UnmatchedBracketError(Error):
     'Raised when inconsistent enclosing brackets break implicit line joining.'
 
 
-# Reserved words
-reserved = {
-    'and': 'AND',
-    'break': 'BREAK',
-    'class': 'CLASS',
-    'continue': 'CONTINUE',
-    'def': 'DEF',
-    'elif': 'ELIF',
-    'else': 'ELSE',
-    'for': 'FOR',
-    # 'from': 'FROM',
-    'if': 'IF',
-	# 'import': 'IMPORT',
-    'in': 'IN',
-    'is': 'IS',
-    'not': 'NOT',
-    'or': 'OR',
-    'print': 'PRINT',
-    'return': 'RETURN',
-    'while': 'WHILE',
-	# 'None': 'NONE',
-}
+class Lexer(object):
 
+    # Reserved words
+    _reserved = {
+        'and': 'AND',
+        'break': 'BREAK',
+        'class': 'CLASS',
+        'continue': 'CONTINUE',
+        'def': 'DEF',
+        'elif': 'ELIF',
+        'else': 'ELSE',
+        'for': 'FOR',
+        # 'from': 'FROM',
+        'if': 'IF',
+        # 'import': 'IMPORT',
+        'in': 'IN',
+        'is': 'IS',
+        'not': 'NOT',
+        'or': 'OR',
+        'print': 'PRINT',
+        'return': 'RETURN',
+        'while': 'WHILE',
+        # 'None': 'NONE',
+        }
 
-tokens = (
-    # Literals (identifier, number literal, string literal)
-    'NAME', 'NUMBER', 'STRING',
+    tokens = (
+        # Literals (identifier, number literal, string literal)
+        'NAME', 'NUMBER', 'STRING',
 
-    # Operators (+, -, *, **, /, %, <, <=, >, >=, ==, !=)
-    'PLUS', 'MINUS', 'STAR', 'DOUBLESTAR', 'SLASH', 'PERCENT',
-    'LESS', 'LESSEQUAL', 'GREATER', 'GREATEREQUAL', 'EQUAL', 'NOTEQUAL',
+        # Operators (+, -, *, **, /, %, <, <=, >, >=, ==, !=)
+        'PLUS', 'MINUS', 'STAR', 'DOUBLESTAR', 'SLASH', 'PERCENT',
+        'LESS', 'LESSEQUAL', 'GREATER', 'GREATEREQUAL', 'EQUAL', 'NOTEQUAL',
 
-    # Delimiters , : . = ( ) [ ] { }
-    'COMMA', 'COLON', 'DOT', 'ASSIGN',
-    'LPAREN', 'RPAREN',
-    'LBRACKET', 'RBRACKET',
-    'LBRACE', 'RBRACE',
-	'NEWLINE',
+        # Delimiters , : . = ( ) [ ] { }
+        'COMMA', 'COLON', 'DOT', 'ASSIGN',
+        'LPAREN', 'RPAREN',
+        'LBRACKET', 'RBRACKET',
+        'LBRACE', 'RBRACE',
+        'NEWLINE',
 
-    # Indentation
-    'INDENT', 'DEDENT', 'ENDMARKER',
-    ) + tuple(reserved.values())
+        # Indentation
+        'INDENT', 'DEDENT', 'ENDMARKER',
+        ) + tuple(_reserved.values())
 
+    ## Operators
+    t_PLUS             = r'\+'
+    t_MINUS            = r'-'
+    t_STAR             = r'\*'
+    t_DOUBLESTAR       = r'\*\*'
+    t_SLASH            = r'/'
+    t_PERCENT          = r'%'
+    t_LESS             = r'<'
+    t_LESSEQUAL        = r'<='
+    t_GREATER          = r'>'
+    t_GREATEREQUAL     = r'>='
+    t_EQUAL            = r'=='
+    t_NOTEQUAL         = r'!='
 
-## Operators
-t_PLUS             = r'\+'
-t_MINUS            = r'-'
-t_STAR             = r'\*'
-t_DOUBLESTAR       = r'\*\*'
-t_SLASH            = r'/'
-t_PERCENT          = r'%'
-t_LESS             = r'<'
-t_LESSEQUAL        = r'<='
-t_GREATER          = r'>'
-t_GREATEREQUAL     = r'>='
-t_EQUAL            = r'=='
-t_NOTEQUAL         = r'!='
+    ## Delimiters
+    t_COMMA            = r','
+    t_COLON            = r':'
+    t_DOT              = r'\.'
+    t_ASSIGN           = r'='
 
+    ## Helper regular expressions
 
-## Delimiters
-t_COMMA            = r','
-t_COLON            = r':'
-t_DOT              = r'\.'
-t_ASSIGN           = r'='
+    ## For number literals
+    digits_re = r'(\d+)'
+    # Int must be 0, or multiple digits not starting with 0
+    int_re = r'(0|[1-9]{0}?)'.format(digits_re)
+    # Float must have an int left of decimal point,
+    # and must have at least one digit after it
+    float_re = r'({0}\.{1})'.format(int_re, digits_re)
+    # Note: order of disjuncts matters, because int is a prefix of float
+    number_literal = r'({0}|{1})'.format(float_re, int_re)
 
+    ## For string literals
+    escape = r'(\\.)'
+    single_quote_string = r"('({0}|[^\\\n'])*')".format(escape)
+    double_quote_string = r'("({0}|[^\\\n"])*")'.format(escape)
+    string_literal = r'({0}|{1})'.format(single_quote_string,
+                                         double_quote_string)
 
-def t_LPAREN(t):
-    r'\('
-    t.lexer.implicit_line_joining_level += 1
-    return t
+    newline = r'(\r?\n)'
+    newline_equivalent = r'[ \t]*(\#.*)?{0}+'.format(newline)
 
-
-def t_RPAREN(t):
-    r'\)'
-    t.lexer.implicit_line_joining_level -= 1
-    if t.lexer.implicit_line_joining_level < 0:
-        raise UnmatchedBracketError(str(t))
-    return t
-
-
-def t_LBRACKET(t):
-    r'\['
-    t.lexer.implicit_line_joining_level += 1
-    return t
-
-
-def t_RBRACKET(t):
-    r'\]'
-    t.lexer.implicit_line_joining_level -= 1
-    if t.lexer.implicit_line_joining_level < 0:
-        raise UnmatchedBracketError(str(t))
-    return t
-
-
-def t_LBRACE(t):
-    r'\{'
-    t.lexer.implicit_line_joining_level += 1
-    return t
-
-
-def t_RBRACE(t):
-    r'\}'
-    t.lexer.implicit_line_joining_level -= 1
-    if t.lexer.implicit_line_joining_level < 0:
-        raise UnmatchedBracketError(str(t))
-    return t
-
-
-## Identifiers and reserved words
-# If lexeme is a reserved word, uses its appropriate token type
-def t_NAME(t):
-    r'[A-Za-z_][A-Za-z0-9_]*'
-    t.type = reserved.get(t.value, 'NAME')
-    return t
-
-
-## Number literal
-digits_re = r'(\d+)'
-# Int must be 0, or multiple digits not starting with 0
-int_re = r'(0|[1-9]{0}?)'.format(digits_re)
-# Float must have an int left of decimal point,
-# and must have at least one digit after it
-float_re = r'({0}\.{1})'.format(int_re, digits_re)
-number_literal = r'({0}|{1})'.format(int_re, float_re)
-@TOKEN(number_literal)
-def t_NUMBER(t):
-    if '.' in t.value:
-        t.value = float(t.value)
-    else:
-        t.value = int(t.value)
-    return t
-
-
-## String literal
-# TODO: how to handle Unicode?
-escape = r'(\\.)'
-# TODO: make sure these quotes work, i.e., they don't need escaping
-single_quote_string = r"('({0}|[^\\\n'])*')".format(escape)
-double_quote_string = r'("({0}|[^\\\n"])*")'.format(escape)
-string_literal = r'({0}|{1})'.format(single_quote_string, double_quote_string)
-@TOKEN(string_literal)
-def t_STRING(t):
-    return t
-
-
-## Newline equivalent
-# Optional whitespace, optional comment, then at least one newline.
-# We emit a NEWLINE token only if:
-# - we're not implicitly joining logical lines, and
-# - we're not at the start of the line.
-# For all other whitespace, including line-initial, see t_WS().
-newline = r'(\r?\n)'
-newline_equivalent = r'[ \t]*(\#.*)?{0}+'.format(newline)
-@TOKEN(newline_equivalent)
-def t_NEWLINE(t):
-    if not t.lexer.implicit_line_joining_level and find_column(t):
-        # E.g., at the end of a statement, or just before a suite of them
-        t.type = 'NEWLINE'
+    def t_LPAREN(self, t):
+        r'\('
+        self._implicit_line_joining_level += 1
         return t
 
-
-## All other whitespace
-# We only do indent/dedent calculations if:
-# - we're not implicitly joining logical lines, and
-# - we're either at the start of the line, or else we're not in the process of
-#   dedenting.
-def t_WS(t):
-    r'[ \t]+'
-    if (t.lexer.implicit_line_joining_level or
-        (find_column(t) and not t.lexer.dedenting)):
-        # Ignore this whitespace; we're either joining logical lines, or
-        # we're not at the start of the line (and not dedenting)
-        return None
-
-    num_tabs = t.value.count('\t') + t.value.count(t.lexer.tab)
-    if num_tabs == t.lexer.indent_stack[-1]:
-        # Same indentation as previous logical line
-        return None
-
-    if num_tabs > t.lexer.indent_stack[-1]:
-        t.lexer.indent_stack.append(num_tabs)
-        t.type = 'INDENT'
-        t.value = get_first_tab_substring(t)
+    def t_RPAREN(self, t):
+        r'\)'
+        self._implicit_line_joining_level -= 1
+        if self._implicit_line_joining_level < 0:
+            raise UnmatchedBracketError(str(t))
         return t
 
-    t.lexer.indent_stack.pop()
-    if num_tabs > t.lexer.indent_stack[-1]:
-        raise InconsistentDedentError(str(t.lexer.indent_stack))
-    elif num_tabs == t.lexer.indent_stack[-1]:
-        # We're at a proper indentation level
-        t.lexer.dedenting = False
-    else:
-        # Rewind the lexer position to just after the first "tab", so that
-        # we can emit another DEDENT token
-        rewind_lexer_for_dedenting(t)
-        # Let the lexer know that we need another round of dedenting
-        t.lexer.dedenting = True
-    t.type = 'DEDENT'
-    t.value = get_first_tab_substring(t)
-    return t
-
-
-def t_error(t):
-    print "Illegal character '{0}'".format(t.value)
-    t.lexer.skip(1)
-
-
-# Compute column index (starting from 0).
-def find_column(token):
-    last_cr = token.lexer.lexdata.rfind('\n', 0, token.lexpos)
-    column = token.lexpos - (last_cr + 1)
-    return column
-
-
-def rewind_lexer_for_dedenting(token):
-    tab = get_first_tab_substring(token)
-    token.lexer.lexpos = token.lexpos + len(tab)
-
-
-def get_first_tab_substring(token):
-    if token.value.startswith('\t'):
-        return '\t'
-    elif token.value.startswith(token.lexer.tab):
-        return token.lexer.tab
-
-
-lexer = lex.lex()
-lexer.implicit_line_joining_level = 0
-lexer.tab = ' ' * 4
-# Pushed when indenting, popped when dedenting
-lexer.indent_stack = [0]
-lexer.dedenting = False
-
-
-def lexer_test(filename):
-	'''To parse a file containing Gramola code and print all Lexical Tokens.'''
-	fd = open(filename, "r")
-	lexer.input(fd.read())
-	fd.close()
-
-	for tok in lexer:
-		# output = "@" + str(tok.lineno) + ":" + str(tok.lexpos) + "\t" \
-					# + str(tok.value) + "\t" + tok.type
-		# print output
-		print tok
-
-
-# ----------------------------------------------------------------------
-# Parser begins now that tokenizing is done.
-# ----------------------------------------------------------------------
-
-def p_start(p):
-	'''start : ENDMARKER
-			 | content_list ENDMARKER'''
-	pass
-
-
-def p_content_list(p):
-	'''content_list : content
-					| content_list content'''
-	pass
-
-
-def p_content(p):
-	'''content : NEWLINE
-			   | top_level_stmt'''
-	p[0] = p[1]
-
-
-def p_function_def(p):
-	'''function_def : DEF NAME NAME LPAREN RPAREN COLON suite
-					| DEF NAME NAME LPAREN parameter_list RPAREN COLON suite'''
-	pass
-
-
-def p_parameter_list(p):
-	'''parameter_list : param
-					  | parameter_list COMMA param'''
-	if len(p) > 2:
-		p[0] = p[1], p[3]
-	else:
-		p[0] = p[1]
-
-
-def p_param(p):
-	'''param : NAME NAME'''
-	p[0].type = p[1]
-	p[0] = p[2]
-
-
-def p_top_level_stmt(p):
-	'''top_level_stmt : stmt
-					  | function_def
-					  | class_def'''
-	pass
-
-
-def p_stmt(p):
-	'''stmt : simple_stmt
-			| compound_stmt'''
-	p[0] = p[1]
-
-
-def p_simple_stmt(p):
-	'''simple_stmt : small_stmt NEWLINE
-				   | declaration'''
-	if len(p) > 2:
-		p[0] = p[1] + "\n"
-	else:
-		p[0] = p[1]
-
-
-def p_small_stmt(p):
-	'''small_stmt : expr
-				  | assignment_stmt
-				  | print_stmt
-				  | flow_stmt'''
-	p[0] = p[1]
-
-
-def p_assignment_stmt(p):
-	'''assignment_stmt : NAME target ASSIGN expr'''
-	# p[0].type = p[1]
-	# p[0] = p[2]
-	# p[0].val = p[4]
-	print p[1], p[2], p[3], p[4]
-
-
-def p_target(p):
-	'''target : NAME
-			  | attribute_ref
-			  | subscription'''
-	p[0] = p[1]
-
-
-
-# def p_target_list(p):
-	'''target_list : target
-				   | target_list COMMA target'''
-	# pass
-
-
-def p_print_stmt(p):
-	'''print_stmt : PRINT
-				  | PRINT expr_list'''
-	pass
-
-
-def p_flow_stmt(p):
-	'''flow_stmt : BREAK
-				 | CONTINUE
-				 | RETURN
-				 | RETURN expr'''
-	pass
-
-
-def p_declaration(p):
-	'''declaration : NAME name_list NEWLINE'''
-	pass
-
-
-def p_name_list(p):
-	'''name_list : NAME
-				 | name_list COMMA NAME'''
-	pass
-
-
-def p_compound_stmt(p):
-	'''compound_stmt : if_stmt
-					 | while_stmt
-					 | for_stmt'''
-	pass
-
-
-def p_if_stmt(p):
-	'''if_stmt : IF expr COLON suite
-			   | IF expr COLON suite else_clause
-			   | IF expr COLON suite elif_clauses else_clause'''
-	pass
-
-
-def p_elif_clauses(p):
-	'''elif_clauses : elif_clause
-					| elif_clauses elif_clause'''
-	pass
-
-
-def p_elif_clause(p):
-	'''elif_clause : ELIF expr COLON suite'''
-	pass
-
-
-def p_else_clause(p):
-	'''else_clause : ELSE expr COLON suite'''
-	pass
-
-
-def p_while_stmt(p):
-	'''while_stmt : WHILE expr COLON suite'''
-	pass
-
-
-def p_for_stmt(p):
-	'''for_stmt : FOR NAME NAME IN primary COLON suite'''
-	pass
-
-
-def p_suite(p):
-	'''suite : simple_stmt
-			 | NEWLINE INDENT stmt_list DEDENT'''
-	pass
-
-
-def p_stmt_list(p):
-	'''stmt_list : stmt
-				 | stmt_list stmt'''
-	pass
-
-
-def p_expr_list(p):
-	'''expr_list : expr
-				 | expr_list COMMA expr'''
-	if len(p) > 2:
-		p[0] = p[1], p[3]
-	else:
-		p[0] = p[1]
-
-
-def p_expr(p):
-	'''expr : or_test''' 
-	p[0] = p[1]
-
-
-def p_or_test(p):
-	'''or_test : and_test
-			   | or_test OR and_test'''
-	pass
-
-
-def p_and_test(p):
-	'''and_test : not_test
-				| and_test AND not_test'''
-	pass
-
-
-def p_not_test(p):
-	'''not_test : comparison
-				| NOT not_test'''
-	pass
-
-
-def p_comparison(p):
-	'''comparison : arith_expr
-				  | comparison comp_op arith_expr'''
-	pass
-
-
-def p_comp_op(p):
-	'''comp_op : LESS
-			   | LESSEQUAL
-			   | GREATER
-			   | GREATEREQUAL
-			   | EQUAL
-			   | NOTEQUAL
-			   | IN
-			   | NOT IN
-			   | IS
-			   | IS NOT'''
-	if len(p) > 2:
-		p[0] = p[1] + " " + p[2]
-	else:
-		p[0] = p[1]
-
-
-def p_arith_expr(p):
-	'''arith_expr : mult_expr
-				  | arith_expr arith_op mult_expr'''
-	if len(p) > 2:
-		if p[2] == "+":
-			p[0] = p[1] + p[3]
-		else:
-			p[0] = p[1] - p[3]
-	else:
-		p[0] = p[1]
-
-
-def p_arith_op(p):
-	'''arith_op : PLUS
-				| MINUS'''
-	p[0] = p[1]
-
-
-def p_mult_expr(p):
-	'''mult_expr : unary_expr
-				 | mult_expr mult_op unary_expr'''
-	if len(p) > 2:
-		if p[2] == "*":
-			p[0] = p[1] * p[3]
-		elif p[2] == "/":
-			p[0] = 0.0 + p[1] / p[3]
-		else:
-			p[0] = p[1] % p[3]
-	else:
-		p[0] = p[1]
-
-
-def p_mult_op(p):
-	'''mult_op : STAR
-			   | SLASH
-			   | PERCENT'''
-	p[0] = p[1]
-
-
-def p_unary_expr(p):
-	'''unary_expr : power
-				  | unary_op unary_expr'''
-	if len(p) > 2:
-		if p[1] == "+":
-			p[0] = p[2]
-		else:
-			p[0] = -p[2]
-	else:
-		p[0] = p[1]
-
-
-def p_unary_op(p):
-	'''unary_op : PLUS
-				| MINUS'''
-	p[0] = p[1]
-
-
-def p_power(p):
-	'''power : primary
-			 | primary DOUBLESTAR unary_expr'''
-	if len(p) > 2:
-		p[0] = p[1] ** p[3]
-	else:
-		p[0] = p[1]
-
-
-def p_primary(p):
-	'''primary : atom
-			   | attribute_ref
-			   | subscription
-			   | call'''
-	pass
-
-
-def p_atom(p):
-	'''atom : NAME
-			| literal
-			| enclosure'''
-	pass
-
-
-def p_literal(p):
-	'''literal : string_list
-			   | NUMBER'''
-	p[0] = p[1]
-
-
-def p_string_list(p):
-	'''string_list : STRING
-				   | string_list STRING'''
-	pass
-
-
-def p_enclosure(p):
-	'''enclosure : LPAREN expr RPAREN
-				 | LBRACKET expr_list RBRACKET
-				 | LBRACE key_datum_list RBRACE
-				 | LBRACE expr_list RBRACE'''
-	pass
-
-
-def p_key_datum_list(p):
-	'''key_datum_list : key_datum
-					  | key_datum_list COMMA key_datum'''
-	pass
-
-
-def p_key_datum(p):
-	'''key_datum : expr COLON expr'''
-	pass
-
-
-def p_attribute_ref(p):
-	'''attribute_ref : primary DOT NAME'''
-	pass
-
-
-def p_subscription(p):
-	'''subscription : primary LBRACKET expr RBRACKET'''
-	pass
-
-
-# TODO
-def p_call(p):
-	'''call : primary LPAREN argument_list RPAREN'''
-	pass
-
-
-def p_argument_list(p):
-	'''argument_list : expr
-					 | argument_list COMMA expr'''
-	pass
-
-
-def p_class_def(p):
-	'''class_def : CLASS NAME LPAREN RPAREN COLON class_def_suite
-				 | CLASS NAME LPAREN NAME RPAREN COLON class_def_suite'''
-	pass
-
-
-def p_class_def_suite(p):
-	'''class_def_suite : NEWLINE INDENT class_stmt_list DEDENT'''
-	pass
-
-
-def p_class_stmt_list(p):
-	'''class_stmt_list : function_defs
-					   | declarations function_defs
-					   | node_types_def function_defs
-					   | declarations node_types_def function_defs'''
-	pass
-
-
-def p_declarations(p):
-	'''declarations : declaration
-					| declarations declaration'''
-	pass
-
-
-def p_node_types_def(p):
-	'''node_types_def : assignment_stmt NEWLINE'''
-	pass
-
-
-def p_function_defs(p):
-	'''function_defs : function_def
-					 | function_defs function_def'''
-	pass
-
-
-def p_error(p):
-	print "Syntax error in", p
-
-
-def parser_test(filename):
-	'''To parse a file containing Gramola code.'''
-	fd = open(filename, "r")
-	prog = fd.read()
-	fd.close()
-
-	print parser.parse(prog)
-
-
-parser = yacc.yacc()
-
-import sys
-# lexer_test(sys.argv[1])
-parser_test(sys.argv[1])
+    def t_LBRACKET(self, t):
+        r'\['
+        self._implicit_line_joining_level += 1
+        return t
+
+    def t_RBRACKET(self, t):
+        r'\]'
+        self._implicit_line_joining_level -= 1
+        if self._implicit_line_joining_level < 0:
+            raise UnmatchedBracketError(str(t))
+        return t
+
+    def t_LBRACE(self, t):
+        r'\{'
+        self._implicit_line_joining_level += 1
+        return t
+
+    def t_RBRACE(self, t):
+        r'\}'
+        self._implicit_line_joining_level -= 1
+        if self._implicit_line_joining_level < 0:
+            raise UnmatchedBracketError(str(t))
+        return t
+
+    ## Identifiers and reserved words
+    # If lexeme is a reserved word, uses its appropriate token type
+    def t_NAME(self, t):
+        r'[A-Za-z_][A-Za-z0-9_]*'
+        t.type = self._reserved.get(t.value, 'NAME')
+        if (t.type in ('DEF', 'CLASS') and self._indent_stack[-1] != 0 and
+            not self._find_column(t)):
+            # We have line-initial content after an indented block, so dedent
+            self._indent_stack.pop()
+            self._lexer.lexpos -= len(t.value)
+            return self._make_token('DEDENT', self._indent_stack[-1])
+        return t
+
+    @TOKEN(number_literal)
+    def t_NUMBER(self, t):
+        if '.' in t.value:
+            t.value = float(t.value)
+        else:
+            t.value = int(t.value)
+        return t
+
+    @TOKEN(string_literal)
+    def t_STRING(self, t):
+        return t
+
+    ## Newline equivalent
+    # Optional whitespace, optional comment, then at least one newline
+    # We emit a NEWLINE token only if:
+    # - we're not implicitly joining logical lines, and
+    # - we're not at the start of the line.
+    # For all other whitespace, including line-initial, see t_WS().
+    @TOKEN(newline_equivalent)
+    def t_NEWLINE(self, t):
+        self._lexer.lineno += t.value.count('\n')
+        if not self._implicit_line_joining_level and self._find_column(t):
+            # We're at the end of a statement, or just before a suite of them
+            t.type = 'NEWLINE'
+            return t
+
+
+    ## All other whitespace
+    # We only do indent/dedent calculations if:
+    # - we're not implicitly joining logical lines, and
+    # - we're either at the start of the line, or else we're not in the process
+    #   of dedenting.
+    def t_WS(self, t):
+        r'[ \t]+'
+        if (self._implicit_line_joining_level or
+            (self._find_column(t) and not self._dedenting)):
+            # Ignore this whitespace; we're either joining logical lines, or
+            # we're not at the start of the line (and not dedenting)
+            return None
+
+        num_tabs = t.value.count('\t') + t.value.count(self._tab)
+        if num_tabs == self._indent_stack[-1]:
+            # Same indentation as previous logical line
+            return None
+
+        if num_tabs > self._indent_stack[-1]:
+            self._indent_stack.append(num_tabs)
+            t.type = 'INDENT'
+            t.value = num_tabs
+            return t
+
+        self._indent_stack.pop()
+        indent_level = self._indent_stack[-1]
+        if num_tabs > indent_level:
+            raise InconsistentDedentError(str(self._indent_stack))
+        elif num_tabs == indent_level:
+            # We're at a proper indentation level
+            self._dedenting = False
+        else:
+            # Rewind the lexer position to just after the first "tab", so that
+            # we can emit another DEDENT token
+            self._rewind_lexer_for_dedenting(t)
+            # Let the lexer know that we need another round of dedenting
+            self._dedenting = True
+        t.type = 'DEDENT'
+        t.value = indent_level
+        return t
+
+    def t_error(self, t):
+        print "Illegal character '{0}'".format(t.value)
+        # TODO: smarter error handling
+        self._lexer.skip(1)
+
+    # Compute column index (starting from 0).
+    # NB: This counts one column per character, including tabs
+    def _find_column(self, token):
+        last_cr = self._lexer.lexdata.rfind('\n', 0, token.lexpos)
+        column = token.lexpos - (last_cr + 1)
+        return column
+
+    def _rewind_lexer_for_dedenting(self, token):
+        tab = self._get_first_tab_substring(token)
+        self._lexer.lexpos = token.lexpos + len(tab)
+
+    def _get_first_tab_substring(self, token):
+        if token.value.startswith('\t'):
+            return '\t'
+        elif token.value.startswith(self._tab):
+            return self._tab
+
+    def __init__(self, **kwargs):
+        self._lexer = lex.lex(module=self, **kwargs)
+        self._tab = ' ' * TAB_WIDTH
+        self._indent_stack = None
+        self._dedenting = None
+        self._implicit_line_joining_level = None
+        self._reset()
+
+    def _reset(self):
+        # Pushed when indenting, popped when dedenting
+        self._indent_stack = [0]
+        # Are we in the process of dedenting multiple times?
+        self._dedenting = False
+        self._implicit_line_joining_level = 0
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        token = self.token()
+        if token is None:
+            raise StopIteration
+        return token
+
+    def token(self):
+        token = self._lexer.token()
+        if token is not None:
+            return token
+        if not self._indent_stack:
+            # Reset this custom lexer
+            self._reset()
+            return None
+        level = self._indent_stack.pop()
+        if not level:
+            # We're at the end of the file, without any indentation
+            return self._make_token('ENDMARKER', None)
+        # We have some indentation to unwind before we're done
+        return self._make_token('DEDENT', self._indent_stack[-1])
+
+    def _make_token(self, tok_type, tok_value):
+        token = lex.LexToken()
+        token.type = tok_type
+        token.value = tok_value
+        token.lineno = self._lexer.lineno
+        token.lexpos = self._lexer.lexpos
+        return token
+
+    def input(self, s):
+        return self._lexer.input(s)
+
+
+def main(args):
+    # Parse a file containing Gramola code and print all Lexical Tokens
+    if not len(args):
+        print >> sys.stderr, 'ERROR: Must provide the lexer with a filename!'
+        sys.exit(1)
+
+    filename = args[0]
+    lexer = Lexer()
+    with open(filename, 'r') as fd:
+        lexer.input(fd.read())
+
+    for tok in lexer:
+        # output = "@" + str(tok.lineno) + ":" + str(tok.lexpos) + "\t" \
+            # + str(tok.value) + "\t" + tok.type
+        # print output
+        print str(tok)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
