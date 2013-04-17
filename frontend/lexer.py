@@ -105,8 +105,9 @@ class Lexer(object):
 
     ## For string literals
     escape = r'(\\.)'
-    single_quote_string = r"('({0}|[^\\\n'])*')".format(escape)
-    double_quote_string = r'("({0}|[^\\\n"])*")'.format(escape)
+    # NB: the \ character does *not* do explicit line joining
+    single_quote_string = r"('({0}|[^\n'])*')".format(escape)
+    double_quote_string = r'("({0}|[^\n"])*")'.format(escape)
     string_literal = r'({0}|{1})'.format(single_quote_string,
                                          double_quote_string)
 
@@ -304,7 +305,7 @@ class Lexer(object):
 
 
 def main(args):
-    # Parse a file containing Gramola code and print all Lexical Tokens
+    # Tokenize a file containing Gramola code
     if not len(args):
         print >> sys.stderr, 'ERROR: Must provide the lexer with a filename!'
         sys.exit(1)

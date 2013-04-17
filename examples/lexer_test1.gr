@@ -1,5 +1,8 @@
+
+
 # This is a comment!
 float exp1 = 1 + 2 - 3.03 * 14.75 / 0.001
+
 
 for a in b:
 	print a
@@ -17,3 +20,7 @@ class MyClass(parent):
 		self.long_string = ("this string uses "
 				    "implicit line "
 				    "joining...")
+
+
+# Final comment
+
