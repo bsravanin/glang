@@ -1,0 +1,73 @@
+# Class definitions based on Gramola Tutorial Section 8.1.3.
+# Do we need or support those variable types?
+# Are the variable types supposed to be keywords? Not listed in LRM. :(
+
+class Movie(Node):
+	str title
+	str rating
+	set cast	# cast [Actor]?
+
+class Actor(Node):
+	str name
+	set filmography		# filmography [Movie]?
+
+# These 2 Edge subclasses may be wrong, so not using. Something like this is good to have.
+class Stars(Edge):
+	Movie start
+	Actor end
+	str name
+
+class ActedIn(Edge):
+	Actor start
+	Movie end
+	str name
+
+class IMDB(Graph):
+	# field declarations?
+
+	def find_movie(self, title):
+		# Find movie by title. Assuming unique titles.
+		return self.get_node(type==Movie, title==title)
+
+	def find_actor(self, name):
+		# Find actor by name. Assuming unique names.
+		return self.get_node(type==Actor, name==name)
+
+	def update(self, title, rating, cast):
+		# To trigger updates for both movies and actors simultaneously.
+		movie = self.find_movie(self, title)
+
+		if movie == None:
+			movie = self.Movie(title, rating, cast)
+		else:
+			movie.rating = rating
+			movie.cast.union(cast)
+
+		for name in cast:
+			actor = self.find_actor(name)
+
+			if actor == None:
+				actor = self.Actor(name, set([movie]))
+			else:
+				actor.filmography.add(movie)
+
+			self.Edge(movie, actor, name=="has actor")
+
+	def worked_with(self, name1, name2):
+		# A unique (hidden) feature of IMDB to search for movies where two
+		# people worked together. http://www.imdb.com/name/nm0000020/workedwith
+		actor1 = self.find_actor(name1)
+		actor2 = self.find_actor(name2)
+
+		if actor1 == None or actor2 == None:
+			print "One of the actors not in IMDB."
+			return set()
+
+		return actor1.filmography.intersection(actor2.filmography)
+
+
+imdb = IMDB()
+western = imdb.Movie("Once Upon a Time in the West", 8.7, set(["Henry Fonda", "Charles Bronson", "Jason Robards", "Claudia Cardinale]"))	# Will this work? Can IMDB sub-graph recognize Node of type Movie/Actor?
+imdb.update("Once Upon a Time in the West", 8.7, set(["Henry Fonda", "Charles Bronson", "Jason Robards", "Claudia Cardinale]"))
+imdb.update("12 Angry Men", 8.9, set(["Henry Fonda"]))
+imdb.worked_with("Henry Fonda", "Charles Bronson")

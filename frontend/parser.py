@@ -1,29 +1,29 @@
-# ----------------------------------------------------------------------
-# parser.py
-#
-# Parser for Gramola.
-#
-# NB: by convention, whenever the grammar calls for an optional rule,
-# we create a separate method "opt_RULENAME" that matches either that
-# rule, or "empty".
-#
-# TODO: implement symbol table
-#
-# ----------------------------------------------------------------------
+#!/usr/bin/python2.7
+
+'''Parser for Gramola.
+
+NB: by convention, whenever the grammar calls for an optional rule,
+we create a separate method "opt_RULENAME" that matches either that
+rule, or "empty".
+
+TODO: implement symbol table
+'''
 
 # pylint: disable=C0103
 # "Invalid name"
 # pylint: disable=R0201
 # "Method could be a function"
+# pylint: disable=R0904
+# "Too many public methods" (for Parser class)
 
-import pprint
+import nodes
 import sys
 from ply import yacc
 from lexer import Lexer
 
 
 class Error(Exception):
-    'Generic error class.'
+    'Generic error class for parser.py.'
 
 
 class SymbolAlreadyPresentError(Error):
@@ -32,25 +32,6 @@ class SymbolAlreadyPresentError(Error):
 
 class SymbolMissingError(Error):
     'Raised when a referenced symbol is not in the symbol table.'
-
-
-class Node(object):
-
-    def __init__(self, node_type, **kwargs):
-        self._node_type = node_type
-        self.__dict__.update(kwargs)
-        # TODO: maintain "parent" pointers within Node "children"?
-
-    @property
-    def node_type(self):
-        return self._node_type
-
-    def __str__(self):
-        # TODO: find better way to print this
-        return '<Node {0}>'.format(pprint.pformat(self.__dict__))
-
-    def __repr__(self):
-        return str(self)
 
 
 class Parser(object):
@@ -62,11 +43,11 @@ class Parser(object):
     def __init__(self, lexer=None):
         self._lexer = lexer or Lexer()
         self.tokens = self._lexer.tokens
-        self._parser = yacc.yacc(module=self)
+        self._parser = yacc.yacc(module=self)  #, method='SLR')
 
     def parse(self, s, **kwargs):
         lexer = kwargs.pop('lexer', self._lexer)
-        self._parser.parse(s, lexer=lexer, **kwargs)
+        return self._parser.parse(s, lexer=lexer, **kwargs)
 
     def p_empty(self, p):
         'empty :'
@@ -74,7 +55,7 @@ class Parser(object):
 
     def p_start(self, p):
         'start : opt_top_level_stmt_list ENDMARKER'
-        p[0] = Node('start', stmt_list=p[1])
+        p[0] = nodes.StartNode(stmt_list=p[1])
 
     def p_opt_top_level_stmt_list(self, p):
         '''opt_top_level_stmt_list : top_level_stmt_list
@@ -98,18 +79,18 @@ class Parser(object):
         # We keep "type" and "name" separate (as opposed to using type_and_name)
         # because we don't want to create a declaration Node for the function
         # name
-        p[0] = Node('function_def', return_type=p[2], name=p[3], params=p[5],
-                    body=p[8])
+        p[0] = nodes.FunctionDefNode(return_type=p[2], name=p[3], params=p[5],
+                                     body=p[8])
 
     def p_type(self, p):
         'type : NAME'
         # TODO: manage symbol table
-        p[0] = Node('type', value=p[1])
+        p[0] = nodes.TypeNode(value=p[1])
 
     def p_name(self, p):
         'name : NAME'
         # TODO: manage symbol table
-        p[0] = Node('name', value=p[1])
+        p[0] = nodes.NameNode(value=p[1])
 
     def p_opt_parameter_list(self, p):
         '''opt_parameter_list : parameter_list
@@ -128,7 +109,7 @@ class Parser(object):
     def p_type_and_name(self, p):
         'type_and_name : type name'
         # TODO: manage symbol table
-        p[0] = Node('declaration', type=p[1], names=[p[2]])
+        p[0] = nodes.DeclarationNode(id_type=p[1], names=[p[2]])
 
     def p_stmt(self, p):
         '''stmt : simple_stmt
@@ -149,7 +130,7 @@ class Parser(object):
 
     def p_assignment_stmt(self, p):
         'assignment_stmt : target ASSIGN expr'
-        p[0] = Node('assignment', target=p[1], value=p[3])
+        p[0] = nodes.AssignmentNode(target=p[1], value=p[3])
 
     def p_target(self, p):
         '''target : id_opt_type
@@ -165,7 +146,7 @@ class Parser(object):
 
     def p_print_stmt(self, p):
         'print_stmt : PRINT opt_expr_list'
-        p[0] = Node('print', values=p[2])
+        p[0] = nodes.PrintNode(values=p[2])
 
     def p_opt_expr_list(self, p):
         '''opt_expr_list : expr_list
@@ -180,15 +161,15 @@ class Parser(object):
 
     def p_break_stmt(self, p):
         'break_stmt : BREAK'
-        p[0] = Node('break')
+        p[0] = nodes.BreakNode()
 
     def p_continue_stmt(self, p):
         'continue_stmt : CONTINUE'
-        p[0] = Node('continue')
+        p[0] = nodes.ContinueNode()
 
     def p_return_stmt(self, p):
         'return_stmt : RETURN opt_expr'
-        p[0] = Node('return', value=p[2])
+        p[0] = nodes.ReturnNode()
 
     def p_opt_expr(self, p):
         '''opt_expr : expr
@@ -197,7 +178,7 @@ class Parser(object):
 
     def p_declaration(self, p):
         'declaration : type name_list NEWLINE'
-        p[0] = Node('declaration', type=p[1], names=p[2])
+        p[0] = nodes.DeclarationNode(id_type=p[1], names=p[2])
 
     def p_name_list(self, p):
         '''name_list : name
@@ -219,7 +200,7 @@ class Parser(object):
         elses = p[5]  # might be a list of "if" Nodes
         if p[6]:
             elses.append(p[6])
-        p[0] = Node('if', test=p[2], body=p[4], elses=elses)
+        p[0] = nodes.IfNode(test=p[2], body=p[4], elses=elses)
 
     def p_opt_elif_clauses(self, p):
         '''opt_elif_clauses : elif_clauses
@@ -242,7 +223,7 @@ class Parser(object):
 
     def p_elif_clause(self, p):
         'elif_clause : ELIF expr COLON suite'
-        p[0] = Node('if', test=p[2], body=p[4])
+        p[0] = nodes.IfNode(test=p[2], body=p[4])
 
     def p_else_clause(self, p):
         'else_clause : ELSE COLON suite'
@@ -250,15 +231,15 @@ class Parser(object):
 
     def p_while_stmt(self, p):
         'while_stmt : WHILE expr COLON suite'
-        p[0] = Node('while', test=p[2], body=p[4])
+        p[0] = nodes.WhileNode(test=p[2], body=p[4])
 
     def p_for_stmt(self, p):
         'for_stmt : FOR id_opt_type IN primary COLON suite'
-        p[0] = Node('for', target=p[2], iterable=p[4], body=p[6])
+        p[0] = nodes.ForNode(target=p[2], iterable=p[4], body=p[6])
 
     def p_suite(self, p):
         'suite : NEWLINE INDENT stmt_list DEDENT'
-        p[0] = Node('suite', stmts=p[3])
+        p[0] = nodes.SuiteNode(stmts=p[3])
 
     def p_stmt_list(self, p):
         '''stmt_list : stmt
@@ -288,7 +269,7 @@ class Parser(object):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = Node('or', left=p[1], right=p[3])
+            p[0] = nodes.BinaryOpNode(operator='or', left=p[1], right=p[3])
 
     def p_and_test(self, p):
         '''and_test : not_test
@@ -296,7 +277,7 @@ class Parser(object):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = Node('and', left=p[1], right=p[3])
+            p[0] = nodes.BinaryOpNode(operator='and', left=p[1], right=p[3])
 
     def p_not_test(self, p):
         '''not_test : comparison
@@ -304,7 +285,7 @@ class Parser(object):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = Node('not', operand=p[2])
+            p[0] = nodes.UnaryOpNode(operator='not', operand=p[2])
 
     def p_comparison(self, p):
         '''comparison : arith_expr
@@ -317,11 +298,13 @@ class Parser(object):
             right = p[3]
             not_loc = op.find('not')
             if not_loc < 0:
-                p[0] = Node(op, left=left, right=right)
+                p[0] = nodes.BinaryOpNode(operator=op, left=left, right=right)
             else:
                 # Strip "not" from operator
                 op = op[:not_loc - 1] + op[not_loc + 3:]
-                p[0] = Node('not', operand=Node(op, left=left, right=right))
+                operand = nodes.BinaryOpNode(operator=op, left=left,
+                                             right=right)
+                p[0] = nodes.UnaryOpNode(operator='not', operand=operand)
 
     def p_comp_op(self, p):
         '''comp_op : LESS
@@ -344,7 +327,7 @@ class Parser(object):
             p[0] = p[1]
         else:
             # p[2] is a string, not a token
-            p[0] = Node(p[2], left=p[1], right=p[3])
+            p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
 
     def p_arith_op(self, p):
         '''arith_op : PLUS
@@ -359,7 +342,7 @@ class Parser(object):
             p[0] = p[1]
         else:
             # p[2] is a string, not a token
-            p[0] = Node(p[2], left=p[1], right=p[3])
+            p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
 
     def p_mult_op(self, p):
         '''mult_op : STAR
@@ -375,7 +358,7 @@ class Parser(object):
             p[0] = p[1]
         else:
             # p[2] is a string, not a token
-            p[0] = Node(p[1], operand=p[2])
+            p[0] = nodes.UnaryOpNode(operator=p[1], operand=p[2])
 
     def p_unary_op(self, p):
         '''unary_op : PLUS
@@ -389,7 +372,8 @@ class Parser(object):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = Node(p[2].type.lower(), left=p[1], right=p[3])
+            p[0] = nodes.BinaryOpNode(
+                operator=p[2].type.lower(), left=p[1], right=p[3])
 
     def p_primary(self, p):
         '''primary : atom
@@ -441,15 +425,15 @@ class Parser(object):
 
     def p_attribute_ref(self, p):
         'attribute_ref : primary DOT name'
-        p[0] = Node('attribute', value=p[1], attr=p[3])
+        p[0] = nodes.AttributeRefNode(value=p[1], attribute=p[3])
 
     def p_subscription(self, p):
         'subscription : primary LBRACKET expr RBRACKET'
-        p[0] = Node('subscript', value=p[1], index=p[3])
+        p[0] = nodes.SubscriptNode(value=p[1], index=p[3])
 
     def p_call(self, p):
         'call : primary LPAREN opt_argument_list RPAREN'
-        p[0] = Node('call', func=p[1], args=p[3])
+        p[0] = nodes.CallNode(func=p[1], args=p[3])
 
     def p_opt_argument_list(self, p):
         '''opt_argument_list : argument_list
@@ -467,7 +451,7 @@ class Parser(object):
 
     def p_class_def(self, p):
         'class_def : CLASS type LPAREN opt_name RPAREN COLON class_def_suite'
-        p[0] = Node('class_def', name=p[2], base=p[4], body=p[7])
+        p[0] = nodes.ClassDefNode(name=p[2], base=p[4], body=p[7])
 
     def p_opt_name(self, p):
         '''opt_name : name
@@ -534,9 +518,10 @@ def main(args):
     filename = args[0]
     parser = Parser()
     with open(filename, 'r') as fd:
-        result = parser.parse(fd.read())
+        file_input = fd.read()
+        result = parser.parse(file_input)
 
-    pprint.pprint(result)
+    print str(result)
 
 
 if __name__ == '__main__':
