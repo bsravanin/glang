@@ -1,9 +1,6 @@
-# ----------------------------------------------------------------------
-# lexer.py
-#
-# Lexical analyzer for symbols in Gramola.
-##
-# ----------------------------------------------------------------------
+#!/usr/bin/python2.7
+
+'Lexical analyzer for symbols in Gramola.'
 
 # pylint: disable=C0103
 # "Invalid name...."
