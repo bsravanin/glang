@@ -1,15 +1,13 @@
-# ----------------------------------------------------------------------
-# parser.py
-#
-# Parser for Gramola.
-#
-# NB: by convention, whenever the grammar calls for an optional rule,
-# we create a separate method "opt_RULENAME" that matches either that
-# rule, or "empty".
-#
-# TODO: implement symbol table
-#
-# ----------------------------------------------------------------------
+#!/usr/bin/python2.7
+
+'''Parser for Gramola.
+
+NB: by convention, whenever the grammar calls for an optional rule,
+we create a separate method "opt_RULENAME" that matches either that
+rule, or "empty".
+
+TODO: implement symbol table
+'''
 
 # pylint: disable=C0103
 # "Invalid name"
@@ -39,7 +37,6 @@ class Node(object):
     def __init__(self, node_type, **kwargs):
         self._node_type = node_type
         self.__dict__.update(kwargs)
-        # TODO: maintain "parent" pointers within Node "children"?
 
     @property
     def node_type(self):
@@ -47,7 +44,7 @@ class Node(object):
 
     def __str__(self):
         # TODO: find better way to print this
-        return '<Node {0}>'.format(pprint.pformat(self.__dict__))
+        return pprint.pformat(self.__dict__)
 
     def __repr__(self):
         return str(self)
@@ -62,11 +59,11 @@ class Parser(object):
     def __init__(self, lexer=None):
         self._lexer = lexer or Lexer()
         self.tokens = self._lexer.tokens
-        self._parser = yacc.yacc(module=self)
+        self._parser = yacc.yacc(module=self)  #, method='SLR')
 
     def parse(self, s, **kwargs):
         lexer = kwargs.pop('lexer', self._lexer)
-        self._parser.parse(s, lexer=lexer, **kwargs)
+        return self._parser.parse(s, lexer=lexer, **kwargs)
 
     def p_empty(self, p):
         'empty :'
@@ -534,9 +531,10 @@ def main(args):
     filename = args[0]
     parser = Parser()
     with open(filename, 'r') as fd:
-        result = parser.parse(fd.read())
+        input = fd.read()
+        result = parser.parse(input)
 
-    pprint.pprint(result)
+    print str(result)
 
 
 if __name__ == '__main__':
