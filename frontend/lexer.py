@@ -308,15 +308,20 @@ def main(args):
         sys.exit(1)
 
     filename = args[0]
+    try:
+        outname = open(args[1], "w")
+    except IndexError:
+        outname = sys.stdout
+
     lexer = Lexer()
     with open(filename, 'r') as fd:
         lexer.input(fd.read())
 
     for tok in lexer:
-        # output = "@" + str(tok.lineno) + ":" + str(tok.lexpos) + "\t" \
-            # + str(tok.value) + "\t" + tok.type
-        # print output
-        print str(tok)
+        print >>outname, str(tok.value), str(tok.type)
+
+    outname.flush()
+    outname.close()
 
 
 if __name__ == '__main__':
