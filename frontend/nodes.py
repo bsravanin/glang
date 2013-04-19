@@ -29,7 +29,7 @@ class Node(object):
 
     def __str__(self):
         # TODO: find better way to print this
-        return pprint.pformat(self.__dict__)
+        return pprint.pformat({self.__class__.__name__: self.__dict__})
 
     def __repr__(self):
         return str(self)
