@@ -25,6 +25,13 @@ class UnmatchedBracketError(Error):
 
 
 class Lexer(object):
+    '''Representation of a lexer object.
+
+    Important attributes:
+      input: Sets the input text for the lexer.
+      token: Returns the next available token from the input stream.
+      next: Wrapper around token(), used for iteration.
+    '''
 
     # Reserved words
     _reserved = {
@@ -232,13 +239,16 @@ class Lexer(object):
         return t
 
     def t_error(self, t):
+        'Error handling.'
         print "Illegal character '{0}'".format(t.value)
         # TODO: smarter error handling
         self._lexer.skip(1)
 
-    # Compute column index (starting from 0).
-    # NB: This counts one column per character, including tabs
     def _find_column(self, token):
+        '''Compute the token's column index (starting from 0).
+
+        NB: This counts one column per character, including tabs.
+        '''
         last_cr = self._lexer.lexdata.rfind('\n', 0, token.lexpos)
         column = token.lexpos - (last_cr + 1)
         return column
