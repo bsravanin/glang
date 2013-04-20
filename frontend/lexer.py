@@ -319,7 +319,7 @@ def main(args):
 				print >>ofd, str(tok.value), str(tok.type)
 	except IndexError:
 		for tok in lexer:
-			print str(tok.value), str(tok.type)
+			print tok
 
 
 if __name__ == '__main__':
