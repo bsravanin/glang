@@ -1,10 +1,11 @@
 #!/usr/bin/python2.7
 
+'AST node definitions for Gramola.'
+
 # pylint: disable=R0903
 # "Too few public methods"
-# pylint: disable=C0111
-# "Missing docstring"
 
+from ply import lex
 
 
 class Error(Exception):
@@ -19,6 +20,10 @@ class InvalidNodeConstructionError(Error):
 
 
 def pretty_print(obj, indent=''):
+    'Recursively pretty-prints the given object. Does not handle loops, though.'
+    if isinstance(obj, lex.LexToken):
+        # At the moment, we don't want to print the whole LexToken
+        return repr(obj.value)
     if getattr(obj, '__iter__', None):
         indent += '\t'
         if isinstance(obj, list):
@@ -51,6 +56,7 @@ def pretty_print(obj, indent=''):
 
 
 class Node(object):
+    'Representation of a node in an abstract syntax tree (AST).'
 
     def __init__(self, **kwargs):
         for kwarg in kwargs:
@@ -69,12 +75,14 @@ class Node(object):
 
 
 class StartNode(Node):
+    'AST node for the start symbol.'
 
     def __init__(self, stmt_list=None):
         Node.__init__(self, stmt_list=stmt_list)
 
 
 class FunctionDefNode(Node):
+    'AST node for a function definition.'
 
     def __init__(self, return_type=None, name=None, params=None, body=None):
         Node.__init__(self, return_type=return_type, name=name, params=params,
@@ -82,54 +90,71 @@ class FunctionDefNode(Node):
 
 
 class TypeNode(Node):
+    'AST node for a data type, either built-in or derived.'
 
     def __init__(self, value=None):
         Node.__init__(self, value=value)
 
 
 class NameNode(Node):
+    'AST node for a variable or function identifier.'
 
     def __init__(self, value=None):
         Node.__init__(self, value=value)
 
 
 class DeclarationNode(Node):
+    'AST node for a variable declaration.'
 
     def __init__(self, id_type=None, name=None):
         Node.__init__(self, id_type=id_type, name=name)
 
 
+class ClassDefNode(Node):
+    'AST node for a class definition.'
+
+    def __init__(self, name=None, base=None, body=None):
+        # base is optional. use empty string to pass the "not None" check
+        Node.__init__(self, name=name, base=base or '', body=body)
+
+
 class AssignmentNode(Node):
+    'AST node for an assignment statement.'
 
     def __init__(self, target=None, value=None):
         Node.__init__(self, target=target, value=value)
 
 
 class PrintNode(Node):
+    'AST node for a print statement.'
 
     def __init__(self, values=None):
         Node.__init__(self, values=values)
 
 
 class BreakNode(Node):
+    'AST node for a break statement.'
 
     def __init__(self):
         Node.__init__(self)
 
 
 class ContinueNode(Node):
+    'AST node for a continue statement.'
 
     def __init__(self):
         Node.__init__(self)
 
 
 class ReturnNode(Node):
+    'AST node for a return statement.'
 
     def __init__(self):
         Node.__init__(self)
 
 
 class IfNode(Node):
+    'AST node for an if statement.'
 
     def __init__(self, test=None, body=None, elses=None):
         # elses are optional. use empty list to pass the "not None" check
@@ -137,55 +162,64 @@ class IfNode(Node):
 
 
 class WhileNode(Node):
+    'AST node for a while statement.'
 
     def __init__(self, test=None, body=None):
         Node.__init__(self, test=test, body=body)
 
 
 class ForNode(Node):
+    'AST node for a for statement.'
 
     def __init__(self, target=None, iterable=None, body=None):
         Node.__init__(self, target=target, iterable=iterable, body=body)
 
 
-class SuiteNode(Node):
-
-    def __init__(self, stmts=None):
-        Node.__init__(self, stmts=stmts)
-
-
 class BinaryOpNode(Node):
+    'AST node for a binary operation.'
 
     def __init__(self, operator=None, left=None, right=None):
         Node.__init__(self, operator=operator, left=left, right=right)
 
 
 class UnaryOpNode(Node):
+    'AST node for a unary operation.'
 
     def __init__(self, operator=None, operand=None):
         Node.__init__(self, operator=operator, operand=operand)
 
 
+class StringNode(Node):
+    'AST node for a string object.'
+
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
+
+
+class NumberNode(Node):
+    'AST node for a number object.'
+
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
+
+
 class AttributeRefNode(Node):
+    'AST node for an attribute reference.'
 
     def __init__(self, value=None, attribute=None):
         Node.__init__(self, value=value, attribute=attribute)
 
 
 class SubscriptNode(Node):
+    'AST node for a subscription.'
 
     def __init__(self, value=None, index=None):
         Node.__init__(self, value=value, index=index)
 
+
 class CallNode(Node):
+    'AST node for a function call.'
 
     def __init__(self, func=None, args=None):
         # args are optional. use empty list to pass the "not None" check
         Node.__init__(self, func=func, args=args or [])
-
-
-class ClassDefNode(Node):
-
-    def __init__(self, name=None, base=None, body=None):
-        # base is optional. use empty string to pass the "not None" check
-        Node.__init__(self, name=name, base=base or '', body=body)
