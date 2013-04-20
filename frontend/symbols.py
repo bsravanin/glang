@@ -30,49 +30,21 @@ class PreexistingSymbolError(Error):
 
 
 def _check_name_type(name):
+    'Checks that the given identifier has the proper type.'
     if not isinstance(name, basestring):
         raise TypeError('Identifier must be an instance of basestring')
 
 
 def _check_full_name_type(full_name):
+    'Checks that the given qualified identifier has the proper type.'
     if type(full_name) != tuple:
         raise TypeError('Fully qualified identifier must be of type tuple')
 
 
 def _check_symbol_type(symbol):
+    'Checks that the given symbol has the proper type.'
     if not isinstance(symbol, Symbol):
         raise TypeError('SymbolTable value must be an instance of Symbol')
-
-
-class ScopeStack(object):
-    '''Representation of a stack of "scopes".
-
-    A "scope" is simply some consistent identifier for program scope, which
-    helps determine the appropriate identifier namespace.
-    '''
-
-    def __init__(self, scopes=None):
-        if scopes is None:
-            scopes = []
-        self._stack = list(scopes)
-
-    def __iter__(self):
-        return iter(self._stack)
-
-    def __str__(self):
-        return str(self._stack)
-
-    def __repr__(self):
-        return 'ScopeStack(stack={!r})'.format(self._stack)
-
-    def push(self, arg):
-        "Pushes 'arg' onto the stack."
-        _check_name_type(arg)
-        self._stack.append(arg)
-
-    def pop(self):
-        'Pops a scope identifier off the stack.'
-        return self._stack.pop()
 
 
 class Symbol(object):
@@ -157,6 +129,17 @@ class FunctionSymbol(Symbol):
 
 
 def _get_qualified_name(scopes, name):
+    '''Returns the given identifier, qualified with the given namespace.
+
+    Args:
+      scopes: An iterable of scope identifiers (str), i.e., a namespace.
+      name: (str) An identifier to qualify.
+
+    Returns:
+      A tuple of:
+        tuple of identifiers (str)
+        identifier (str)
+    '''
     return (tuple(scopes), name)
 
 
@@ -184,6 +167,16 @@ class SymbolTable(object):
         return self._scopes
 
     def get_qualified_name(self, name):
+        '''Returns the given identifier, qualified with the current namespace.
+
+        Args:
+          name: (str) An identifier to qualify.
+
+        Returns:
+          A tuple of:
+              tuple of identifiers (str)
+              identifier (str)
+        '''
         return _get_qualified_name(self._scopes, name)
 
     def get(self, identifier):
@@ -212,6 +205,15 @@ class SymbolTable(object):
         return cur_scopes, value
 
     def get_in_current_scope(self, identifier):
+        '''Returns the entry in the current scope for the given identifier.
+
+        Args:
+          identifier: (str) An identifier to qualify.
+
+        Returns:
+          If an entry exists for the given qualified identifier, an instance of
+          Symbol. Otherwise, None.
+        '''
         full_name = self.get_qualified_name(identifier)
         return self.get_by_qualified_name(full_name)
 
@@ -262,3 +264,34 @@ class SymbolTable(object):
         _check_full_name_type(full_name)
         _check_symbol_type(symbol)
         self._table[full_name] = symbol
+
+
+class ScopeStack(object):
+    '''Representation of a stack of "scopes".
+
+    A "scope" is simply some consistent identifier for program scope, which
+    helps determine the appropriate identifier namespace.
+    '''
+
+    def __init__(self, scopes=None):
+        if scopes is None:
+            scopes = []
+        self._stack = list(scopes)
+
+    def __iter__(self):
+        return iter(self._stack)
+
+    def __str__(self):
+        return str(self._stack)
+
+    def __repr__(self):
+        return 'ScopeStack(stack={!r})'.format(self._stack)
+
+    def push(self, arg):
+        "Pushes 'arg' onto the stack."
+        _check_name_type(arg)
+        self._stack.append(arg)
+
+    def pop(self):
+        'Pops a scope identifier off the stack.'
+        return self._stack.pop()
