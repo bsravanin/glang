@@ -26,7 +26,7 @@ public class Edge extends GraphElement{
 		this.id = id;
 	}
 
-	public void setId(int id) {
+	public synchronized void setId(int id) {
 		this.id = id;
 	}
 	
@@ -62,7 +62,7 @@ public class Edge extends GraphElement{
 		return this.variableMap.get(variable);
 	}
 	
-	public void setVariableValue(String variable, Object value) {
+	public synchronized void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
 	}
 	
@@ -70,7 +70,7 @@ public class Edge extends GraphElement{
 	 * Set the Edge parent of the current Edge. Mainly for path traversal.
 	 * @param pathParent the parent Edge object
 	 */
-	public void addParents(Edge pathParent) {
+	public synchronized void addParents(Edge pathParent) {
 		this.pathParent.add(pathParent);
 	}
 	
@@ -80,5 +80,9 @@ public class Edge extends GraphElement{
 	 */
 	public HashSet<Edge> getParents() {
 		return this.pathParent;
+	}
+	
+	public String toString() {
+		return this.start.getId() + " =(" + this.id + ")=> " + this.end.getId(); 
 	}
 }

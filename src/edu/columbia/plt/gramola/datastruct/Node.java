@@ -19,14 +19,14 @@ public class Node extends GraphElement{
 		
 	public Node(HashMap<String, Object> variableMap, int id) {
 		this.variableMap = variableMap;
-		this.id = id;
+		this.setId(id);
 	}
 	
 	public Node(HashMap<String, Object> variableMap) {
 		this.variableMap = variableMap;
 	}
 
-	public void setId(int id) {
+	public synchronized void setId(int id) {
 		this.id = id;
 	}
 	
@@ -38,7 +38,7 @@ public class Node extends GraphElement{
 		return this.variableMap.get(variable);
 	}
 	
-	public void setVariableValue(String variable, Object value) {
+	public synchronized void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
 	}
 	
@@ -54,7 +54,7 @@ public class Node extends GraphElement{
 	 * Set incoming Edge of the current Node
 	 * @param e incoming Edge object
 	 */
-	public void setInE(Edge e) {
+	public synchronized void setInE(Edge e) {
 		this.incoming.add(e);
 	}
 	
@@ -62,7 +62,7 @@ public class Node extends GraphElement{
 	 * Set outgoing Edge from the current Node
 	 * @param e outgoing Edge object
 	 */
-	public void setOutE(Edge e) {
+	public synchronized void setOutE(Edge e) {
 		this.outgoing.add(e);
 	}
 	
@@ -119,7 +119,11 @@ public class Node extends GraphElement{
 	 * @param variable the name of the specific variable
 	 * @param newValue the new value of the specific variable
 	 */
-	public void update(String variable, Object newValue) {		
+	public synchronized void update(String variable, Object newValue) {		
 		this.variableMap.put(variable, newValue);
+	}
+	
+	public String toString() {
+		return String.valueOf(this.id);
 	}
 }
