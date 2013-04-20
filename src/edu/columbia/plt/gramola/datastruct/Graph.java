@@ -1,6 +1,7 @@
 package edu.columbia.plt.gramola.datastruct;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,7 +11,7 @@ import java.util.Stack;
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
 public class Graph{
-	
+
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	private ArrayList<Edge> edgeList = new ArrayList<Edge>();
@@ -19,6 +20,9 @@ public class Graph{
 	
 	private int edgeId = 0;
 	
+	public Graph() {
+		Date now = new Date();
+	}	
 	/**
 	 * The regular way to create Node within the Graph
 	 * Please note that if a Node is created by new Node()
@@ -26,9 +30,9 @@ public class Graph{
 	 * @param vvlist the length of vvlist must be even. It contains "var1", "value1", "var2", "value2"..."varN", "valueN"
 	 * @return a new Node
 	 */
-	public Node createNode(Object...vvlist) {
+	public synchronized Node createNode(Object...vvlist) {
 		HashMap<String, Object> variableMap = createVariableMap(vvlist);
-		Node node = new Node(variableMap, nodeId++);
+		Node node = new Node(variableMap, this.generateNodeId());
 		this.addNode(node);
 		
 		return node;
@@ -41,9 +45,9 @@ public class Graph{
 	 * @param vvlist the length of vvlist must be even. It contains "var1", "value1", "var2", "value2"..."varN", "valueN"
 	 * @return a new Edge
 	 */
-	public Edge createEdge(Node start, Node end, Object...vvlist) {
+	public synchronized Edge createEdge(Node start, Node end, Object...vvlist) {
 		HashMap<String, Object> variableMap = createVariableMap(vvlist);
-		Edge edge = new Edge(start, end, variableMap, edgeId++);
+		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
 		start.setOutE(edge);
 		end.setInE(edge);
 		this.addEdge(edge);
@@ -77,9 +81,9 @@ public class Graph{
 	 * Inserting Node into the Graph, if the Node is created by new Node()
 	 * @param n a Node object that has not registered to any Graph
 	 */
-	public void addNode(Node n) {
+	public synchronized void addNode(Node n) {
 		if (n.getId() == -1) {
-			n.setId(nodeId++);
+			n.setId(this.generateNodeId());
 		}
 		
 		//this.nodeMap.put(n.getId(), n);
@@ -161,7 +165,10 @@ public class Graph{
 	 * Helper method for createEdge to register Edge in Graph
 	 * @param e the Edge to be registered in Graph
 	 */
-	private void addEdge(Edge e) {		
+	public synchronized void addEdge(Edge e) {
+		if (e.getId() == -1) {
+			e.setId(this.generateEdgeId());
+		}
 		this.edgeList.add(e);
 	}
 	
@@ -351,5 +358,19 @@ public class Graph{
 			}	
 		}
 		return paths;
+	}
+	
+	private synchronized int generateNodeId() {
+		return this.nodeId++;
+	}
+	
+	private synchronized int generateEdgeId() {
+		return this.edgeId++;
+	}
+	
+	public String toString() {
+		return  "Graph contains " + 
+				this.nodeList.size() + " nodes and " + 
+				this.edgeList.size() + " edges"; 
 	}
 }
