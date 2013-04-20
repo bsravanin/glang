@@ -190,8 +190,8 @@ class Lexer(object):
     ## All other whitespace
     # We only do indent/dedent calculations if:
     # - we're not implicitly joining logical lines, and
-    # - we're either at the start of the line, or else we're not in the process
-    #   of dedenting.
+    # - we're either at the start of the line, or we're not already in the
+    #   process of dedenting.
     def t_WS(self, t):
         r'[ \t]+'
         if (self._implicit_line_joining_level or
@@ -202,26 +202,29 @@ class Lexer(object):
 
         num_tabs = t.value.count('\t') + t.value.count(self._tab)
         if num_tabs == self._indent_stack[-1]:
-            # Same indentation as previous logical line
+            # Same indentation as previous logical line, so do nothing
             return None
 
         if num_tabs > self._indent_stack[-1]:
+            # We've gone past the current indentation level
             self._indent_stack.append(num_tabs)
             t.type = 'INDENT'
             t.value = num_tabs
             return t
 
+        # We're less than the current indentation level, so we need to pop the
+        # indentation stack until we're at the proper level, emitting a DEDENT
+        # token each time
         self._indent_stack.pop()
         indent_level = self._indent_stack[-1]
         if num_tabs > indent_level:
             raise InconsistentDedentError(str(self._indent_stack))
         elif num_tabs == indent_level:
-            # We're at a proper indentation level
+            # We're at a proper indentation level, so we're done
             self._dedenting = False
         else:
-            # Rewind the lexer position to just after the first "tab", so that
-            # we can emit another DEDENT token
-            self._rewind_lexer_for_dedenting(t)
+            # Rewind the lexer position so that we can emit another DEDENT token
+            self._lexer.lexpos = t.lexpos
             # Let the lexer know that we need another round of dedenting
             self._dedenting = True
         t.type = 'DEDENT'
@@ -240,16 +243,6 @@ class Lexer(object):
         column = token.lexpos - (last_cr + 1)
         return column
 
-    def _rewind_lexer_for_dedenting(self, token):
-        tab = self._get_first_tab_substring(token)
-        self._lexer.lexpos = token.lexpos + len(tab)
-
-    def _get_first_tab_substring(self, token):
-        if token.value.startswith('\t'):
-            return '\t'
-        elif token.value.startswith(self._tab):
-            return self._tab
-
     def __init__(self, **kwargs):
         self._lexer = lex.lex(module=self, **kwargs)
         self._tab = ' ' * TAB_WIDTH
@@ -259,6 +252,7 @@ class Lexer(object):
         self._reset()
 
     def _reset(self):
+        'Resets the state of this Lexer.'
         # Pushed when indenting, popped when dedenting
         self._indent_stack = [0]
         # Are we in the process of dedenting multiple times?
@@ -269,12 +263,14 @@ class Lexer(object):
         return self
 
     def next(self):
+        'Wrapper around token().'
         token = self.token()
         if token is None:
             raise StopIteration
         return token
 
     def token(self):
+        'Gets the next lex.LexToken from this Lexer.'
         token = self._lexer.token()
         if token is not None:
             return token
@@ -290,6 +286,7 @@ class Lexer(object):
         return self._make_token('DEDENT', self._indent_stack[-1])
 
     def _make_token(self, tok_type, tok_value):
+        'Returns a lex.LexToken given a type and value.'
         token = lex.LexToken()
         token.type = tok_type
         token.value = tok_value
@@ -298,11 +295,12 @@ class Lexer(object):
         return token
 
     def input(self, s):
+        'Sets the input for this Lexer to the given string.'
         return self._lexer.input(s)
 
 
 def main(args):
-    # Tokenize a file containing Gramola code
+    'Tokenize a file containing Gramola code.'
     if not len(args):
         print >> sys.stderr, 'ERROR: Must provide the lexer with a filename!'
         sys.exit(1)
@@ -313,13 +311,13 @@ def main(args):
     with open(filename, 'r') as fd:
         lexer.input(fd.read())
 
-	try:
-		with open(args[1], "w") as ofd:
-			for tok in lexer:
-				print >>ofd, str(tok.value), str(tok.type)
-	except IndexError:
-		for tok in lexer:
-			print tok
+    try:
+        with open(args[1], 'w') as ofd:
+            for tok in lexer:
+                print >> ofd, str(tok.value), str(tok.type)
+    except IndexError:
+        for tok in lexer:
+            print tok
 
 
 if __name__ == '__main__':
