@@ -5,7 +5,6 @@
 # pylint: disable=C0111
 # "Missing docstring"
 
-import pprint
 
 
 class Error(Exception):
@@ -13,10 +12,42 @@ class Error(Exception):
 
 
 class InvalidNodeConstructionError(Error):
-    'Raised when node constructor is passed invalid arguments.'
+    'Node constructor was passed invalid arguments.'
     def __init__(self, node_obj):
         Error.__init__(self, 'Invalid arguments to {0} constructor'.format(
                 node_obj.__class__.__name__))
+
+
+def pretty_print(obj, indent=''):
+    if getattr(obj, '__iter__', None):
+        indent += '\t'
+        if isinstance(obj, list):
+            pretty_iter = [pretty_print(x, indent=indent) for x in obj]
+            start, end = '[', ']'
+        elif isinstance(obj, tuple):
+            pretty_iter = [pretty_print(x, indent=indent) for x in obj]
+            start, end = '(', ')'
+        elif isinstance(obj, dict):
+            pretty_iter = ['{0}: {1}'.format(pretty_print(x, indent=indent),
+                                             pretty_print(y, indent=indent))
+                           for x, y in obj.iteritems()]
+            start, end = '{', '}'
+        else:
+            return str(obj)
+        if len(obj) > 0:
+            bounds_sep = '\n' + indent
+            item_sep = ',' + bounds_sep
+        else:
+            bounds_sep = ''
+            item_sep = ', '
+        content = item_sep.join(pretty_iter)
+        return '{start}{bounds_sep}{content}{bounds_sep}{end}'.format(
+            start=start, bounds_sep=bounds_sep, content=content, end=end)
+    if getattr(obj, '__dict__', None):
+        return '{{{0}: {1}}}'.format(
+            obj.__class__.__name__,
+            pretty_print(obj.__dict__, indent=indent), indent=indent)
+    return str(obj)
 
 
 class Node(object):
@@ -28,8 +59,10 @@ class Node(object):
         self.__dict__.update(kwargs)
 
     def __str__(self):
-        # TODO: find better way to print this
-        return pprint.pformat({self.__class__.__name__: self.__dict__})
+        return '<{0}: {1}>'.format(
+            self.__class__.__name__,
+            ', '.join('{0}={1}'.format(x, y)
+                      for x, y in self.__dict__.iteritems()))
 
     def __repr__(self):
         return str(self)
@@ -62,8 +95,8 @@ class NameNode(Node):
 
 class DeclarationNode(Node):
 
-    def __init__(self, id_type=None, names=None):
-        Node.__init__(self, id_type=id_type, names=names)
+    def __init__(self, id_type=None, name=None):
+        Node.__init__(self, id_type=id_type, name=name)
 
 
 class AssignmentNode(Node):

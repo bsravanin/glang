@@ -1,25 +1,29 @@
 
 
-# This is a comment!
-float exp1 = 1 + 2 - 3.03 * 14.75 / 0.001
-
-
-for a in b:
-	print a
-	if a > 3.14 and b != 100:
-		a = a**({[a + 1)}]
-
 class MyClass(parent):
 
-	str some_field, another_field, long_string
-	node_types = [Person, Friend]
+	str some_field
+	str another_field
+	str long_string
+	list node_types = [Person, Friend]
 
-	def void init(arg1, arg2):
+	def void init(void arg1, void arg2):
 		self.some_field = 'this is a string!'
 		self.another_field = "this is another string!"
 		self.long_string = ("this string uses "
 				    "implicit line "
 				    "joining...")
+
+
+def void main():
+
+	# This is a comment!
+	float exp1 = 1 + 2 - 3.03 * 14.75 / 0.001
+
+	for a in b:
+		print a
+		if a > 3.14 and b != 100:
+			a = a**({[a + 1]})
 
 
 # Final comment
