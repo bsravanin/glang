@@ -43,9 +43,9 @@ class Lexer(object):
         'elif': 'ELIF',
         'else': 'ELSE',
         'for': 'FOR',
-        # 'from': 'FROM',
+        #'from': 'FROM',
         'if': 'IF',
-        # 'import': 'IMPORT',
+        #'import': 'IMPORT',
         'in': 'IN',
         'is': 'IS',
         'not': 'NOT',
@@ -53,7 +53,8 @@ class Lexer(object):
         'print': 'PRINT',
         'return': 'RETURN',
         'while': 'WHILE',
-        # 'None': 'NONE',
+        #'None': 'NONE',
+        'pass': 'PASS',
         }
 
     tokens = (
@@ -159,7 +160,8 @@ class Lexer(object):
     def t_NAME(self, t):
         r'[A-Za-z_][A-Za-z0-9_]*'
         t.type = self._reserved.get(t.value, 'NAME')
-        if (t.type in ('DEF', 'CLASS') and self._indent_stack[-1] != 0 and
+        if (t.type in ('DEF', 'CLASS', 'NAME') and
+            self._indent_stack[-1] != 0 and
             not self._find_column(t)):
             # We have line-initial content after an indented block, so dedent
             self._indent_stack.pop()
