@@ -25,6 +25,13 @@ class Error(Exception):
     'Generic error class for parser.py.'
 
 
+class ParsingError(Error):
+    'An error occurred during parsing.'
+
+    def __init__(self, arg):
+        Error.__init__(self, 'A syntax error occurred at: ' + arg)
+
+
 class Parser(object):
     '''Representation of a parser object.
 
@@ -61,18 +68,35 @@ class Parser(object):
     @property
     def _cur_namespace(self):
         'Getter for the current namespace.'
-        return tuple(self._symbol_table.scope_stack)
+        # We need this check for yacc initialization in __init__.
+        # When getattr is called on all of the Parser instance's attributes,
+        # property methods get called, though _symbol_table isn't available
+        # until parser() is called.
+        if self._symbol_table:
+            return tuple(self._symbol_table.scope_stack)
+        else:
+            return None
 
     def _get_qualified_name(self, name):
         'Returns the given identifier, qualified by its namespace.'
         return self._symbol_table.get_qualified_name(name)
 
     def parse(self, s, **kwargs):
-        'Parse!'
+        'Parses the given string of text.'
         lexer = kwargs.pop('lexer', self._lexer)
         debug = kwargs.pop('debug', False)
-        self._symbol_table = symbols.SymbolTable()
+        self._symbol_table.reset()
         return self._parser.parse(s, lexer=lexer, debug=debug, **kwargs)
+
+    def parse_file(self, filename, **kwargs):
+        'Parses the string of text in the given named file.'
+        with open(filename, 'r') as infile:
+            s = infile.read()
+        return self.parse(s, **kwargs)
+
+    def reset(self):
+        'Resets this Parser.'
+        self._parser.restart()
 
     def _push_scope(self, arg):
         'Pushes a new identifier onto the scope stack.'
@@ -101,9 +125,9 @@ class Parser(object):
         'Handle parsing errors.'
         # TODO: more robust error handling here
         if p:
-            print 'Syntax error at', str(p)
+            raise SyntaxError(str(p))
         else:
-            print 'Syntax error at EOF'
+            raise SyntaxError('EOF')
 
     ## TOP LEVEL ##
     def p_start(self, p):
@@ -153,7 +177,7 @@ class Parser(object):
                 sym, name_token, self._cur_namespace)
         full_name = self._get_qualified_name(name)
         symbol = symbols.FunctionSymbol(full_name, name_token)
-        self._symbol_table.set_by_qualified_name(full_name, symbol)
+        self._symbol_table.set(symbol)
         p[0] = nodes.NameNode(value=name_token)
 
     def p_opt_parameter_list(self, p):
@@ -186,7 +210,7 @@ class Parser(object):
                 sym, name_token, self._cur_namespace)
         full_name = self._get_qualified_name(name)
         symbol = symbols.IdSymbol(full_name, name_token)
-        self._symbol_table.set_by_qualified_name(full_name, symbol)
+        self._symbol_table.set(symbol)
         p[0] = nodes.NameNode(value=name_token)
 
     ## CLASS DEFINITIONS ##
@@ -206,7 +230,7 @@ class Parser(object):
                 sym, name_token, self._cur_namespace)
         full_name = self._get_qualified_name(name)
         symbol = symbols.TypeSymbol(full_name, name_token)
-        self._symbol_table.set_by_qualified_name(full_name, symbol)
+        self._symbol_table.set(symbol)
         p[0] = nodes.TypeNode(value=name_token)
 
     def p_opt_type(self, p):
@@ -279,7 +303,7 @@ class Parser(object):
         name_token = p.slice[1]
         full_name = self._get_qualified_name(name_token.value)
         symbol = symbols.Symbol(full_name, name_token)
-        self._symbol_table.set_by_qualified_name(full_name, symbol)
+        self._symbol_table.set(symbol)
         p[0] = nodes.NameNode(value=name_token)
 
     def p_print_stmt(self, p):
