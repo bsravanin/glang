@@ -22,6 +22,7 @@ public class GraphDBController {
 	private static DynamicRelationshipType connect = 
 			DynamicRelationshipType.withName("connectTo");
 	
+	/*For storing node/edge index in neo4j*/
 	private static String nodeIdxString = "nodes";
 	
 	private static String edgeIdxString = "edges";
@@ -30,6 +31,11 @@ public class GraphDBController {
 
 	private GraphDatabaseService graphDB;
 	
+	/**
+	 * Each GraphDBController is only responsible for one neo4j DB.
+	 * A Neo4j DB is for only one Graph object in Gramola.
+	 * @param dbPath
+	 */
 	public GraphDBController(String dbPath) {
 		this.neo4jPath = dbPath;
 		this.createDBDir();
@@ -37,6 +43,9 @@ public class GraphDBController {
 		registerShutdownHook(graphDB);
 	}
 	
+	/**
+	 * Create directory for neo4j DB
+	 */
 	private void createDBDir() {
 		File graphDBFile = new File(this.neo4jPath);
 		
@@ -45,6 +54,10 @@ public class GraphDBController {
 		}
 	}
 	
+	/**
+	 * Get the path of graph DB controlled by this congroller
+	 * @return graph DB path
+	 */
 	public String getGraphDBDir() {
 		File graphDBFile = new File(this.neo4jPath);
 		String path;
@@ -58,6 +71,14 @@ public class GraphDBController {
 		return null;
 	}
 	
+	/**
+	 * Store Graph object of Gramola into neo4j DB
+	 * Node==>Node
+	 * Edge==>Relationship
+	 * @param g
+	 * @param nodeIdx
+	 * @param edgeIdx
+	 */
 	public void dump(Graph g, String nodeIdx, String edgeIdx) {
 		Transaction trans = this.graphDB.beginTx();
 		try {
@@ -93,6 +114,11 @@ public class GraphDBController {
 		}
 	}
 	
+	/**
+	 * Helper method for "dump" to dump Node
+	 * @param mNode Node object in Gramola
+	 * @return Node object in neo4j DB
+	 */
 	private Node dumpNode(edu.columbia.plt.gramola.datastruct.Node mNode) {
 		Node dbNode = graphDB.createNode();
 		Iterator<String> vIT = mNode.getVariables().iterator();
@@ -108,6 +134,13 @@ public class GraphDBController {
 		return dbNode;
 	}
 	
+	/**
+	 * Helper method for "dump" to dump Edge
+	 * @param startDBNode startNode in neo4j DB
+	 * @param endDBNode endNode in neo4j DB
+	 * @param edge Edge object in Gramola
+	 * @return Relationship object in neo4j
+	 */
 	private Relationship dumpRelation(Node startDBNode, Node endDBNode,
 			edu.columbia.plt.gramola.datastruct.Edge edge) {
 		Relationship relation = startDBNode.createRelationshipTo(endDBNode, connect);
@@ -126,6 +159,10 @@ public class GraphDBController {
 		return relation;
 	}
 	
+	/**
+	 * Load Nodes and Relationships from neo4j to Gramola
+	 * @return Graph object in Gramola
+	 */
 	public Graph load() {
 		Graph g = new Graph();
 		Transaction trans = this.graphDB.beginTx();
@@ -164,6 +201,11 @@ public class GraphDBController {
 		return g;
 	}
 	
+	/**
+	 * Reconstruct Node object in Gramola from new4j DB
+	 * @param dbNode
+	 * @return Node object in Gramola
+	 */
 	private edu.columbia.plt.gramola.datastruct.Node reproNode(Node dbNode) {
 		Iterator<String> pKeys = dbNode.getPropertyKeys().iterator();
 		String propertyKey;
@@ -185,6 +227,13 @@ public class GraphDBController {
 		return repoNode;
 	}
 	
+	/**
+	 * Reconstruct Edge object in Gramola from neo4j DB
+	 * @param dbRelation Relationship in neo4j
+	 * @param startNode Node object in Gramola
+	 * @param endNode Node object in Gramola
+	 * @return Edge object in Gramola
+	 */
 	private edu.columbia.plt.gramola.datastruct.Edge reproEdge(Relationship dbRelation,
 			edu.columbia.plt.gramola.datastruct.Node startNode,
 			edu.columbia.plt.gramola.datastruct.Node endNode) {
@@ -208,6 +257,10 @@ public class GraphDBController {
 		return repoEdge;
 	}
 	
+	/**
+	 * Helper method for ensuring neo4j DB is shutdown after program terminates
+	 * @param graphDB
+	 */
 	public static void registerShutdownHook (final GraphDatabaseService graphDB) {
 		Runtime.getRuntime().addShutdownHook (new Thread() {
 			public void run() {

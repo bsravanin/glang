@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -55,6 +54,10 @@ public class GraphVisualizer {
 		this.createDotFile();
 	}
 	
+	/**
+	 * Gephi lib consumes several data type for drawing. We choose dot here.
+	 * Convert Node and Edge info from Graph object to a dot file.
+	 */
 	private void createDotFile() {
 		finalPath = dotFileRoot + this.g.getGraphId() + ".dot";
 		StringBuilder sb = new StringBuilder();
@@ -79,17 +82,16 @@ public class GraphVisualizer {
 	}
 	
 	/**
+	 * Visualize graph. Consume dot file created by createDotFile()
 	 * Reference: 
 	 * https://github.com/gephi/gephi-toolkit-demos/
 	 * blob/master/src/org/gephi/toolkit/demos/PreviewJFrame.java
 	 */
 	public void draw() {
-		//Init a project - and therefore a workspace
         ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
         pc.newProject();
         Workspace ws = pc.getCurrentWorkspace();
 
-        //Import file
         ImportController importController = Lookup.getDefault().lookup(ImportController.class);
         Container container;
         try {
@@ -100,10 +102,9 @@ public class GraphVisualizer {
             return;
         }
 
-        //Append imported data to GraphAPI
         importController.process(container, new DefaultProcessor(), ws);
 
-        //Preview configuration
+        //Change graph (in visualization) properties here
         PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
         PreviewModel previewModel = previewController.getModel();
         previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
@@ -119,19 +120,19 @@ public class GraphVisualizer {
         previewModel.getProperties().putValue(PreviewProperty.ARROW_SIZE, 5);
         previewController.refreshPreview();
 
-        //New Processing target, get the PApplet
+        //Draw applet
         ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
         PApplet applet = target.getApplet();
         applet.init();
 
-        //Refresh the preview and reset the zoom
         previewController.render(target);
         target.refresh();
         //target.resetZoom();
         target.zoomMinus();
 
-        //Add the applet to a JFrame and display
+        //Create UI. Title is the graph id
         JFrame frame = new JFrame(String.valueOf(this.g.getGraphId()));
+        //Create menu bar
         frame.setJMenuBar(this.createMenuBar(target));
         
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -141,6 +142,12 @@ public class GraphVisualizer {
         frame.setVisible(true);
 	}
 	
+	/**
+	 * Create menubar containing three items: zoom-in, zoom-out and pdf exporting
+	 * Not allow user to specify exporting path. Use default path.
+	 * @param target
+	 * @return
+	 */
 	private JMenuBar createMenuBar(final ProcessingTarget target) {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);

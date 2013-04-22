@@ -27,6 +27,11 @@ public class Graph{
 		this.graphId = now.getTime();
 	}
 	
+	/**
+	 * Return id of Graph.
+	 * Graph id is the long representation of its creation time.
+	 * @return
+	 */
 	public long getGraphId() {
 		return this.graphId;
 	}
@@ -367,16 +372,25 @@ public class Graph{
 		return paths;
 	}
 	
+	/**
+	 * Helper method to generate id for Node in this Graph
+	 * @return
+	 */
 	private synchronized int generateNodeId() {
 		return this.nodeId++;
 	}
 	
+	/**
+	 * Helper method to generate id for Edge in this Graph
+	 * @return
+	 */
 	private synchronized int generateEdgeId() {
 		return this.edgeId++;
 	}
 	
+	@Override
 	public String toString() {
-		return  "Graph contains " + 
+		return  "Graph " + this.graphId + " contains " + 
 				this.nodeList.size() + " nodes and " + 
 				this.edgeList.size() + " edges"; 
 	}

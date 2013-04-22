@@ -9,6 +9,12 @@ public class NodeSet implements Set{
 	
 	private HashSet<Node> nodeSet = new HashSet<Node>();
 	
+	/**
+	 * Find out Nodes that fit var-value constraints in NodeSet
+	 * @param variable
+	 * @param value
+	 * @return
+	 */
 	public NodeSet filter(String variable, Object value) {
 		NodeSet filterNodes = new NodeSet();
 		Iterator<Node> nodeIT = nodeSet.iterator();
