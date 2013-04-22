@@ -14,6 +14,7 @@ rule, or "empty".
 # pylint: disable=R0904
 # "Too many public methods" (for Parser class)
 
+import builtins
 import nodes
 import symbols
 import sys
@@ -52,7 +53,7 @@ class Parser(object):
     def __init__(self, lexer=None):
         self._lexer = lexer or Lexer()
         self.tokens = self._lexer.tokens
-        self._symbol_table = symbols.SymbolTable()
+        self._symbol_table = symbols.SymbolTable(table=builtins.SYMBOL_TABLE)
         self._parser = yacc.yacc(module=self)
 
     @property
@@ -68,14 +69,7 @@ class Parser(object):
     @property
     def _cur_namespace(self):
         'Getter for the current namespace.'
-        # We need this check for yacc initialization in __init__.
-        # When getattr is called on all of the Parser instance's attributes,
-        # property methods get called, though _symbol_table isn't available
-        # until parser() is called.
-        if self._symbol_table:
-            return tuple(self._symbol_table.scope_stack)
-        else:
-            return None
+        return tuple(self._symbol_table.scope_stack)
 
     def _get_qualified_name(self, name):
         'Returns the given identifier, qualified by its namespace.'
@@ -85,7 +79,7 @@ class Parser(object):
         'Parses the given string of text.'
         lexer = kwargs.pop('lexer', self._lexer)
         debug = kwargs.pop('debug', False)
-        self._symbol_table.reset()
+        self._symbol_table.reset(table=builtins.SYMBOL_TABLE)
         return self._parser.parse(s, lexer=lexer, debug=debug, **kwargs)
 
     def parse_file(self, filename, **kwargs):
@@ -170,15 +164,16 @@ class Parser(object):
     def p_new_func_name(self, p):
         'new_func_name : NAME'
         name_token = p.slice[1]
-        name = name_token.value
-        sym = self._symbol_table.get_in_current_scope(name)
-        if sym is not None:
-            raise symbols.PreexistingSymbolError(
-                sym, name_token, self._cur_namespace)
-        full_name = self._get_qualified_name(name)
-        symbol = symbols.FunctionSymbol(full_name, name_token)
-        self._symbol_table.set(symbol)
         p[0] = nodes.NameNode(value=name_token)
+        name = name_token.value
+        sym = self._symbol_table.get(name)
+        if sym is None:
+            full_name = self._get_qualified_name(name)
+            symbol = symbols.FunctionSymbol(full_name, name_token)
+            self._symbol_table.set(symbol)
+        elif sym.namespace == self._cur_namespace:
+            raise symbols.ConflictingSymbolError(
+                sym, name_token, self._cur_namespace)
 
     def p_opt_parameter_list(self, p):
         '''opt_parameter_list : parameter_list
@@ -203,15 +198,16 @@ class Parser(object):
     def p_new_name(self, p):
         'new_name : NAME'
         name_token = p.slice[1]
-        name = name_token.value
-        sym = self._symbol_table.get_in_current_scope(name)
-        if sym is not None:
-            raise symbols.PreexistingSymbolError(
-                sym, name_token, self._cur_namespace)
-        full_name = self._get_qualified_name(name)
-        symbol = symbols.IdSymbol(full_name, name_token)
-        self._symbol_table.set(symbol)
         p[0] = nodes.NameNode(value=name_token)
+        name = name_token.value
+        sym = self._symbol_table.get(name)
+        if sym is None:
+            full_name = self._get_qualified_name(name)
+            symbol = symbols.IdSymbol(full_name, name_token)
+            self._symbol_table.set(symbol)
+        elif sym.namespace == self._cur_namespace:
+            raise symbols.ConflictingSymbolError(
+                sym, name_token, self._cur_namespace)
 
     ## CLASS DEFINITIONS ##
     def p_class_def(self, p):
@@ -223,15 +219,16 @@ class Parser(object):
     def p_new_type(self, p):
         'new_type : NAME'
         name_token = p.slice[1]
-        name = name_token.value
-        sym = self._symbol_table.get_in_current_scope(name)
-        if sym is not None:
-            raise symbols.PreexistingSymbolError(
-                sym, name_token, self._cur_namespace)
-        full_name = self._get_qualified_name(name)
-        symbol = symbols.TypeSymbol(full_name, name_token)
-        self._symbol_table.set(symbol)
         p[0] = nodes.TypeNode(value=name_token)
+        name = name_token.value
+        sym = self._symbol_table.get(name)
+        if sym is None:
+            full_name = self._get_qualified_name(name)
+            symbol = symbols.TypeSymbol(full_name, name_token)
+            self._symbol_table.set(symbol)
+        elif sym.namespace == self._cur_namespace:
+            raise symbols.ConflictingSymbolError(
+                sym, name_token, self._cur_namespace)
 
     def p_opt_type(self, p):
         '''opt_type : type
@@ -612,12 +609,12 @@ def main(args):
         sys.exit(1)
 
     debug = False
-    pretty_print = False
+    prettify = False
     for arg in args[:]:
         if arg == '-d':
             debug = True
         elif arg == '-p':
-            pretty_print = True
+            prettify = True
         if arg.startswith('-'):
             args.remove(arg)
 
@@ -627,8 +624,8 @@ def main(args):
         file_input = fd.read()
         result = parser.parse(file_input, debug=debug)
 
-    if pretty_print:
-        print nodes.pretty_print(result)
+    if prettify:
+        print nodes.prettify(result)
     else:
         print str(result)
 

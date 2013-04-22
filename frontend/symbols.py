@@ -23,7 +23,7 @@ class UnknownSymbolError(Error):
                 token.value, token, namespace))
 
 
-class PreexistingSymbolError(Error):
+class ConflictingSymbolError(Error):
     'Attempted to add a symbol that already exists in the namespace.'
 
     def __init__(self, symbol_obj, token, namespace):
@@ -95,9 +95,9 @@ class Symbol(object):
             del attrs[attr]
         fields = []
         for attr in ('full_name', 'token'):
-            fields.append('{0}={1}'.format(attr, attrs[attr]))
+            fields.append('{0}={1!r}'.format(attr, attrs[attr]))
             del attrs[attr]
-        fields.extend('{0}={1}'.format(x, y) for x, y in attrs.iteritems())
+        fields.extend('{0}={1!r}'.format(x, y) for x, y in attrs.iteritems())
         return '<{0}: {1}>'.format(self.__class__.__name__, ', '.join(fields))
 
     @property
@@ -166,7 +166,7 @@ class FunctionSymbol(Symbol):
           token: see Symbol.
           return_type: (str or None) Return type for the function represented
               by this object.
-          param_types: (list of str, or None) Types for this function's
+          param_types: (tuple of str, or None) Types for this function's
               parameters.
         '''
         Symbol.__init__(self, full_name, token=token)
@@ -204,7 +204,7 @@ class SymbolTable(object):
     def __init__(self, table=None, scopes=None):
         self._table = {}
         if table is not None:
-            self._table.update(table)
+            self.update(table)
         self._scopes = ScopeStack(scopes=scopes)
 
     def __contains__(self, arg):
@@ -220,11 +220,12 @@ class SymbolTable(object):
 
     @property
     def as_dict(self):
+        'Return the dict that backs this SymbolTable.'
         return self._table
 
-    def reset(self, scopes=None):
+    def reset(self, table=None, scopes=None):
         'Resets this SymbolTable.'
-        self.__init__(scopes=scopes)
+        self.__init__(table=table, scopes=scopes)
 
     def update(self, table):
         'Updates this SymbolTable with the given SymbolTable.'
@@ -262,8 +263,8 @@ class SymbolTable(object):
           name: (basestring)
 
         Returns:
-          A tuple (table key (tuple), entry (Symbol)), if an entry exists for
-          the given name at some scoping level. Otherwise, a tuple ((), None).
+          A Symbol, if an entry exists for the given name at some scoping level.
+          Otherwise, None.
 
         Raises:
           TypeError: If 'name' is not of type basestring.
@@ -280,10 +281,7 @@ class SymbolTable(object):
         else:
             full_name = _get_qualified_name(cur_scopes, name)
             value = self.get_by_qualified_name(full_name)
-        full_name = None
-        if value is not None:
-            full_name = value.full_name
-        return full_name, value
+        return value
 
     def get_in_current_scope(self, name):
         '''Returns the entry in the current scope for the given name.
