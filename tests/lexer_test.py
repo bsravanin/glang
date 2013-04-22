@@ -54,10 +54,10 @@ TOKENS = {
 	'print': 'PRINT',
 	'return': 'RETURN',
 	'while': 'WHILE',
-	'None': 'ENDMARKER',
+	'None': 'NAME',
 
 	'NAME': ["int", "float", "str", "Graph", "Node", "Edge"],
-	'NUMBER': [0, 42, -17, 0.00, 3.14, -2.718],
+	'NUMBER': [0, 42, 17, 0.00, 3.14, 2.718],
 	'STRING': ['"The Shawshank Redemption"', '"Schindler\'s List"',
 				'"The Godfather: Part II"', '"Se7en"'],
 }
@@ -128,6 +128,7 @@ def generate_random_tokens(count):
 			expected_buffer.write(value)
 			expected_buffer.write("\n")
 
+	expected_buffer.write("None ENDMARKER\n")
 	prog_buffer.flush()
 	prog_buffer.close()
 	expected_buffer.flush()
