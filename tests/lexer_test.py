@@ -1,7 +1,8 @@
 #! /usr/bin/python
 '''
-Date: 18th April, 2013
+Date: 21st April, 2013
 Purpose: To test the tokenizing of lexer.py.
+Usage: python lexer_test.py <number_of_tokens>
 '''
 
 import os, random, subprocess, sys
@@ -12,11 +13,13 @@ TOKENS = {
 	'=': 'ASSIGN',
 	':': 'COLON',
 	',': 'COMMA',
+	'dedent': 'DEDENT',
 	'.': 'DOT',
 	'**': 'DOUBLESTAR',
 	'==': 'EQUAL',
 	'>': 'GREATER',
 	'>=': 'GREATEREQUAL',
+	'\t': 'INDENT',
 	'{': 'LBRACE',
 	'[': 'LBRACKET',
 	'<': 'LESS',
@@ -62,10 +65,14 @@ TOKENS = {
 
 def generate_random_tokens(count):
 	prog_file = os.path.join(PWD, "tmp_%d_%d.gr" % (count, random.randint(32768, 65536)))
+	expected_file = os.path.join(PWD, prog_file.replace(".gr", ".exp"))
 	lexer_file = os.path.join(PWD, prog_file.replace(".gr", ".lex"))
-	output_file = os.path.join(PWD, prog_file.replace(".gr", ".out"))
 	prog_buffer = open(prog_file, "w")
-	lexer_buffer = open(lexer_file, "w")
+	expected_buffer = open(expected_file, "w")
+	braces = 0
+	brackets = 0
+	parens = 0
+	tabs = 0
 
 	for i in xrange(0, count):
 		token = random.choice(TOKENS.keys())
@@ -75,24 +82,62 @@ def generate_random_tokens(count):
 			chosen_token = str(random.choice(value))
 			prog_buffer.write(chosen_token)
 			prog_buffer.write(" ")
-			lexer_buffer.write(chosen_token)
-			lexer_buffer.write(" ")
-			lexer_buffer.write(token)
-			lexer_buffer.write("\n")
+			expected_buffer.write(chosen_token)
+			expected_buffer.write(" ")
+			expected_buffer.write(token)
+			expected_buffer.write("\n")
 		else:
+			if value == "LBRACE":
+				braces += 1
+			elif value == "RBRACE":
+				if braces == 0:
+					continue
+				else:
+					braces -= 1
+			elif value == "LBRACKET":
+				brackets += 1
+			elif value == "RBRACKET":
+				if brackets == 0:
+					continue
+				else:
+					brackets -= 1
+			elif value == "LPAREN":
+				parens += 1
+			elif value == "RPAREN":
+				if parens == 0:
+					continue
+				else:
+					parens -= 1
+			elif value == "INDENT":
+				tabs += 1
+				continue
+			elif value == "DEDENT":
+				if tabs > 0:
+					tabs -= 1
+				continue
+			elif value == "NEWLINE":
+				if tabs > 0:
+					token = "\n" + "\t" * tabs
+				else:
+					continue
+
 			prog_buffer.write(token)
 			prog_buffer.write(" ")
-			lexer_buffer.write(token)
-			lexer_buffer.write(" ")
-			lexer_buffer.write(value)
-			lexer_buffer.write("\n")
+			expected_buffer.write(token)
+			expected_buffer.write(" ")
+			expected_buffer.write(value)
+			expected_buffer.write("\n")
 
 	prog_buffer.flush()
 	prog_buffer.close()
-	lexer_buffer.flush()
-	lexer_buffer.close()
-	return prog_file, lexer_file, output_file
+	expected_buffer.flush()
+	expected_buffer.close()
+	return prog_file, expected_file, lexer_file
 
+
+if len(sys.argv) == 1:
+	print "Usage: python", sys.argv[0], "<number_of_tokens>"
+	sys.exit(-1)
 
 if PWD.endswith("glang"):
 	lexer = os.path.join(PWD, "frontend/lexer.py")
@@ -102,6 +147,6 @@ else:
 	print "Run from glang or glang/tests directory."
 	sys.exit(-1)
 
-prog_file, lexer_file, output_file = generate_random_tokens(int(sys.argv[1]))
-subprocess.call(["python", lexer, prog_file, output_file])
-subprocess.call(["diff", lexer_file, output_file])
+prog_file, expected_file, lexer_file = generate_random_tokens(int(sys.argv[1]))
+subprocess.call(["python", lexer, prog_file, lexer_file])
+subprocess.call(["diff", expected_file, lexer_file])
