@@ -259,15 +259,18 @@ class Lexer(object):
         self._indent_stack = None
         self._dedenting = None
         self._implicit_line_joining_level = None
-        self._reset()
+        self.reset()
 
-    def _reset(self):
+    def reset(self):
         'Resets the state of this Lexer.'
         # Pushed when indenting, popped when dedenting
         self._indent_stack = [0]
         # Are we in the process of dedenting multiple times?
         self._dedenting = False
         self._implicit_line_joining_level = 0
+        # We track lineno in the lex.Lexer because lex uses it to update tokens'
+        # lineno automagically
+        self._lexer.lineno = 1
 
     def __iter__(self):
         return self
@@ -285,8 +288,6 @@ class Lexer(object):
         if token is not None:
             return token
         if not self._indent_stack:
-            # Reset this custom lexer
-            self._reset()
             return None
         level = self._indent_stack.pop()
         if not level:
@@ -306,6 +307,7 @@ class Lexer(object):
 
     def input(self, s):
         'Sets the input for this Lexer to the given string.'
+        self.reset()
         return self._lexer.input(s)
 
 
