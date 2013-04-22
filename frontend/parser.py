@@ -5,8 +5,6 @@
 NB: by convention, whenever the grammar calls for an optional rule,
 we create a separate method "opt_RULENAME" that matches either that
 rule, or "empty".
-
-TODO: implement symbol table
 '''
 
 # pylint: disable=C0103
@@ -17,8 +15,9 @@ TODO: implement symbol table
 # "Too many public methods" (for Parser class)
 
 import nodes
+import symbols
 import sys
-from ply import yacc
+from ply import lex, yacc
 from lexer import Lexer
 
 
@@ -26,15 +25,25 @@ class Error(Exception):
     'Generic error class for parser.py.'
 
 
-class SymbolAlreadyPresentError(Error):
-    'Raised when a declared symbol is already in the symbol table.'
+class ParsingError(Error):
+    'An error occurred during parsing.'
 
-
-class SymbolMissingError(Error):
-    'Raised when a referenced symbol is not in the symbol table.'
+    def __init__(self, arg):
+        Error.__init__(self, 'A syntax error occurred at: ' + arg)
 
 
 class Parser(object):
+    '''Representation of a parser object.
+
+    Important public attributes:
+      tokens: A tuple of token strings from the lexer.
+      start: (str) The start symbol.
+      lexer: The lexer.Lexer object used for lexical analysis.
+      symbol_table: The symbols.SymbolTable object partially filled during
+          parsing.
+      parse: Parses the given input, returns a nodes.Node instance representing
+          the abstract syntax tree (AST) for the input.
+    '''
 
     # Set in __init__()
     tokens = None
@@ -43,16 +52,84 @@ class Parser(object):
     def __init__(self, lexer=None):
         self._lexer = lexer or Lexer()
         self.tokens = self._lexer.tokens
-        self._parser = yacc.yacc(module=self)  #, method='SLR')
+        self._symbol_table = symbols.SymbolTable()
+        self._parser = yacc.yacc(module=self)
+
+    @property
+    def lexer(self):
+        'Getter for the lexer field.'
+        return self._lexer
+
+    @property
+    def symbol_table(self):
+        'Getter for the symbol table field.'
+        return self._symbol_table
+
+    @property
+    def _cur_namespace(self):
+        'Getter for the current namespace.'
+        # We need this check for yacc initialization in __init__.
+        # When getattr is called on all of the Parser instance's attributes,
+        # property methods get called, though _symbol_table isn't available
+        # until parser() is called.
+        if self._symbol_table:
+            return tuple(self._symbol_table.scope_stack)
+        else:
+            return None
+
+    def _get_qualified_name(self, name):
+        'Returns the given identifier, qualified by its namespace.'
+        return self._symbol_table.get_qualified_name(name)
 
     def parse(self, s, **kwargs):
+        'Parses the given string of text.'
         lexer = kwargs.pop('lexer', self._lexer)
-        return self._parser.parse(s, lexer=lexer, **kwargs)
+        debug = kwargs.pop('debug', False)
+        self._symbol_table.reset()
+        return self._parser.parse(s, lexer=lexer, debug=debug, **kwargs)
 
+    def parse_file(self, filename, **kwargs):
+        'Parses the string of text in the given named file.'
+        with open(filename, 'r') as infile:
+            s = infile.read()
+        return self.parse(s, **kwargs)
+
+    def reset(self):
+        'Resets this Parser.'
+        self._parser.restart()
+
+    def _push_scope(self, arg):
+        'Pushes a new identifier onto the scope stack.'
+        self._symbol_table.scope_stack.push(arg)
+
+    def _pop_scope(self):
+        'Pops an identifier off the scope stack.'
+        self._symbol_table.scope_stack.pop()
+
+    ## HELPER RULES ##
     def p_empty(self, p):
         'empty :'
         pass
 
+    def p_new_scope(self, p):
+        'new_scope :'
+        # We need to create a unique identifier for the new scope
+        for item in p.stack[::-1]:
+            if isinstance(item, lex.LexToken):
+                left_token = item
+                break
+        left = '{0}_{1}'.format(left_token.value, left_token.lineno)
+        self._push_scope(left)
+
+    def p_error(self, p):
+        'Handle parsing errors.'
+        # TODO: more robust error handling here
+        if p:
+            raise SyntaxError(str(p))
+        else:
+            raise SyntaxError('EOF')
+
+    ## TOP LEVEL ##
     def p_start(self, p):
         'start : opt_top_level_stmt_list ENDMARKER'
         p[0] = nodes.StartNode(stmt_list=p[1])
@@ -74,23 +151,34 @@ class Parser(object):
                           | class_def'''
         p[0] = p[1]
 
+    ## FUNCTION DEFINITIONS ##
     def p_function_def(self, p):
-        'function_def : DEF type name LPAREN opt_parameter_list RPAREN COLON suite'
-        # We keep "type" and "name" separate (as opposed to using type_and_name)
-        # because we don't want to create a declaration Node for the function
-        # name
-        p[0] = nodes.FunctionDefNode(return_type=p[2], name=p[3], params=p[5],
-                                     body=p[8])
+        ('function_def : DEF type new_func_name new_scope '
+         'LPAREN opt_parameter_list RPAREN COLON suite')
+        # We verify/set types for this function symbol in a later pass, since we
+        # may not know about the types yet.
+        p[0] = nodes.FunctionDefNode(return_type=p[2], name=p[3], params=p[6],
+                                     body=p[9])
+        self._pop_scope()
 
     def p_type(self, p):
         'type : NAME'
-        # TODO: manage symbol table
-        p[0] = nodes.TypeNode(value=p[1])
+        # We verify validity of this type in a later pass. For all we know, it
+        # could be defined further on in the parsing pass.
+        p[0] = nodes.TypeNode(value=p.slice[1])
 
-    def p_name(self, p):
-        'name : NAME'
-        # TODO: manage symbol table
-        p[0] = nodes.NameNode(value=p[1])
+    def p_new_func_name(self, p):
+        'new_func_name : NAME'
+        name_token = p.slice[1]
+        name = name_token.value
+        sym = self._symbol_table.get_in_current_scope(name)
+        if sym is not None:
+            raise symbols.PreexistingSymbolError(
+                sym, name_token, self._cur_namespace)
+        full_name = self._get_qualified_name(name)
+        symbol = symbols.FunctionSymbol(full_name, name_token)
+        self._symbol_table.set(symbol)
+        p[0] = nodes.NameNode(value=name_token)
 
     def p_opt_parameter_list(self, p):
         '''opt_parameter_list : parameter_list
@@ -98,27 +186,91 @@ class Parser(object):
         p[0] = p[1] or []
 
     def p_parameter_list(self, p):
-        '''parameter_list : type_and_name
-                          | parameter_list COMMA type_and_name'''
+        '''parameter_list : declaration
+                          | parameter_list COMMA declaration'''
         if len(p) == 2:
             p[0] = [p[1]]
         else:
             p[0] = p[1]
             p[0].append(p[3])
 
-    def p_type_and_name(self, p):
-        'type_and_name : type name'
-        # TODO: manage symbol table
-        p[0] = nodes.DeclarationNode(id_type=p[1], names=[p[2]])
+    def p_declaration(self, p):
+        'declaration : type new_name'
+        # Set the type in the names' symbols in a later pass, since we may not
+        # know about this type yet.
+        p[0] = nodes.DeclarationNode(id_type=p[1], name=p[2])
 
+    def p_new_name(self, p):
+        'new_name : NAME'
+        name_token = p.slice[1]
+        name = name_token.value
+        sym = self._symbol_table.get_in_current_scope(name)
+        if sym is not None:
+            raise symbols.PreexistingSymbolError(
+                sym, name_token, self._cur_namespace)
+        full_name = self._get_qualified_name(name)
+        symbol = symbols.IdSymbol(full_name, name_token)
+        self._symbol_table.set(symbol)
+        p[0] = nodes.NameNode(value=name_token)
+
+    ## CLASS DEFINITIONS ##
+    def p_class_def(self, p):
+        ('class_def : CLASS new_type new_scope '
+         'LPAREN opt_type RPAREN COLON class_def_suite')
+        p[0] = nodes.ClassDefNode(name=p[2], base=p[5], body=p[8])
+        self._pop_scope()
+
+    def p_new_type(self, p):
+        'new_type : NAME'
+        name_token = p.slice[1]
+        name = name_token.value
+        sym = self._symbol_table.get_in_current_scope(name)
+        if sym is not None:
+            raise symbols.PreexistingSymbolError(
+                sym, name_token, self._cur_namespace)
+        full_name = self._get_qualified_name(name)
+        symbol = symbols.TypeSymbol(full_name, name_token)
+        self._symbol_table.set(symbol)
+        p[0] = nodes.TypeNode(value=name_token)
+
+    def p_opt_type(self, p):
+        '''opt_type : type
+                    | empty'''
+        p[0] = p[1]
+
+    def p_class_def_suite(self, p):
+        'class_def_suite : NEWLINE INDENT class_stmt_list DEDENT'
+        p[0] = p[3]
+
+    def p_class_stmt_list(self, p):
+        '''class_stmt_list : class_stmt
+                           | class_stmt_list class_stmt'''
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1]
+            p[0].append(p[2])
+
+    def p_class_stmt(self, p):
+        '''class_stmt : declaration NEWLINE
+                      | node_types_def
+                      | function_def'''
+        p[0] = p[1]
+
+    def p_node_types_def(self, p):
+        'node_types_def : assignment_stmt NEWLINE'
+        p[0] = p[1]
+
+    ## STATEMENTS ##
     def p_stmt(self, p):
         '''stmt : simple_stmt
                 | compound_stmt'''
         p[0] = p[1]
 
+    ## SIMPLE STATEMENTS ##
     def p_simple_stmt(self, p):
         '''simple_stmt : small_stmt NEWLINE
-                       | declaration'''
+                       | declaration NEWLINE'''
         p[0] = p[1]
 
     def p_small_stmt(self, p):
@@ -139,10 +291,20 @@ class Parser(object):
         p[0] = p[1]
 
     def p_id_opt_type(self, p):
-        '''id_opt_type : type_and_name
+        '''id_opt_type : declaration
                        | name'''
-        # TODO: make sure this doesn't cause a shift/reduce conflict
         p[0] = p[1]
+
+    def p_name(self, p):
+        'name : NAME'
+        # Using generic Symbol class because we don't know what kind of name
+        # this is (type? id? function?). We can update it to a Symbol subclass
+        # later once we know what it really is.
+        name_token = p.slice[1]
+        full_name = self._get_qualified_name(name_token.value)
+        symbol = symbols.Symbol(full_name, name_token)
+        self._symbol_table.set(symbol)
+        p[0] = nodes.NameNode(value=name_token)
 
     def p_print_stmt(self, p):
         'print_stmt : PRINT opt_expr_list'
@@ -176,19 +338,7 @@ class Parser(object):
                     | empty'''
         p[0] = p[1]
 
-    def p_declaration(self, p):
-        'declaration : type name_list NEWLINE'
-        p[0] = nodes.DeclarationNode(id_type=p[1], names=p[2])
-
-    def p_name_list(self, p):
-        '''name_list : name
-                     | name_list COMMA name'''
-        if len(p) == 2:
-            p[0] = [p[1]]
-        else:
-            p[0] = p[1]
-            p[0].append(p[3])
-
+    ## COMPOUND STATEMENTS ##
     def p_compound_stmt(self, p):
         '''compound_stmt : if_stmt
                          | while_stmt
@@ -197,6 +347,7 @@ class Parser(object):
 
     def p_if_stmt(self, p):
         'if_stmt : IF expr COLON suite opt_elif_clauses opt_else_clause'
+        # TODO: new scopes here?
         elses = p[5]  # might be a list of "if" Nodes
         if p[6]:
             elses.append(p[6])
@@ -231,15 +382,17 @@ class Parser(object):
 
     def p_while_stmt(self, p):
         'while_stmt : WHILE expr COLON suite'
+        # TODO: new scope here?
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
 
     def p_for_stmt(self, p):
-        'for_stmt : FOR id_opt_type IN primary COLON suite'
-        p[0] = nodes.ForNode(target=p[2], iterable=p[4], body=p[6])
+        'for_stmt : FOR new_scope id_opt_type IN primary COLON suite'
+        p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
+        self._pop_scope()
 
     def p_suite(self, p):
         'suite : NEWLINE INDENT stmt_list DEDENT'
-        p[0] = nodes.SuiteNode(stmts=p[3])
+        p[0] = p[3]
 
     def p_stmt_list(self, p):
         '''stmt_list : stmt
@@ -250,6 +403,7 @@ class Parser(object):
             p[0] = p[1]
             p[0].append(p[2])
 
+    ## EXPRESSIONS ##
     def p_expr_list(self, p):
         '''expr_list : expr
                      | expr_list COMMA expr'''
@@ -301,7 +455,7 @@ class Parser(object):
                 p[0] = nodes.BinaryOpNode(operator=op, left=left, right=right)
             else:
                 # Strip "not" from operator
-                op = op[:not_loc - 1] + op[not_loc + 3:]
+                op = op[:max(not_loc - 1, 0)] + op[not_loc + 4:]
                 operand = nodes.BinaryOpNode(operator=op, left=left,
                                              right=right)
                 p[0] = nodes.UnaryOpNode(operator='not', operand=operand)
@@ -317,8 +471,7 @@ class Parser(object):
                    | NOT IN
                    | IS
                    | IS NOT'''
-        # sets p[0] to a string, not a token
-        p[0] = ' '.join(x.type.lower() for x in p[1:])
+        p[0] = '_'.join(x.type.lower() for x in p.slice[1:])
 
     def p_arith_expr(self, p):
         '''arith_expr : mult_expr
@@ -332,8 +485,7 @@ class Parser(object):
     def p_arith_op(self, p):
         '''arith_op : PLUS
                     | MINUS'''
-        # sets p[0] to a string, not a token
-        p[0] = p[1].type.lower()
+        p[0] = p.slice[1].type.lower()
 
     def p_mult_expr(self, p):
         '''mult_expr : unary_expr
@@ -348,8 +500,7 @@ class Parser(object):
         '''mult_op : STAR
                    | SLASH
                    | PERCENT'''
-        # sets p[0] to a string, not a token
-        p[0] = p[1].type.lower()
+        p[0] = p.slice[1].type.lower()
 
     def p_unary_expr(self, p):
         '''unary_expr : power
@@ -363,8 +514,7 @@ class Parser(object):
     def p_unary_op(self, p):
         '''unary_op : PLUS
                     | MINUS'''
-        # sets p[0] to a string, not a token
-        p[0] = p[1].type.lower()
+        p[0] = p.slice[1].type.lower()
 
     def p_power(self, p):
         '''power : primary
@@ -373,13 +523,15 @@ class Parser(object):
             p[0] = p[1]
         else:
             p[0] = nodes.BinaryOpNode(
-                operator=p[2].type.lower(), left=p[1], right=p[3])
+                operator=p.slice[2].type.lower(), left=p[1], right=p[3])
 
     def p_primary(self, p):
         '''primary : atom
                    | attribute_ref
                    | subscription
                    | call'''
+        # TODO: considering splitting this up into separate primaries for
+        # (1) attribute_ref, subscription, and call, vs. (2) expressions
         p[0] = p[1]
 
     def p_atom(self, p):
@@ -392,11 +544,14 @@ class Parser(object):
     def p_string_list(self, p):
         '''string_list : STRING
                        | string_list STRING'''
-        p[0] = ''.join(p[1:])
+        if len(p) == 2:
+            p[0] = nodes.StringNode(value=p[1])
+        else:
+            p[0] = nodes.StringNode(value=p[1].value + p[2])
 
     def p_number(self, p):
         'number : NUMBER'
-        p[0] = p[1]
+        p[0] = nodes.NumberNode(value=p.slice[1])
 
     def p_enclosure(self, p):
         '''enclosure : LPAREN expr RPAREN
@@ -449,79 +604,33 @@ class Parser(object):
             p[0] = p[1]
             p[0].append(p[3])
 
-    def p_class_def(self, p):
-        'class_def : CLASS type LPAREN opt_name RPAREN COLON class_def_suite'
-        p[0] = nodes.ClassDefNode(name=p[2], base=p[4], body=p[7])
-
-    def p_opt_name(self, p):
-        '''opt_name : name
-                    | empty'''
-        p[0] = p[1]
-
-    def p_class_def_suite(self, p):
-        'class_def_suite : NEWLINE INDENT class_stmt_list DEDENT'
-        p[0] = p[3]
-
-    def p_class_stmt_list(self, p):
-        'class_stmt_list : opt_declarations opt_node_types_def function_defs'
-        p[0] = p[1]
-        p[0].append(p[2])
-        p[0].extend(p[3])
-
-    def p_opt_declarations(self, p):
-        '''opt_declarations : declarations
-                            | empty'''
-        p[0] = p[1] or []
-
-    def p_declarations(self, p):
-        '''declarations : declaration
-                        | declarations declaration'''
-        if len(p) == 2:
-            p[0] = [p[1]]
-        else:
-            p[0] = p[1]
-            p[0].append(p[2])
-
-    def p_opt_node_types_def(self, p):
-        '''opt_node_types_def : node_types_def
-                              | empty'''
-        p[0] = p[1] or []
-
-    def p_node_types_def(self, p):
-        'node_types_def : assignment_stmt NEWLINE'
-        p[0] = p[1]
-
-    def p_function_defs(self, p):
-        '''function_defs : function_def
-                         | function_defs function_def'''
-        if len(p) == 2:
-            p[0] = [p[1]]
-        else:
-            p[0] = p[1]
-            p[0].append(p[2])
-
-    def p_error(self, p):
-        'Handle parsing errors.'
-        # TODO: more robust error handling here
-        if p:
-            print 'Syntax error at', str(p)
-        else:
-            print 'Syntax error at EOF'
-
 
 def main(args):
-    # Parse a file containing Gramola code and print the result
+    'Parse a file containing Gramola code and print the result.'
     if not len(args):
         print >> sys.stderr, 'ERROR: Must provide the parser with a filename!'
         sys.exit(1)
+
+    debug = False
+    pretty_print = False
+    for arg in args[:]:
+        if arg == '-d':
+            debug = True
+        elif arg == '-p':
+            pretty_print = True
+        if arg.startswith('-'):
+            args.remove(arg)
 
     filename = args[0]
     parser = Parser()
     with open(filename, 'r') as fd:
         file_input = fd.read()
-        result = parser.parse(file_input)
+        result = parser.parse(file_input, debug=debug)
 
-    print str(result)
+    if pretty_print:
+        print nodes.pretty_print(result)
+    else:
+        print str(result)
 
 
 if __name__ == '__main__':
