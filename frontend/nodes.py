@@ -19,22 +19,25 @@ class InvalidNodeConstructionError(Error):
                 node_obj.__class__.__name__))
 
 
-def pretty_print(obj, indent=''):
-    'Recursively pretty-prints the given object. Does not handle loops, though.'
+def prettify(obj, indent=''):
+    '''Recursively builds a pretty string for printing the given object.
+
+    Doesn't handle loops, though.
+    '''
     if isinstance(obj, lex.LexToken):
         # At the moment, we don't want to print the whole LexToken
         return repr(obj.value)
     if getattr(obj, '__iter__', None):
         indent += '\t'
         if isinstance(obj, list):
-            pretty_iter = [pretty_print(x, indent=indent) for x in obj]
+            pretty_iter = [prettify(x, indent=indent) for x in obj]
             start, end = '[', ']'
         elif isinstance(obj, tuple):
-            pretty_iter = [pretty_print(x, indent=indent) for x in obj]
+            pretty_iter = [prettify(x, indent=indent) for x in obj]
             start, end = '(', ')'
         elif isinstance(obj, dict):
-            pretty_iter = ['{0}: {1}'.format(pretty_print(x, indent=indent),
-                                             pretty_print(y, indent=indent))
+            pretty_iter = ['{0}: {1}'.format(prettify(x, indent=indent),
+                                             prettify(y, indent=indent))
                            for x, y in obj.iteritems()]
             start, end = '{', '}'
         else:
@@ -51,7 +54,7 @@ def pretty_print(obj, indent=''):
     if getattr(obj, '__dict__', None):
         return '{{{0}: {1}}}'.format(
             obj.__class__.__name__,
-            pretty_print(obj.__dict__, indent=indent), indent=indent)
+            prettify(obj.__dict__, indent=indent), indent=indent)
     return str(obj)
 
 
