@@ -7,160 +7,253 @@ import symbols as sym
 
 # TODO: include special functions like __len__, then replace top-level builtins
 # with those calls? Also, subscriptions, operators.
+# TODO: do we need a None type, i.e., an object with no value at all
+# (not even bool)?
 
-SYMBOL_TABLE = sym.SymbolTable()
+_OBJECT = sym.TypeSymbol(((), 'object'))
+_VOID = sym.TypeSymbol(((), 'void'))
+_BOOL = sym.TypeSymbol(((), 'bool'), base=_OBJECT.full_name)
+_INT = sym.TypeSymbol(((), 'int'), base=_OBJECT.full_name)
+_FLOAT = sym.TypeSymbol(((), 'float'), base=_OBJECT.full_name)
+# Java: String
+_STR = sym.TypeSymbol(((), 'str'), base=_OBJECT.full_name)
+# Java: ArrayList<E>
+_LIST = sym.TypeSymbol(((), 'list'), base=_OBJECT.full_name)
+# HashSet<E>
+_SET = sym.TypeSymbol(((), 'set'), base=_OBJECT.full_name)
+# HashMap<K,V>
+_DICT = sym.TypeSymbol(((), 'dict'), base=_OBJECT.full_name)
+_GRAPH = sym.TypeSymbol(((), 'Graph'), base=_OBJECT.full_name)
+_NODE = sym.TypeSymbol(((), 'Node'), base=_OBJECT.full_name)
+_EDGE = sym.TypeSymbol(((), 'Edge'), base=_OBJECT.full_name)
 
 BASIC_TYPES = (
-
-    sym.TypeSymbol(((), 'bool')),
-    sym.TypeSymbol(((), 'int')),
-    sym.TypeSymbol(((), 'float')),
-    # String
-    sym.TypeSymbol(((), 'str')),
-    # ArrayList<E>
-    sym.TypeSymbol(((), 'list')),
-    # HashSet<E>
-    sym.TypeSymbol(((), 'set')),
-    # HashMap<K,V>
-    sym.TypeSymbol(((), 'dict')),
-    sym.TypeSymbol(((), 'Graph')),
-    sym.TypeSymbol(((), 'Node')),
-    sym.TypeSymbol(((), 'Edge')),
-
+    _OBJECT,
+    _VOID,
+    _BOOL,
+    _INT,
+    _FLOAT,
+    _STR,
+    _LIST,
+    _SET,
+    _DICT,
+    _GRAPH,
+    _NODE,
+    _EDGE,
     )
 
-SYMBOL_TABLE.set_all(BASIC_TYPES)
 
-SET_TYPE = SYMBOL_TABLE.get('set')
-assert SET_TYPE is not None
+_NODE_SET = sym.TypeSymbol(((), 'NodeSet'), base=_SET.full_name)
+_EDGE_SET = sym.TypeSymbol(((), 'EdgeSet'), base=_SET.full_name)
+_PATH = sym.TypeSymbol(((), 'Path'), base=_LIST.full_name)
 
 DERIVED_TYPES = (
-
-    sym.TypeSymbol(((), 'NodeSet'), base=SET_TYPE),
-    sym.TypeSymbol(((), 'EdgeSet'), base=SET_TYPE),
-
+    _NODE_SET,
+    _EDGE_SET,
+    _PATH,
 )
 
-SYMBOL_TABLE.set_all(DERIVED_TYPES)
 
 # TODO: fill in types for params, returns
 BUILTIN_METHODS = (
 
     ## STRINGS ##
     # String.clone
-    sym.FunctionSymbol((('str',), 'copy')),
+    sym.FunctionSymbol((('str',), 'copy'),
+                       return_type=_STR.full_name),
     # String.endsWith
-    sym.FunctionSymbol((('str',), 'endswith')),
+    sym.FunctionSymbol((('str',), 'endswith'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_STR.full_name,)),
     # String.indexOf
-    sym.FunctionSymbol((('str',), 'find')),
+    sym.FunctionSymbol((('str',), 'find'),
+                       return_type=_LIST.full_name,
+                       param_types=(_INT.full_name,)),
     # String.toLowerCase
-    sym.FunctionSymbol((('str',), 'lower')),
+    sym.FunctionSymbol((('str',), 'lower'),
+                       return_type=_STR.full_name),
     # String.replace
-    sym.FunctionSymbol((('str',), 'replace')),
+    sym.FunctionSymbol((('str',), 'replace'),
+                       return_type=_STR.full_name,
+                       param_types=(_STR.full_name, _STR.full_name)),
     # String.lastIndexOf
-    sym.FunctionSymbol((('str',), 'rfind')),
+    sym.FunctionSymbol((('str',), 'rfind'),
+                       return_type=_INT.full_name,
+                       param_types=(_STR.full_name,)),
     # String.split
-    sym.FunctionSymbol((('str',), 'split')),
+    sym.FunctionSymbol((('str',), 'split'),
+                       return_type=_LIST.full_name,
+                       param_types=(_STR.full_name,)),
     # String.startswith
-    sym.FunctionSymbol((('str',), 'startswith')),
+    sym.FunctionSymbol((('str',), 'startswith'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_STR.full_name,)),
     # String.trim
-    sym.FunctionSymbol((('str',), 'strip')),
+    sym.FunctionSymbol((('str',), 'strip'),
+                       return_type=_STR.full_name),
     # String.substring
-    sym.FunctionSymbol((('str',), 'substring')),
+    sym.FunctionSymbol((('str',), 'substring'),
+                       return_type=_STR.full_name,
+                       param_types=(_INT.full_name, _INT.full_name)),
     # String.toUpperCase
-    sym.FunctionSymbol((('str',), 'upper')),
+    sym.FunctionSymbol((('str',), 'upper'),
+                       return_type=_STR.full_name),
 
     ## LISTS ##
     # ArrayList<E>.add
-    sym.FunctionSymbol((('list',), 'append')),
+    sym.FunctionSymbol((('list',), 'append'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # ArrayList<E>.clear
-    sym.FunctionSymbol((('list',), 'clear')),
+    sym.FunctionSymbol((('list',), 'clear'),
+                       return_type=_VOID.full_name),
     # ArrayList<E>.clone
-    sym.FunctionSymbol((('list',), 'copy')),
+    sym.FunctionSymbol((('list',), 'copy'),
+                       return_type=_LIST.full_name),
     # ArrayList<E>.addAll
-    sym.FunctionSymbol((('list',), 'extend')),
+    sym.FunctionSymbol((('list',), 'extend'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_LIST.full_name,)),
     # ArrayList<E>.indexOf
-    sym.FunctionSymbol((('list',), 'index')),
+    sym.FunctionSymbol((('list',), 'index'),
+                       return_type=_INT.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # ArrayList<E>.add
-    sym.FunctionSymbol((('list',), 'insert')),
+    sym.FunctionSymbol((('list',), 'insert'),
+                       return_type=_VOID.full_name,
+                       param_types=(_INT.full_name, _OBJECT.full_name)),
     # ArrayList<E>.remove
-    sym.FunctionSymbol((('list',), 'pop')),
+    sym.FunctionSymbol((('list',), 'pop'),
+                       return_type=_OBJECT.full_name,
+                       param_types=(_INT.full_name,)),
     # ArrayList<E>.remove
-    sym.FunctionSymbol((('list',), 'remove')),
+    sym.FunctionSymbol((('list',), 'remove'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # Collections.reverse
-    sym.FunctionSymbol((('list',), 'reverse')),
+    sym.FunctionSymbol((('list',), 'reverse'),
+                       return_type=_VOID.full_name),
     # Collections.sort
-    sym.FunctionSymbol((('list',), 'sort')),
+    sym.FunctionSymbol((('list',), 'sort'),
+                       return_type=_VOID.full_name),
 
     ## SETS ##
     # HashSet<E>.add
-    sym.FunctionSymbol((('set',), 'add')),
+    sym.FunctionSymbol((('set',), 'add'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # HashSet<E>.clear
-    sym.FunctionSymbol((('set',), 'clear')),
+    sym.FunctionSymbol((('set',), 'clear'),
+                       return_type=_VOID.full_name),
     # HashSet<E>.clone
-    sym.FunctionSymbol((('set',), 'copy')),
+    sym.FunctionSymbol((('set',), 'copy'),
+                       return_type=_SET.full_name),
     # HashSet<E>.retainAll
-    sym.FunctionSymbol((('set',), 'intersection_update')),
+    sym.FunctionSymbol((('set',), 'intersection_update'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_SET.full_name,)),
     # HashSet<E>.remove
-    sym.FunctionSymbol((('set',), 'remove')),
+    sym.FunctionSymbol((('set',), 'remove'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # HashSet<E>.addAll
-    sym.FunctionSymbol((('set',), 'update')),
+    sym.FunctionSymbol((('set',), 'update'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_SET.full_name,)),
 
     ## DICTS ##
     # HashMap<K,V>.clear
-    sym.FunctionSymbol((('dict',), 'clear')),
+    sym.FunctionSymbol((('dict',), 'clear'),
+                       return_type=_BOOL.full_name),
     # HashMap<K,V>.clone
-    sym.FunctionSymbol((('dict',), 'copy')),
+    sym.FunctionSymbol((('dict',), 'copy'),
+                       return_type=_DICT.full_name),
     # HashMap<K,V>.get
-    sym.FunctionSymbol((('dict',), 'get')),
+    sym.FunctionSymbol((('dict',), 'get'),
+                       return_type=_OBJECT.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # HashMap<K,V>.containsKey
-    sym.FunctionSymbol((('dict',), 'has_key')),
+    sym.FunctionSymbol((('dict',), 'has_key'),
+                       return_type=_BOOL.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # HashMap<K,V>.entrySet
-    sym.FunctionSymbol((('dict',), 'items')),
+    sym.FunctionSymbol((('dict',), 'items'),
+                       return_type=_SET.full_name),
     # HashMap<K,V>.keySet
-    sym.FunctionSymbol((('dict',), 'keys')),
+    sym.FunctionSymbol((('dict',), 'keys'),
+                       return_type=_SET.full_name),
     # HashMap<K,V>.remove
-    sym.FunctionSymbol((('dict',), 'pop')),
+    sym.FunctionSymbol((('dict',), 'pop'),
+                       return_type=_OBJECT.full_name,
+                       param_types=(_OBJECT.full_name,)),
     # HashMap<K,V>.putAll
-    sym.FunctionSymbol((('dict',), 'update')),
+    sym.FunctionSymbol((('dict',), 'update'),
+                       return_type=_VOID.full_name,
+                       param_types=(_DICT.full_name,)),
     # HashMap<K,V>.values
-    sym.FunctionSymbol((('dict',), 'values')),
+    sym.FunctionSymbol((('dict',), 'values'),
+                       return_type=_SET.full_name),
 
     ## GRAPHS ##
 
     ## NODES ##
-    sym.FunctionSymbol((('Node',), 'in_nodes')),
-    sym.FunctionSymbol((('Node',), 'out_nodes')),
-    sym.FunctionSymbol((('Node',), 'in_edges')),
-    sym.FunctionSymbol((('Node',), 'out_edges')),
-    sym.FunctionSymbol((('Node',), 'shortest_path')),
-    sym.FunctionSymbol((('Node',), 'paths')),
+    sym.FunctionSymbol((('Node',), 'in_nodes'),
+                       return_type=_NODE_SET.full_name),
+    sym.FunctionSymbol((('Node',), 'out_nodes'),
+                       return_type=_NODE_SET.full_name),
+    sym.FunctionSymbol((('Node',), 'in_edges'),
+                       return_type=_EDGE_SET.full_name),
+    sym.FunctionSymbol((('Node',), 'out_edges'),
+                       return_type=_EDGE_SET.full_name),
+    sym.FunctionSymbol((('Node',), 'shortest_path'),
+                       return_type=_PATH.full_name,
+                       param_types=(_NODE.full_name,)),
+    sym.FunctionSymbol((('Node',), 'paths'),
+                       return_type=_PATH.full_name,
+                       param_types=(_NODE.full_name,)),
 
     ## EDGES ##
-    sym.FunctionSymbol((('Edge',), 'get_attribute_set')),
+    sym.FunctionSymbol((('Edge',), 'get_attribute_set'),
+                       return_type=_SET.full_name),
 
     ## NODE SETS ##
-    sym.FunctionSymbol((('NodeSet',), 'in_edges')),
-    sym.FunctionSymbol((('NodeSet',), 'out_edges')),
-    sym.FunctionSymbol((('NodeSet',), 'filter')),
-    sym.FunctionSymbol((('NodeSet',), 'sort')),
-    sym.FunctionSymbol((('NodeSet',), 'group_by')),
+    sym.FunctionSymbol((('NodeSet',), 'in_edges'),
+                       return_type=_EDGE_SET.full_name),
+    sym.FunctionSymbol((('NodeSet',), 'out_edges'),
+                       return_type=_EDGE_SET.full_name),
+    sym.FunctionSymbol((('NodeSet',), 'filter'),
+                       return_type=_NODE_SET.full_name,
+                       param_types=(_LIST.full_name)),
+    sym.FunctionSymbol((('NodeSet',), 'sort'),
+                       return_type=_LIST.full_name),
+    # TODO: check this
+    sym.FunctionSymbol((('NodeSet',), 'group_by'),
+                       return_type=_DICT.full_name,
+                       param_types=_LIST.full_name),
 
     ## EDGE SETS ##
-    sym.FunctionSymbol((('EdgeSet',), 'in_nodes')),
-    sym.FunctionSymbol((('EdgeSet',), 'out_nodes')),
-    sym.FunctionSymbol((('EdgeSet',), 'filter')),
+    sym.FunctionSymbol((('EdgeSet',), 'in_nodes'),
+                       return_type=_SET.full_name),
+    sym.FunctionSymbol((('EdgeSet',), 'out_nodes'),
+                       return_type=_SET.full_name),
+    sym.FunctionSymbol((('EdgeSet',), 'filter'),
+                       return_type=_EDGE_SET.full_name,
+                       param_types=(_LIST.full_name)),
 
     )
-
-SYMBOL_TABLE.set_all(BUILTIN_METHODS)
 
 
 BUILTIN_FUNCTIONS = (
 
-    ## BUILT-IN FUNCTIONS ##
-    sym.FunctionSymbol(((), 'len')),
+    sym.FunctionSymbol(((), 'len'),
+                       return_type=_INT.full_name,
+                       param_types=(_OBJECT.full_name,)),
 
 )
 
+
+SYMBOL_TABLE = sym.SymbolTable()
+SYMBOL_TABLE.set_all(BASIC_TYPES)
+SYMBOL_TABLE.set_all(DERIVED_TYPES)
+SYMBOL_TABLE.set_all(BUILTIN_METHODS)
 SYMBOL_TABLE.set_all(BUILTIN_FUNCTIONS)
