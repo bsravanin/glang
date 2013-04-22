@@ -126,4 +126,22 @@ public class Node extends GraphElement{
 	public String toString() {
 		return String.valueOf(this.id);
 	}
+	
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
+		
+		if (!(obj instanceof Node))
+			return false;
+		
+		Node tmp = (Node) obj;
+		
+		if (this.getId() == tmp.getId())
+			return true;
+		
+		return false;
+	}
 }

@@ -146,10 +146,12 @@ public class GraphDBController {
 				endDBNode = tmpRelation.getEndNode();
 				
 				startNode = this.reproNode(startDBNode);
-				g.addNode(startNode);
+				if (!g.getAllNodes().contains(startNode))
+					g.addNode(startNode);
 				
 				endNode = this.reproNode(endDBNode);
-				g.addNode(endNode);
+				if (!g.getAllNodes().contains(endNode))
+					g.addNode(endNode);
 				
 				edge = this.reproEdge(tmpRelation, startNode, endNode);
 				g.addEdge(edge);

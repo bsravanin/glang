@@ -85,4 +85,22 @@ public class Edge extends GraphElement{
 	public String toString() {
 		return this.start.getId() + " =(" + this.id + ")=> " + this.end.getId(); 
 	}
+	
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
+		
+		if (!(obj instanceof Edge))
+			return false;
+		
+		Edge tmp = (Edge) obj;
+		
+		if (this.getId() == tmp.getId())
+			return true;
+		
+		return false;
+	}
 }
