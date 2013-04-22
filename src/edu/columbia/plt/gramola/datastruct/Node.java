@@ -26,26 +26,44 @@ public class Node extends GraphElement{
 		this.variableMap = variableMap;
 	}
 
+	/**
+	 * Set id for Node
+	 */
 	public synchronized void setId(int id) {
 		this.id = id;
 	}
 	
+	/**
+	 * Get id of Node
+	 */
 	public int getId() {
 		return this.id;
 	}
 		
+	/**
+	 * Get value for specific variable
+	 */
 	public Object getVariableValue(String variable) {
 		return this.variableMap.get(variable);
 	}
 	
+	/**
+	 * Set value for specific variable
+	 */
 	public synchronized void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
 	}
 	
+	/**
+	 * Get all variables describing Node
+	 */
 	public Set<String> getVariables() {
 		return this.variableMap.keySet();
 	}
 	
+	/**
+	 * Get the variable map containing <varName, varValue> pairs
+	 */
 	public HashMap<String, Object> getVariableMap() {
 		return this.variableMap;
 	}
@@ -123,10 +141,15 @@ public class Node extends GraphElement{
 		this.variableMap.put(variable, newValue);
 	}
 	
+	@Override
 	public String toString() {
 		return String.valueOf(this.id);
 	}
 	
+	/**
+	 * If two Node have the same id, they are the same
+	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
