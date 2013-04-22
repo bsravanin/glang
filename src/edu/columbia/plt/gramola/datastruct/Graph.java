@@ -20,9 +20,16 @@ public class Graph{
 	
 	private int edgeId = 0;
 	
+	private long graphId = 0;
+	
 	public Graph() {
 		Date now = new Date();
-	}	
+		this.graphId = now.getTime();
+	}
+	
+	public long getGraphId() {
+		return this.graphId;
+	}
 	/**
 	 * The regular way to create Node within the Graph
 	 * Please note that if a Node is created by new Node()

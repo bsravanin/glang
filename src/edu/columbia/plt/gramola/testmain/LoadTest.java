@@ -6,6 +6,7 @@ import edu.columbia.plt.gramola.datastruct.Edge;
 import edu.columbia.plt.gramola.datastruct.Graph;
 import edu.columbia.plt.gramola.datastruct.Node;
 import edu.columbia.plt.gramola.util.GraphDBController;
+import edu.columbia.plt.gramola.util.GraphVisualizer;
 
 public class LoadTest {
 
@@ -31,6 +32,8 @@ public class LoadTest {
 			System.out.println("Test load end node: " + end + " " + end.getVariableValue("name"));
 		}
 		
+		GraphVisualizer gv = new GraphVisualizer(g, "name", "type");
+		gv.draw();
 		
 		
 	}
