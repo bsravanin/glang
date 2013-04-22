@@ -109,7 +109,9 @@ class Parser(object):
         'new_scope :'
         # We need to create a unique identifier for the new scope
         for item in p.stack[::-1]:
-            if isinstance(item, lex.LexToken):
+            if isinstance(item, (nodes.NameNode, nodes.TypeNode)):
+                left_token = item.value
+            elif isinstance(item, lex.LexToken):
                 left_token = item
                 break
         left = '{0}_{1}'.format(left_token.value, left_token.lineno)
@@ -214,6 +216,19 @@ class Parser(object):
         ('class_def : CLASS new_type new_scope '
          'LPAREN opt_type RPAREN COLON class_def_suite')
         p[0] = nodes.ClassDefNode(name=p[2], base=p[5], body=p[8])
+        # Add the 'self' symbol to the class's methods
+        class_name_token = p[2].value
+        class_name = class_name_token.value
+        full_class_name = symbols.stringify_full_name(
+            symbols.get_qualified_name(self._cur_namespace[:-1], class_name))
+        for stmt in p[8]:
+            if type(stmt) == nodes.FunctionDefNode:
+                func_name_token = stmt.name.value
+                func_name = func_name_token.value
+                namespace, name = self._get_qualified_name(func_name)
+                sym = symbols.IdSymbol((namespace + (name,), 'self'),
+                                       id_type=full_class_name)
+                self._symbol_table.set(sym)
         self._pop_scope()
 
     def p_new_type(self, p):
@@ -328,7 +343,7 @@ class Parser(object):
 
     def p_return_stmt(self, p):
         'return_stmt : RETURN opt_expr'
-        p[0] = nodes.ReturnNode()
+        p[0] = nodes.ReturnNode(value=p[2])
 
     def p_opt_expr(self, p):
         '''opt_expr : expr

@@ -71,6 +71,32 @@ def _validate_symbol(symbol):
                         + str(symbol))
 
 
+def get_qualified_name(namespace, name):
+    '''Returns the given name, qualified with the given namespace.
+
+    Args:
+      namespace: A tuple of identifier strings.
+      name: An identifier string.
+
+    Returns:
+      A tuple of:
+        tuple of names (str)
+        name (str)
+    '''
+    if isinstance(namespace, ScopeStack) or '__iter__' in dir(namespace):
+        namespace = tuple(namespace)
+    _validate_namespace(namespace)
+    _validate_name(name)
+    return (namespace, name)
+
+
+def stringify_full_name(full_name):
+    'Return a stringified version of the given qualified name.'
+    _validate_full_name(full_name)
+    namespace, name = full_name
+    return NAMESPACE_SEP.join(namespace + (name,))
+
+
 class Symbol(object):
     'Representation of a symbol table entry.'
 
@@ -85,7 +111,7 @@ class Symbol(object):
         namespace, name = full_name
         self._namespace = namespace
         self._name = name
-        self._full_name = NAMESPACE_SEP.join(namespace + (name,))
+        self._full_name = stringify_full_name(full_name)
         self._token = token
 
     def __str__(self):
@@ -128,8 +154,7 @@ class TypeSymbol(Symbol):
         '''Constructor for TypeSymbol.
 
         Args:
-          namespace: A tuple of identifier strings.
-          name: An identifier string.
+          full_name: A (namespace, name) tuple.
           token: see Symbol.
           base: (str) Base class for this type.
         '''
@@ -140,17 +165,16 @@ class TypeSymbol(Symbol):
 class IdSymbol(Symbol):
     'Simple subclass of Symbol, for names.'
 
-    def __init__(self, full_name, token=None, sym_type=None):
+    def __init__(self, full_name, token=None, id_type=None):
         '''Constructor for IdSymbol.
 
         Args:
-          namespace: A tuple of identifier strings.
-          name: An identifier string.
+          full_name: A (namespace, name) tuple.
           token: see Symbol.
-          sym_type: (str) Type for the name represented by this object.
+          id_type: (str) Qualified type for the name represented by this object.
         '''
         Symbol.__init__(self, full_name, token=token)
-        self.type = sym_type
+        self.type = id_type
 
 
 class FunctionSymbol(Symbol):
@@ -161,8 +185,7 @@ class FunctionSymbol(Symbol):
         '''Constructor for FunctionSymbol.
 
         Args:
-          namespace: A tuple of identifier strings.
-          name: An identifier string.
+          full_name: A (namespace, name) tuple.
           token: see Symbol.
           return_type: (str or None) Return type for the function represented
               by this object.
@@ -172,25 +195,6 @@ class FunctionSymbol(Symbol):
         Symbol.__init__(self, full_name, token=token)
         self.return_type = return_type
         self.param_types = param_types
-
-
-def _get_qualified_name(namespace, name):
-    '''Returns the given name, qualified with the given namespace.
-
-    Args:
-      namespace: A tuple of identifier strings.
-      name: An identifier string.
-
-    Returns:
-      A tuple of:
-        tuple of names (str)
-        name (str)
-    '''
-    if isinstance(namespace, ScopeStack) or '__iter__' in dir(namespace):
-        namespace = tuple(namespace)
-    _validate_namespace(namespace)
-    _validate_name(name)
-    return (namespace, name)
 
 
 class SymbolTable(object):
@@ -215,10 +219,9 @@ class SymbolTable(object):
         items.sort()
         vals = []
         for _, sym in items:
-            vals.append('({0}, {1})'.format(sym.full_name, sym))
+            vals.append('({0!r}, {1})'.format(sym.full_name, sym))
         return '\n'.join(vals)
 
-    @property
     def as_dict(self):
         'Return the dict that backs this SymbolTable.'
         return self._table
@@ -230,7 +233,7 @@ class SymbolTable(object):
     def update(self, table):
         'Updates this SymbolTable with the given SymbolTable.'
         if isinstance(table, SymbolTable):
-            table = table.as_dict
+            table = table.as_dict()
         if not isinstance(table, dict):
             raise TypeError("Parameter 'table' must be a SymbolTable or dict")
         self._table.update(table)
@@ -254,7 +257,7 @@ class SymbolTable(object):
               tuple of names (str)
               name (str)
         '''
-        return _get_qualified_name(self._scopes, name)
+        return get_qualified_name(self._scopes, name)
 
     def get(self, name):
         '''Looks up an (unqualified) name in the symbol table.
@@ -273,13 +276,13 @@ class SymbolTable(object):
         cur_scopes = list(self._scopes)
         value = None
         while cur_scopes:
-            full_name = _get_qualified_name(cur_scopes, name)
+            full_name = get_qualified_name(cur_scopes, name)
             value = self.get_by_qualified_name(full_name)
             if value:
                 break
             cur_scopes.pop()
         else:
-            full_name = _get_qualified_name(cur_scopes, name)
+            full_name = get_qualified_name(cur_scopes, name)
             value = self.get_by_qualified_name(full_name)
         return value
 

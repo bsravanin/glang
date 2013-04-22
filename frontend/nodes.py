@@ -41,7 +41,7 @@ def prettify(obj, indent=''):
                            for x, y in obj.iteritems()]
             start, end = '{', '}'
         else:
-            return str(obj)
+            return repr(obj)
         if len(obj) > 0:
             bounds_sep = '\n' + indent
             item_sep = ',' + bounds_sep
@@ -55,7 +55,7 @@ def prettify(obj, indent=''):
         return '{{{0}: {1}}}'.format(
             obj.__class__.__name__,
             prettify(obj.__dict__, indent=indent), indent=indent)
-    return str(obj)
+    return repr(obj)
 
 
 class Node(object):
@@ -63,6 +63,9 @@ class Node(object):
 
     def __init__(self, **kwargs):
         for kwarg in kwargs:
+            # These fields can be None
+            if kwarg in ('base', 'args', 'elses'):
+                continue
             if kwarg is None:
                 raise InvalidNodeConstructionError(self)
         self.__dict__.update(kwargs)
@@ -117,8 +120,7 @@ class ClassDefNode(Node):
     'AST node for a class definition.'
 
     def __init__(self, name=None, base=None, body=None):
-        # base is optional. use empty string to pass the "not None" check
-        Node.__init__(self, name=name, base=base or '', body=body)
+        Node.__init__(self, name=name, base=base, body=body)
 
 
 class AssignmentNode(Node):
@@ -152,16 +154,15 @@ class ContinueNode(Node):
 class ReturnNode(Node):
     'AST node for a return statement.'
 
-    def __init__(self):
-        Node.__init__(self)
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
 
 
 class IfNode(Node):
     'AST node for an if statement.'
 
     def __init__(self, test=None, body=None, elses=None):
-        # elses are optional. use empty list to pass the "not None" check
-        Node.__init__(self, test=test, body=body, elses=elses or [])
+        Node.__init__(self, test=test, body=body, elses=elses)
 
 
 class WhileNode(Node):
@@ -224,5 +225,4 @@ class CallNode(Node):
     'AST node for a function call.'
 
     def __init__(self, func=None, args=None):
-        # args are optional. use empty list to pass the "not None" check
-        Node.__init__(self, func=func, args=args or [])
+        Node.__init__(self, func=func, args=args)
