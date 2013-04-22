@@ -91,10 +91,15 @@ def get_qualified_name(namespace, name):
 
 
 def stringify_full_name(full_name):
-    'Return a stringified version of the given qualified name.'
+    'Returns a stringified version of the given qualified name.'
     _validate_full_name(full_name)
     namespace, name = full_name
-    return NAMESPACE_SEP.join(namespace + (name,))
+    return stringify_tuple(namespace + (name,))
+
+
+def stringify_tuple(tup):
+    'Returns a stringified version of the given tuple.'
+    return NAMESPACE_SEP.join(tup)
 
 
 class Symbol(object):

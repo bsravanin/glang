@@ -14,12 +14,14 @@ rule, or "empty".
 # pylint: disable=R0904
 # "Too many public methods" (for Parser class)
 
-import builtins
 import nodes
 import symbols
 import sys
-from ply import lex, yacc
+from ply import yacc
 from lexer import Lexer
+
+
+BUILTINS_FILENAME = 'builtins.gr'
 
 
 class Error(Exception):
@@ -37,34 +39,24 @@ class Parser(object):
     '''Representation of a parser object.
 
     Important public attributes:
-      tokens: A tuple of token strings from the lexer.
-      start: (str) The start symbol.
-      lexer: The lexer.Lexer object used for lexical analysis.
-      symbol_table: The symbols.SymbolTable object partially filled during
-          parsing.
       parse: Parses the given input, returns a nodes.Node instance representing
           the abstract syntax tree (AST) for the input.
+      parse_file: Same as parse(), but on an input filename.
+      reset: Resets the state of the parser, its lexer, and its symbol table.
     '''
-
-    # Set in __init__()
-    tokens = None
-    start = 'start'
 
     def __init__(self, lexer=None):
         self._lexer = lexer or Lexer()
+        self._symbol_table = symbols.SymbolTable()
+        self._cur_scope_name = None
+
         self.tokens = self._lexer.tokens
-        self._symbol_table = symbols.SymbolTable(table=builtins.SYMBOL_TABLE)
+        self.start = 'start'
         self._parser = yacc.yacc(module=self)
-
-    @property
-    def lexer(self):
-        'Getter for the lexer field.'
-        return self._lexer
-
-    @property
-    def symbol_table(self):
-        'Getter for the symbol table field.'
-        return self._symbol_table
+        # We only needed these attributes to initialize Yacc, so we can delete
+        # them now
+        del self.tokens
+        del self.start
 
     @property
     def _cur_namespace(self):
@@ -77,10 +69,15 @@ class Parser(object):
 
     def parse(self, s, **kwargs):
         'Parses the given string of text.'
+        self._symbol_table.reset()
         lexer = kwargs.pop('lexer', self._lexer)
-        debug = kwargs.pop('debug', False)
-        self._symbol_table.reset(table=builtins.SYMBOL_TABLE)
-        return self._parser.parse(s, lexer=lexer, debug=debug, **kwargs)
+        skip_builtins = kwargs.pop('skip_builtins', False)
+        if not skip_builtins:
+            # Populate symbol table with built-ins
+            with open(BUILTINS_FILENAME, 'r') as infile:
+                b = infile.read()
+            self._parser.parse(b, lexer=lexer, **kwargs)
+        return self._parser.parse(s, lexer=lexer, **kwargs)
 
     def parse_file(self, filename, **kwargs):
         'Parses the string of text in the given named file.'
@@ -89,16 +86,28 @@ class Parser(object):
         return self.parse(s, **kwargs)
 
     def reset(self):
-        'Resets this Parser.'
-        self._parser.restart()
+        '''Resets the state and SymbolTable for this Parser.
 
-    def _push_scope(self, arg):
+        Calling parse() will indirectly reset the states of the parser and
+        lexer, but this does a pre-emptive reset, and it's the only way to
+        reset the symbol table.
+        '''
+        self._parser.restart()
+        self._lexer.reset()
+        self._symbol_table.reset()
+
+    def _push_scope(self):
         'Pushes a new identifier onto the scope stack.'
-        self._symbol_table.scope_stack.push(arg)
+        self._symbol_table.scope_stack.push(self._cur_scope_name)
 
     def _pop_scope(self):
         'Pops an identifier off the scope stack.'
         self._symbol_table.scope_stack.pop()
+        namespace = self._cur_namespace
+        if namespace:
+            self._cur_scope_name = namespace[-1]
+        else:
+            self._cur_scope_name = None
 
     ## HELPER RULES ##
     def p_empty(self, p):
@@ -107,15 +116,8 @@ class Parser(object):
 
     def p_new_scope(self, p):
         'new_scope :'
-        # We need to create a unique identifier for the new scope
-        for item in p.stack[::-1]:
-            if isinstance(item, (nodes.NameNode, nodes.TypeNode)):
-                left_token = item.value
-            elif isinstance(item, lex.LexToken):
-                left_token = item
-                break
-        left = '{0}_{1}'.format(left_token.value, left_token.lineno)
-        self._push_scope(left)
+        p[0] = None
+        self._push_scope()
 
     def p_error(self, p):
         'Handle parsing errors.'
@@ -143,7 +145,7 @@ class Parser(object):
             p[0].extend(p[2])
 
     def p_top_level_stmt(self, p):
-        '''top_level_stmt : function_def
+        '''top_level_stmt : class_stmt
                           | class_def'''
         p[0] = p[1]
 
@@ -168,6 +170,10 @@ class Parser(object):
         name_token = p.slice[1]
         p[0] = nodes.NameNode(value=name_token)
         name = name_token.value
+        self._cur_scope_name = name
+
+        # Add this new function name to the symbol table, as long as it doesn't
+        # already exist in the current scope
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
@@ -216,11 +222,9 @@ class Parser(object):
         ('class_def : CLASS new_type new_scope '
          'LPAREN opt_type RPAREN COLON class_def_suite')
         p[0] = nodes.ClassDefNode(name=p[2], base=p[5], body=p[8])
-        # Add the 'self' symbol to the class's methods
-        class_name_token = p[2].value
-        class_name = class_name_token.value
-        full_class_name = symbols.stringify_full_name(
-            symbols.get_qualified_name(self._cur_namespace[:-1], class_name))
+
+        # For each method in this new class, add "self" within its namespace
+        full_class_name = symbols.stringify_tuple(self._cur_namespace)
         for stmt in p[8]:
             if type(stmt) == nodes.FunctionDefNode:
                 func_name_token = stmt.name.value
@@ -236,6 +240,10 @@ class Parser(object):
         name_token = p.slice[1]
         p[0] = nodes.TypeNode(value=name_token)
         name = name_token.value
+        self._cur_scope_name = name
+
+        # Add this type to the symbol table as long as it doesn't already exist
+        # in the current scope
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
@@ -258,19 +266,16 @@ class Parser(object):
         '''class_stmt_list : class_stmt
                            | class_stmt_list class_stmt'''
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = [p[1]] if p[1] else []
         else:
             p[0] = p[1]
             p[0].append(p[2])
 
     def p_class_stmt(self, p):
         '''class_stmt : declaration NEWLINE
-                      | node_types_def
-                      | function_def'''
-        p[0] = p[1]
-
-    def p_node_types_def(self, p):
-        'node_types_def : assignment_stmt NEWLINE'
+                      | assignment_stmt NEWLINE
+                      | function_def
+                      | pass_stmt NEWLINE'''
         p[0] = p[1]
 
     ## STATEMENTS ##
@@ -281,15 +286,16 @@ class Parser(object):
 
     ## SIMPLE STATEMENTS ##
     def p_simple_stmt(self, p):
-        '''simple_stmt : small_stmt NEWLINE
-                       | declaration NEWLINE'''
+        'simple_stmt : small_stmt NEWLINE'
         p[0] = p[1]
 
     def p_small_stmt(self, p):
         '''small_stmt : expr
+                      | declaration
                       | assignment_stmt
                       | print_stmt
-                      | flow_stmt'''
+                      | flow_stmt
+                      | pass_stmt'''
         p[0] = p[1]
 
     def p_assignment_stmt(self, p):
@@ -309,14 +315,20 @@ class Parser(object):
 
     def p_name(self, p):
         'name : NAME'
-        # Using generic Symbol class because we don't know what kind of name
-        # this is (type? id? function?). We can update it to a Symbol subclass
-        # later once we know what it really is.
         name_token = p.slice[1]
-        full_name = self._get_qualified_name(name_token.value)
-        symbol = symbols.Symbol(full_name, name_token)
-        self._symbol_table.set(symbol)
         p[0] = nodes.NameNode(value=name_token)
+
+        # Add this name to the symbol table if it doesn't already exist in the
+        # current scope
+        name = name_token.value
+        sym = self._symbol_table.get(name)
+        if sym is None:
+            full_name = self._get_qualified_name(name)
+            # Using generic Symbol class because we don't know what kind of name
+            # this is (type? id? function?). We can update it to a Symbol
+            # subclass later once we know what it really is.
+            symbol = symbols.Symbol(full_name, name_token)
+            self._symbol_table.set(symbol)
 
     def p_print_stmt(self, p):
         'print_stmt : PRINT opt_expr_list'
@@ -350,6 +362,10 @@ class Parser(object):
                     | empty'''
         p[0] = p[1]
 
+    def p_pass_stmt(self, p):
+        'pass_stmt : PASS'
+        # Do nothing
+
     ## COMPOUND STATEMENTS ##
     def p_compound_stmt(self, p):
         '''compound_stmt : if_stmt
@@ -379,7 +395,7 @@ class Parser(object):
         '''elif_clauses : elif_clause
                         | elif_clauses elif_clause'''
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = [p[1]] if p[1] else []
         else:
             p[0] = p[1]
             p[0].append(p[2])
@@ -398,9 +414,14 @@ class Parser(object):
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
 
     def p_for_stmt(self, p):
-        'for_stmt : FOR new_scope id_opt_type IN primary COLON suite'
+        'for_stmt : for new_scope id_opt_type IN primary COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
         self._pop_scope()
+
+    def p_for(self, p):
+        'for : FOR'
+        p[0] = p[1]
+        self._cur_scope_name = 'for_{0}'.format(p.slice[1].lineno)
 
     def p_suite(self, p):
         'suite : NEWLINE INDENT stmt_list DEDENT'
@@ -410,7 +431,7 @@ class Parser(object):
         '''stmt_list : stmt
                      | stmt_list stmt'''
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = [p[1]] if p[1] else []
         else:
             p[0] = p[1]
             p[0].append(p[2])
@@ -420,7 +441,7 @@ class Parser(object):
         '''expr_list : expr
                      | expr_list COMMA expr'''
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = [p[1]] if p[1] else []
         else:
             p[0] = p[1]
             p[0].append(p[3])
@@ -568,9 +589,14 @@ class Parser(object):
     def p_enclosure(self, p):
         '''enclosure : LPAREN expr RPAREN
                      | LBRACKET expr_list RBRACKET
-                     | LBRACE key_datum_list RBRACE
+                     | LBRACE opt_key_datum_list RBRACE
                      | LBRACE expr_set RBRACE'''
         p[0] = p[2]
+
+    def p_opt_key_datum_list(self, p):
+        '''opt_key_datum_list : key_datum_list
+                              | empty'''
+        p[0] = p[1] or {}
 
     def p_key_datum_list(self, p):
         '''key_datum_list : key_datum
@@ -625,19 +651,20 @@ def main(args):
 
     debug = False
     prettify = False
+    skip_builtins = False
     for arg in args[:]:
         if arg == '-d':
             debug = True
         elif arg == '-p':
             prettify = True
+        elif arg == '-b':
+            skip_builtins = True
         if arg.startswith('-'):
             args.remove(arg)
 
     filename = args[0]
-    parser = Parser()
-    with open(filename, 'r') as fd:
-        file_input = fd.read()
-        result = parser.parse(file_input, debug=debug)
+    p = Parser()
+    result = p.parse_file(filename, debug=debug, skip_builtins=skip_builtins)
 
     if prettify:
         print nodes.prettify(result)
