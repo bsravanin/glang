@@ -163,13 +163,13 @@ class Parser(object):
         'type : NAME'
         # We verify validity of this type in a later pass. For all we know, it
         # could be defined further on in the parsing pass.
-        p[0] = nodes.TypeNode(value=p.slice[1])
+        p[0] = nodes.TypeNode(value=p[1])
 
     def p_new_func_name(self, p):
         'new_func_name : NAME'
         name_token = p.slice[1]
-        p[0] = nodes.NameNode(value=name_token)
         name = name_token.value
+        p[0] = nodes.NameNode(value=name)
         self._cur_scope_name = name
 
         # Add this new function name to the symbol table, as long as it doesn't
@@ -198,20 +198,20 @@ class Parser(object):
             p[0].append(p[3])
 
     def p_declaration(self, p):
-        'declaration : type new_name'
+        'declaration : type new_var_name'
         # Set the type in the names' symbols in a later pass, since we may not
         # know about this type yet.
-        p[0] = nodes.DeclarationNode(id_type=p[1], name=p[2])
+        p[0] = nodes.DeclarationNode(var_type=p[1], name=p[2])
 
-    def p_new_name(self, p):
-        'new_name : NAME'
+    def p_new_var_name(self, p):
+        'new_var_name : NAME'
         name_token = p.slice[1]
-        p[0] = nodes.NameNode(value=name_token)
         name = name_token.value
+        p[0] = nodes.NameNode(value=name)
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
-            symbol = symbols.IdSymbol(full_name, name_token)
+            symbol = symbols.VariableSymbol(full_name, name_token)
             self._symbol_table.set(symbol)
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
@@ -227,18 +227,16 @@ class Parser(object):
         full_class_name = symbols.stringify_tuple(self._cur_namespace)
         for stmt in p[8]:
             if type(stmt) == nodes.FunctionDefNode:
-                func_name_token = stmt.name.value
-                func_name = func_name_token.value
+                func_name = stmt.name.value
                 namespace, name = self._get_qualified_name(func_name)
-                sym = symbols.IdSymbol((namespace + (name,), 'self'),
-                                       id_type=full_class_name)
+                sym = symbols.VariableSymbol((namespace + (name,), 'self'),
+                                             var_type=full_class_name)
                 self._symbol_table.set(sym)
         self._pop_scope()
 
     def p_new_type(self, p):
         'new_type : NAME'
         name_token = p.slice[1]
-        p[0] = nodes.TypeNode(value=name_token)
         name = name_token.value
         self._cur_scope_name = name
 
@@ -252,6 +250,8 @@ class Parser(object):
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
                 sym, name_token, self._cur_namespace)
+
+        p[0] = nodes.TypeNode(value=symbols.stringify_full_name(full_name))
 
     def p_opt_type(self, p):
         '''opt_type : type
@@ -272,7 +272,7 @@ class Parser(object):
             p[0].append(p[2])
 
     def p_class_stmt(self, p):
-        '''class_stmt : declaration NEWLINE
+        '''class_stmt : declaration_stmt
                       | assignment_stmt NEWLINE
                       | function_def
                       | pass_stmt NEWLINE'''
@@ -286,49 +286,54 @@ class Parser(object):
 
     ## SIMPLE STATEMENTS ##
     def p_simple_stmt(self, p):
-        'simple_stmt : small_stmt NEWLINE'
+        '''simple_stmt : small_stmt NEWLINE
+                       | expr_stmt
+                       | declaration_stmt'''
         p[0] = p[1]
 
     def p_small_stmt(self, p):
-        '''small_stmt : expr
-                      | declaration
-                      | assignment_stmt
+        '''small_stmt : assignment_stmt
                       | print_stmt
                       | flow_stmt
                       | pass_stmt'''
         p[0] = p[1]
+
+    def p_expr_stmt(self, p):
+        'expr_stmt : expr NEWLINE'
+        p[0] = nodes.ExpressionStmtNode(expr=p[1])
+
+    def p_declaration_stmt(self, p):
+        'declaration_stmt : declaration NEWLINE'
+        p[0] = nodes.DeclarationStmtNode(value=p[1])
 
     def p_assignment_stmt(self, p):
         'assignment_stmt : target ASSIGN expr'
         p[0] = nodes.AssignmentNode(target=p[1], value=p[3])
 
     def p_target(self, p):
-        '''target : id_opt_type
+        '''target : var_opt_type
                   | attribute_ref
                   | subscription'''
         p[0] = p[1]
 
-    def p_id_opt_type(self, p):
-        '''id_opt_type : declaration
-                       | name'''
+    def p_var_opt_type(self, p):
+        '''var_opt_type : declaration
+                        | variable'''
         p[0] = p[1]
 
-    def p_name(self, p):
-        'name : NAME'
-        name_token = p.slice[1]
-        p[0] = nodes.NameNode(value=name_token)
+    def p_variable(self, p):
+        'variable : NAME'
+        var_token = p.slice[1]
+        name = var_token.value
+        p[0] = nodes.NameNode(value=name)
 
         # Add this name to the symbol table if it doesn't already exist in the
         # current scope
-        name = name_token.value
         sym = self._symbol_table.get(name)
         if sym is None:
-            full_name = self._get_qualified_name(name)
-            # Using generic Symbol class because we don't know what kind of name
-            # this is (type? id? function?). We can update it to a Symbol
-            # subclass later once we know what it really is.
-            symbol = symbols.Symbol(full_name, name_token)
-            self._symbol_table.set(symbol)
+            # While function names and class names can be used in a namespace
+            # before they're declared, variable names cannot
+            raise symbols.UnknownSymbolError(var_token, self._cur_namespace)
 
     def p_print_stmt(self, p):
         'print_stmt : PRINT opt_expr_list'
@@ -414,7 +419,7 @@ class Parser(object):
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
 
     def p_for_stmt(self, p):
-        'for_stmt : for new_scope id_opt_type IN primary COLON suite'
+        'for_stmt : for new_scope var_opt_type IN primary COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
         self._pop_scope()
 
@@ -448,7 +453,7 @@ class Parser(object):
 
     def p_expr(self, p):
         'expr : or_test'
-        p[0] = nodes.ExpressionNode(value=p[1])
+        p[0] = p[1]
 
     def p_or_test(self, p):
         '''or_test : and_test
@@ -504,7 +509,7 @@ class Parser(object):
                    | NOT IN
                    | IS
                    | IS NOT'''
-        p[0] = '_'.join(x.type.lower() for x in p.slice[1:])
+        p[0] = '_'.join(x.value for x in p.slice[1:])
 
     def p_arith_expr(self, p):
         '''arith_expr : mult_expr
@@ -518,7 +523,7 @@ class Parser(object):
     def p_arith_op(self, p):
         '''arith_op : PLUS
                     | MINUS'''
-        p[0] = p.slice[1].type.lower()
+        p[0] = p[1]
 
     def p_mult_expr(self, p):
         '''mult_expr : unary_expr
@@ -533,7 +538,7 @@ class Parser(object):
         '''mult_op : STAR
                    | SLASH
                    | PERCENT'''
-        p[0] = p.slice[1].type.lower()
+        p[0] = p[1]
 
     def p_unary_expr(self, p):
         '''unary_expr : power
@@ -547,7 +552,7 @@ class Parser(object):
     def p_unary_op(self, p):
         '''unary_op : PLUS
                     | MINUS'''
-        p[0] = p.slice[1].type.lower()
+        p[0] = p[1]
 
     def p_power(self, p):
         '''power : primary
@@ -555,16 +560,20 @@ class Parser(object):
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = nodes.BinaryOpNode(
-                operator=p.slice[2].type.lower(), left=p[1], right=p[3])
+            p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
 
     def p_primary(self, p):
         '''primary : atom
                    | attribute_ref
                    | subscription
                    | call'''
-        # TODO: considering splitting this up into separate primaries for
-        # (1) attribute_ref, subscription, and call, vs. (2) expressions
+        # a primary can be:
+        # - attribute-referenced
+        # - subscripted
+        # - called
+        # - in an arithmetic expression
+        # - a for-loop iterable
+        # TODO: considering splitting up primary types based on usage
         p[0] = p[1]
 
     def p_atom(self, p):
@@ -574,52 +583,79 @@ class Parser(object):
                 | enclosure'''
         p[0] = p[1]
 
+    def p_name(self, p):
+        'name : NAME'
+        name_token = p.slice[1]
+        name = name_token.value
+        p[0] = nodes.NameNode(value=name)
+
+        # Add this name to the symbol table if it doesn't already exist in the
+        # current scope
+        sym = self._symbol_table.get(name)
+        if sym is None:
+            full_name = self._get_qualified_name(name)
+            # Using generic Symbol class because we don't know what kind of name
+            # this is out of context (type? variable? function?). We can update
+            # it to a Symbol subclass later once we know what it really is.
+            symbol = symbols.Symbol(full_name, name_token)
+            self._symbol_table.set(symbol)
+
     def p_string_list(self, p):
         '''string_list : STRING
                        | string_list STRING'''
         if len(p) == 2:
-            p[0] = nodes.LiteralNode(
-                value=p[1], lit_type=nodes.TypeNode(value='str'))
+            p[0] = nodes.StringNode(value=p[1])
         else:
-            p[0] = nodes.LiteralNode(
-                value=p[1].value + p[2], lit_type=nodes.TypeNode(value='str'))
+            p[0] = nodes.StringNode(value=p[1].value + p[2])
 
     def p_number(self, p):
         'number : NUMBER'
-        value = p.slice[1]
-        p[0] = nodes.LiteralNode(
-            value=value,
-            lit_type=nodes.TypeNode(value=value.__class__.__name__))
+        value = p[1]
+        p[0] = nodes.NumberNode(value=p[1])
 
     def p_enclosure(self, p):
-        '''enclosure : LPAREN expr RPAREN
-                     | LBRACKET expr_list RBRACKET
-                     | LBRACE opt_key_datum_list RBRACE
-                     | LBRACE expr_set RBRACE'''
-        p[0] = p[2]
+        '''enclosure : paren_expr
+                     | list_maker
+                     | dict_maker
+                     | set_maker'''
+        # TODO: create a separate grammar rule for each enclosure, wrap them in
+        # new nodes to help with generation
+        p[0] = p[1]
+
+    def p_paren_expr(self, p):
+        'paren_expr : LPAREN expr RPAREN'
+        p[0] = nodes.ParenNode(expr=p[2])
+
+    def p_list_maker(self, p):
+        'list_maker : LBRACKET opt_expr_list RBRACKET'
+        p[0] = nodes.ListNode(elts=p[2])
+
+    def p_dict_maker(self, p):
+        'dict_maker : LBRACE opt_key_datum_list RBRACE'
+        p[0] = nodes.DictNode(items=p[2])
+
+    def p_set_maker(self, p):
+        'set_maker : LBRACE expr_list RBRACE'
+        # Note: expr_list is not optional. Otherwise, we'd have empty braces,
+        # which create an empty dict, not a set.
+        p[0] = nodes.SetNode(elts=p[2])
 
     def p_opt_key_datum_list(self, p):
         '''opt_key_datum_list : key_datum_list
                               | empty'''
-        p[0] = p[1] or {}
+        p[0] = p[1] or []
 
     def p_key_datum_list(self, p):
         '''key_datum_list : key_datum
                           | key_datum_list COMMA key_datum'''
         if len(p) == 2:
-            p[0] = dict([p[1]])
+            p[0] = [p[1]]
         else:
             p[0] = p[1]
-            key, value = p[3]
-            p[0][key] = value
 
     def p_key_datum(self, p):
         'key_datum : expr COLON expr'
         p[0] = (p[1], p[3])
-
-    def p_expr_set(self, p):
-        'expr_set : expr_list'
-        p[0] = set(p[1])
 
     def p_attribute_ref(self, p):
         'attribute_ref : primary DOT name'

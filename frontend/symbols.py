@@ -38,10 +38,10 @@ def _validate_full_name(full_name):
     'Checks that the fully qualified name is well-formed.'
     if type(full_name) != tuple:
         raise TypeError('Fully qualified name must be a tuple: '
-                        + str(full_name))
+                        + repr(full_name))
     if len(full_name) != 2:
         raise ValueError('Fully qualified name must be a 2-tuple: '
-                         + str(full_name))
+                         + repr(full_name))
     _validate_namespace(full_name[0])
     _validate_name(full_name[1])
 
@@ -50,7 +50,7 @@ def _validate_name(name):
     'Checks that the given name is well-formed.'
     if not isinstance(name, basestring):
         raise TypeError('Name must be a basestring: '
-                        + str(name))
+                        + repr(name))
     if not name:
         raise ValueError('Name cannot be an empty string')
 
@@ -59,7 +59,7 @@ def _validate_namespace(namespace):
     'Checks that the given qualified name is well-formed.'
     if type(namespace) != tuple:
         raise TypeError('Namespace must be of type tuple: '
-                        + str(namespace))
+                        + repr(namespace))
     for name in namespace:
         _validate_name(name)
 
@@ -68,7 +68,7 @@ def _validate_symbol(symbol):
     'Checks that the given symbol is well-formed.'
     if not isinstance(symbol, Symbol):
         raise TypeError('SymbolTable value must be a Symbol: '
-                        + str(symbol))
+                        + repr(symbol))
 
 
 def get_qualified_name(namespace, name):
@@ -167,19 +167,19 @@ class TypeSymbol(Symbol):
         self.base = base
 
 
-class IdSymbol(Symbol):
-    'Simple subclass of Symbol, for names.'
+class VariableSymbol(Symbol):
+    'Simple subclass of Symbol, for variable names.'
 
-    def __init__(self, full_name, token=None, id_type=None):
-        '''Constructor for IdSymbol.
+    def __init__(self, full_name, token=None, var_type=None):
+        '''Constructor for VariableSymbol.
 
         Args:
           full_name: A (namespace, name) tuple.
           token: see Symbol.
-          id_type: (str) Qualified type for the name represented by this object.
+          var_type: (str) Qualified type for the name represented by this object.
         '''
         Symbol.__init__(self, full_name, token=token)
-        self.type = id_type
+        self.type = var_type
 
 
 class FunctionSymbol(Symbol):
