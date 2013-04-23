@@ -110,10 +110,10 @@ class NameNode(Node):
 
 
 class DeclarationNode(Node):
-    'AST node for a variable declaration.'
+    'AST node for a type-name pair.'
 
-    def __init__(self, id_type=None, name=None):
-        Node.__init__(self, id_type=id_type, name=name)
+    def __init__(self, var_type=None, name=None):
+        Node.__init__(self, var_type=var_type, name=name)
 
 
 class ClassDefNode(Node):
@@ -121,6 +121,20 @@ class ClassDefNode(Node):
 
     def __init__(self, name=None, base=None, body=None):
         Node.__init__(self, name=name, base=base, body=body)
+
+
+class ExpressionStmtNode(Node):
+    'AST node for an expression statement.'
+
+    def __init__(self, expr=None):
+        Node.__init__(self, expr=expr)
+
+
+class DeclarationStmtNode(Node):
+    'AST node for a name declaration.'
+
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
 
 
 class AssignmentNode(Node):
@@ -179,13 +193,6 @@ class ForNode(Node):
         Node.__init__(self, target=target, iterable=iterable, body=body)
 
 
-class ExpressionNode(Node):
-    'AST node for an expression.'
-
-    def __init__(self, value=None):
-        Node.__init__(self, value=value)
-
-
 class BinaryOpNode(Node):
     'AST node for a binary operation.'
 
@@ -200,11 +207,46 @@ class UnaryOpNode(Node):
         Node.__init__(self, operator=operator, operand=operand)
 
 
-class LiteralNode(Node):
-    'AST node for number or string literals.'
+class StringNode(Node):
+    'AST node for a string object.'
 
-    def __init__(self, value=None, lit_type=None):
-        Node.__init__(self, value=value, lit_type=lit_type)
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
+
+
+class NumberNode(Node):
+    'AST node for a number object.'
+
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
+
+
+class ParenNode(Node):
+    'AST node for a parenthesized expression.'
+
+    def __init__(self, expr=None):
+        Node.__init__(self, expr=expr)
+
+
+class ListNode(Node):
+    'AST node for a list of expressions.'
+
+    def __init__(self, elts=None):
+        Node.__init__(self, elts=elts)
+
+
+class DictNode(Node):
+    'AST node for a dict, stored as a list of (key, value) items.'
+
+    def __init__(self, items=None):
+        Node.__init__(self, items=items)
+
+
+class SetNode(Node):
+    'AST node for a set of expressions.'
+
+    def __init__(self, elts=None):
+        Node.__init__(self, elts=elts)
 
 
 class AttributeRefNode(Node):
