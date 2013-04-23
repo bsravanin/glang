@@ -10,9 +10,22 @@ import os, random, string, subprocess, sys
 
 PWD = os.getcwd()
 TOKENS = {
+	'DECLARED': {},
 	'NAME': ["int", "float", "str", "Graph", "Node", "Edge"],
-	'VAR': string.lowercase,
+	'UNDECLARED': list(string.lowercase),
 }
+
+
+def generate_declaration():
+	var = random.choice(TOKENS["UNDECLARED"])
+	TOKENS["UNDECLARED"].remove(var)
+	name = random.choice(TOKENS["NAME"])
+	TOKENS["DECLARED"][var] = name
+	return "%s %s\n" %(name, var)
+
+
+def generate_definition():
+	pass
 
 
 def generate_gr(count):
@@ -27,10 +40,7 @@ def generate_gr(count):
 
 	for i in xrange(count):
 		prog_buffer.write("\t" * tabs)
-		prog_buffer.write(random.choice(TOKENS["NAME"]))
-		prog_buffer.write(" ")
-		prog_buffer.write(random.choice(TOKENS["VAR"]))
-		prog_buffer.write("\n")
+		prog_buffer.write(generate_declaration())
 
 	prog_buffer.flush()
 	prog_buffer.close()
