@@ -448,7 +448,7 @@ class Parser(object):
 
     def p_expr(self, p):
         'expr : or_test'
-        p[0] = p[1]
+        p[0] = nodes.ExpressionNode(value=p[1])
 
     def p_or_test(self, p):
         '''or_test : and_test
@@ -578,13 +578,18 @@ class Parser(object):
         '''string_list : STRING
                        | string_list STRING'''
         if len(p) == 2:
-            p[0] = nodes.StringNode(value=p[1])
+            p[0] = nodes.LiteralNode(
+                value=p[1], lit_type=nodes.TypeNode(value='str'))
         else:
-            p[0] = nodes.StringNode(value=p[1].value + p[2])
+            p[0] = nodes.LiteralNode(
+                value=p[1].value + p[2], lit_type=nodes.TypeNode(value='str'))
 
     def p_number(self, p):
         'number : NUMBER'
-        p[0] = nodes.NumberNode(value=p.slice[1])
+        value = p.slice[1]
+        p[0] = nodes.LiteralNode(
+            value=value,
+            lit_type=nodes.TypeNode(value=value.__class__.__name__))
 
     def p_enclosure(self, p):
         '''enclosure : LPAREN expr RPAREN

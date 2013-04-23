@@ -52,9 +52,9 @@ def prettify(obj, indent=''):
         return '{start}{bounds_sep}{content}{bounds_sep}{end}'.format(
             start=start, bounds_sep=bounds_sep, content=content, end=end)
     if getattr(obj, '__dict__', None):
-        return '{{{0}: {1}}}'.format(
+        return '({0}) {1}'.format(
             obj.__class__.__name__,
-            prettify(obj.__dict__, indent=indent), indent=indent)
+            prettify(obj.__dict__, indent=indent))
     return repr(obj)
 
 
@@ -179,6 +179,13 @@ class ForNode(Node):
         Node.__init__(self, target=target, iterable=iterable, body=body)
 
 
+class ExpressionNode(Node):
+    'AST node for an expression.'
+
+    def __init__(self, value=None):
+        Node.__init__(self, value=value)
+
+
 class BinaryOpNode(Node):
     'AST node for a binary operation.'
 
@@ -193,18 +200,11 @@ class UnaryOpNode(Node):
         Node.__init__(self, operator=operator, operand=operand)
 
 
-class StringNode(Node):
-    'AST node for a string object.'
+class LiteralNode(Node):
+    'AST node for number or string literals.'
 
-    def __init__(self, value=None):
-        Node.__init__(self, value=value)
-
-
-class NumberNode(Node):
-    'AST node for a number object.'
-
-    def __init__(self, value=None):
-        Node.__init__(self, value=value)
+    def __init__(self, value=None, lit_type=None):
+        Node.__init__(self, value=value, lit_type=lit_type)
 
 
 class AttributeRefNode(Node):
