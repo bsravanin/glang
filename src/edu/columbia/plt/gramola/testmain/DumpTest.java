@@ -14,9 +14,9 @@ public class DumpTest {
 		// TODO Auto-generated method stub
 		Graph g = new Graph();
 		
-		Node hello = g.createNode("name", "hello", "age", 21);
-		Node world = g.createNode("name", "world", "age", 27);
-		Edge e = g.createEdge(hello, world, "type", "friend");
+		Node hello = g.Node("name", "hello", "age", 21);
+		Node world = g.Node("name", "world", "age", 27);
+		Edge e = g.Edge(hello, world, "type", "friend");
 		System.out.println("Test start node: " + hello);
 		System.out.println("Test end node: " + world);
 		System.out.println("Test edge: " + e);

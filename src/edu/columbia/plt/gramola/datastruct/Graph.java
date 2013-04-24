@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
+import edu.columbia.plt.gramola.util.GraphUtil;
 
 public class Graph{
 
@@ -42,8 +43,15 @@ public class Graph{
 	 * @param vvlist the length of vvlist must be even. It contains "var1", "value1", "var2", "value2"..."varN", "valueN"
 	 * @return a new Node
 	 */
-	public synchronized Node createNode(Object...vvlist) {
-		HashMap<String, Object> variableMap = createVariableMap(vvlist);
+	public synchronized Node Node(Object...vvlist) {
+		HashMap<String, Object> variableMap = GraphUtil.createVariableMap(vvlist);
+		Node node = new Node(variableMap, this.generateNodeId());
+		this.addNode(node);
+		
+		return node;
+	}
+	
+	public synchronized Node Node(HashMap<String, Object> variableMap) {
 		Node node = new Node(variableMap, this.generateNodeId());
 		this.addNode(node);
 		
@@ -57,8 +65,8 @@ public class Graph{
 	 * @param vvlist the length of vvlist must be even. It contains "var1", "value1", "var2", "value2"..."varN", "valueN"
 	 * @return a new Edge
 	 */
-	public synchronized Edge createEdge(Node start, Node end, Object...vvlist) {
-		HashMap<String, Object> variableMap = createVariableMap(vvlist);
+	public synchronized Edge Edge(Node start, Node end, Object...vvlist) {
+		HashMap<String, Object> variableMap = GraphUtil.createVariableMap(vvlist);
 		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
 		start.setOutE(edge);
 		end.setInE(edge);
@@ -67,26 +75,13 @@ public class Graph{
 		return edge;
 	}
 	
-	/**
-	 * Helper method to convert var-value array into a variable map
-	 * @param vvlist a var-value array with undetermined size
-	 * @return a map containing <var, value> pairs
-	 */
-	private HashMap<String, Object> createVariableMap(Object vvlist[]) {
-		if (vvlist.length%2 != 0)
-			return null;
+	public synchronized Edge Edge(Node start, Node end, HashMap<String, Object> variableMap) {
+		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
+		start.setOutE(edge);
+		end.setInE(edge);
+		this.addEdge(edge);
 		
-		HashMap<String, Object> variableMap = new HashMap<String, Object>();
-		String variable;
-		Object value;
-		for (int i = 0; i < vvlist.length; i += 2) {
-			variable = (String)vvlist[i];
-			value = vvlist[i + 1];
-			
-			variableMap.put(variable, value);
-		}
-		
-		return variableMap;
+		return edge;
 	}
 	
 	/**
@@ -228,7 +223,7 @@ public class Graph{
 		if (!this.nodeList.contains(start) || !this.nodeList.contains(end))
 			return null;
 		
-		HashMap<String, Object> variableMap = this.createVariableMap(vvlist);
+		HashMap<String, Object> variableMap = GraphUtil.createVariableMap(vvlist);
 		
 		int length;
 		
