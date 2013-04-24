@@ -291,11 +291,7 @@ class CodeGenerator(object):
             self.write(',')
             self.write(item[1].value.replace("'", '"'))
 
-        self.write("GraphUtil.createVariableMap(")
-#        self.write('(new {0}('.format(convert_type('dict')))
-        # TODO: find way to init HashMap without breaking up the statement,
-        # maybe use an anonymous class?
-#        self.write('GENERATE MAP CONTENT HERE')
+        self.write("GraphUtil.createVarMap(")
         interleave(lambda: self.write(', '), write_pair, t.items)
         self.write(')')
 
