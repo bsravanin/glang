@@ -252,7 +252,7 @@ class CodeGenerator(object):
         self.write(')')
 
     def _String(self, t):
-        self.write(t.value)
+        self.write(repr(t.value))
 
     def _Number(self, t):
         self.write(repr(t.value))
@@ -276,7 +276,6 @@ class CodeGenerator(object):
         self.write('))')
 
     def _Set(self, t):
-        assert t.elts  # t should contain at least one element
         self.write('(new {0}(Arrays.asList('.format(convert_type('set')))
         interleave(lambda: self.write(', '), self.dispatch, t.elts)
         self.write(')))')
