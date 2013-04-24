@@ -131,6 +131,8 @@ class CodeGenerator(object):
         value = t.value
         if value in ('False', 'True'):
             value = value.lower()
+        elif value == 'self':
+            value = 'this'
         self.write(value)
 
     def _Declaration(self, t):
@@ -217,10 +219,7 @@ class CodeGenerator(object):
     def _For(self, t):
         # "enhanced for" loop
         self.fill('for (')
-        if not isinstance(t.target, str):
-            self.dispatch(t.target)
-        else:
-            self.write(t.target)
+        self.dispatch(t.target)
         self.write(' : ')
         self.dispatch(t.iterable)
         self.write(')')
