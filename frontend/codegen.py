@@ -3,6 +3,7 @@
 'Code generator for Gramola.'
 
 import parser
+import re
 import sys
 
 # pylint: disable=C0103
@@ -253,7 +254,9 @@ class CodeGenerator(object):
         self.write(')')
 
     def _String(self, t):
-        self.write(repr(t.value))
+        # Python allows multiple quote styles for strings, but other languages
+        # (e.g. Java) require one. This normalizes to double-quotes.
+        self.write('"{0}"'.format(re.escape(eval(t.value))))
 
     def _Number(self, t):
         self.write(repr(t.value))
