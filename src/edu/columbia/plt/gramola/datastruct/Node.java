@@ -19,33 +19,51 @@ public class Node extends GraphElement{
 		
 	public Node(HashMap<String, Object> variableMap, int id) {
 		this.variableMap = variableMap;
-		this.id = id;
+		this.setId(id);
 	}
 	
 	public Node(HashMap<String, Object> variableMap) {
 		this.variableMap = variableMap;
 	}
 
-	public void setId(int id) {
+	/**
+	 * Set id for Node
+	 */
+	public synchronized void setId(int id) {
 		this.id = id;
 	}
 	
+	/**
+	 * Get id of Node
+	 */
 	public int getId() {
 		return this.id;
 	}
 		
+	/**
+	 * Get value for specific variable
+	 */
 	public Object getVariableValue(String variable) {
 		return this.variableMap.get(variable);
 	}
 	
-	public void setVariableValue(String variable, Object value) {
+	/**
+	 * Set value for specific variable
+	 */
+	public synchronized void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
 	}
 	
+	/**
+	 * Get all variables describing Node
+	 */
 	public Set<String> getVariables() {
 		return this.variableMap.keySet();
 	}
 	
+	/**
+	 * Get the variable map containing <varName, varValue> pairs
+	 */
 	public HashMap<String, Object> getVariableMap() {
 		return this.variableMap;
 	}
@@ -54,7 +72,7 @@ public class Node extends GraphElement{
 	 * Set incoming Edge of the current Node
 	 * @param e incoming Edge object
 	 */
-	public void setInE(Edge e) {
+	public synchronized void setInE(Edge e) {
 		this.incoming.add(e);
 	}
 	
@@ -62,7 +80,7 @@ public class Node extends GraphElement{
 	 * Set outgoing Edge from the current Node
 	 * @param e outgoing Edge object
 	 */
-	public void setOutE(Edge e) {
+	public synchronized void setOutE(Edge e) {
 		this.outgoing.add(e);
 	}
 	
@@ -119,7 +137,34 @@ public class Node extends GraphElement{
 	 * @param variable the name of the specific variable
 	 * @param newValue the new value of the specific variable
 	 */
-	public void update(String variable, Object newValue) {		
+	public synchronized void update(String variable, Object newValue) {		
 		this.variableMap.put(variable, newValue);
+	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(this.id);
+	}
+	
+	/**
+	 * If two Node have the same id, they are the same
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
+		
+		if (!(obj instanceof Node))
+			return false;
+		
+		Node tmp = (Node) obj;
+		
+		if (this.getId() == tmp.getId())
+			return true;
+		
+		return false;
 	}
 }

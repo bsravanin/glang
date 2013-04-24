@@ -1,6 +1,7 @@
 package edu.columbia.plt.gramola.datastruct;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,9 +9,10 @@ import java.util.Set;
 import java.util.Stack;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
+import edu.columbia.plt.gramola.util.GraphUtil;
 
 public class Graph{
-	
+
 	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
 	private ArrayList<Edge> edgeList = new ArrayList<Edge>();
@@ -19,6 +21,21 @@ public class Graph{
 	
 	private int edgeId = 0;
 	
+	private long graphId = 0;
+	
+	public Graph() {
+		Date now = new Date();
+		this.graphId = now.getTime();
+	}
+	
+	/**
+	 * Return id of Graph.
+	 * Graph id is the long representation of its creation time.
+	 * @return
+	 */
+	public long getGraphId() {
+		return this.graphId;
+	}
 	/**
 	 * The regular way to create Node within the Graph
 	 * Please note that if a Node is created by new Node()
@@ -26,9 +43,16 @@ public class Graph{
 	 * @param vvlist the length of vvlist must be even. It contains "var1", "value1", "var2", "value2"..."varN", "valueN"
 	 * @return a new Node
 	 */
-	public Node createNode(Object...vvlist) {
-		HashMap<String, Object> variableMap = createVariableMap(vvlist);
-		Node node = new Node(variableMap, nodeId++);
+	public synchronized Node Node(Object...vvlist) {
+		HashMap<String, Object> variableMap = GraphUtil.createVariableMap(vvlist);
+		Node node = new Node(variableMap, this.generateNodeId());
+		this.addNode(node);
+		
+		return node;
+	}
+	
+	public synchronized Node Node(HashMap<String, Object> variableMap) {
+		Node node = new Node(variableMap, this.generateNodeId());
 		this.addNode(node);
 		
 		return node;
@@ -41,9 +65,18 @@ public class Graph{
 	 * @param vvlist the length of vvlist must be even. It contains "var1", "value1", "var2", "value2"..."varN", "valueN"
 	 * @return a new Edge
 	 */
-	public Edge createEdge(Node start, Node end, Object...vvlist) {
-		HashMap<String, Object> variableMap = createVariableMap(vvlist);
-		Edge edge = new Edge(start, end, variableMap, edgeId++);
+	public synchronized Edge Edge(Node start, Node end, Object...vvlist) {
+		HashMap<String, Object> variableMap = GraphUtil.createVariableMap(vvlist);
+		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
+		start.setOutE(edge);
+		end.setInE(edge);
+		this.addEdge(edge);
+		
+		return edge;
+	}
+	
+	public synchronized Edge Edge(Node start, Node end, HashMap<String, Object> variableMap) {
+		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
 		start.setOutE(edge);
 		end.setInE(edge);
 		this.addEdge(edge);
@@ -52,34 +85,12 @@ public class Graph{
 	}
 	
 	/**
-	 * Helper method to convert var-value array into a variable map
-	 * @param vvlist a var-value array with undetermined size
-	 * @return a map containing <var, value> pairs
-	 */
-	private HashMap<String, Object> createVariableMap(Object vvlist[]) {
-		if (vvlist.length%2 != 0)
-			return null;
-		
-		HashMap<String, Object> variableMap = new HashMap<String, Object>();
-		String variable;
-		Object value;
-		for (int i = 0; i < vvlist.length; i += 2) {
-			variable = (String)vvlist[i];
-			value = vvlist[i + 1];
-			
-			variableMap.put(variable, value);
-		}
-		
-		return variableMap;
-	}
-	
-	/**
 	 * Inserting Node into the Graph, if the Node is created by new Node()
 	 * @param n a Node object that has not registered to any Graph
 	 */
-	public void addNode(Node n) {
+	public synchronized void addNode(Node n) {
 		if (n.getId() == -1) {
-			n.setId(nodeId++);
+			n.setId(this.generateNodeId());
 		}
 		
 		//this.nodeMap.put(n.getId(), n);
@@ -161,7 +172,10 @@ public class Graph{
 	 * Helper method for createEdge to register Edge in Graph
 	 * @param e the Edge to be registered in Graph
 	 */
-	private void addEdge(Edge e) {		
+	public synchronized void addEdge(Edge e) {
+		if (e.getId() == -1) {
+			e.setId(this.generateEdgeId());
+		}
 		this.edgeList.add(e);
 	}
 	
@@ -209,7 +223,7 @@ public class Graph{
 		if (!this.nodeList.contains(start) || !this.nodeList.contains(end))
 			return null;
 		
-		HashMap<String, Object> variableMap = this.createVariableMap(vvlist);
+		HashMap<String, Object> variableMap = GraphUtil.createVariableMap(vvlist);
 		
 		int length;
 		
@@ -351,5 +365,28 @@ public class Graph{
 			}	
 		}
 		return paths;
+	}
+	
+	/**
+	 * Helper method to generate id for Node in this Graph
+	 * @return
+	 */
+	private synchronized int generateNodeId() {
+		return this.nodeId++;
+	}
+	
+	/**
+	 * Helper method to generate id for Edge in this Graph
+	 * @return
+	 */
+	private synchronized int generateEdgeId() {
+		return this.edgeId++;
+	}
+	
+	@Override
+	public String toString() {
+		return  "Graph " + this.graphId + " contains " + 
+				this.nodeList.size() + " nodes and " + 
+				this.edgeList.size() + " edges"; 
 	}
 }

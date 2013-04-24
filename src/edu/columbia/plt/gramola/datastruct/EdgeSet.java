@@ -9,6 +9,12 @@ public class EdgeSet implements Set{
 	
 	private Set<Edge> edgeSet = new HashSet<Edge>();
 	
+	/**
+	 * Find out Edges that fit variable-value constraint in the EdgeSet
+	 * @param variable
+	 * @param value
+	 * @return
+	 */
 	public EdgeSet filter(String variable, Object value) {
 		EdgeSet filterEdges = new EdgeSet();
 		Iterator<Edge> edgeIT = edgeSet.iterator();

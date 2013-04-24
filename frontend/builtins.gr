@@ -1,0 +1,260 @@
+# Initializes a SymbolTable with Gramola's builtin types, methods and functions.
+
+# TODO: include special functions like __len__, then replace top-level builtins
+# with those calls? Also, subscriptions, operators.
+# TODO: do we need a None type, i.e., an object with no value at all
+# (not even bool)?
+
+
+class object():
+    pass
+
+
+class void():
+    pass
+
+
+class int(object):
+    pass
+
+
+class bool(int):
+    pass
+
+
+bool False = bool(0)
+bool True = bool(1)
+
+
+class float(object):
+    pass
+
+
+class str(object):
+    # Java: String
+
+    def str copy():
+        # String.clone
+        pass
+
+    def bool ends_with(str s):
+        # String.endsWith
+        pass
+
+    def list find(str s):
+        # String.indexOf
+        pass
+
+    def str lower():
+        # String.toLowerCase
+        pass
+
+    def str replace(str s, str t):
+        # String.replace
+        pass
+
+    def int rfind(str s):
+        # String.lastIndexOf
+        pass
+
+    def list split(str s):
+        # String.split
+        pass
+
+    def bool startswith(str s):
+        # String.startswith
+        pass
+
+    def str strip():
+        # String.trim
+        pass
+
+    def str substring(int start, int end):
+        # String.substring
+        pass
+
+    def str upper():
+        # String.toUpperCase
+        pass
+
+
+class list(object):
+    # Java: ArrayList<E>
+
+    def bool append(object obj):
+        # ArrayList<E>.add
+        pass
+
+    def void clear():
+        # ArrayList<E>.clear
+        pass
+
+    def list clone():
+        # ArrayList<E>.clone
+        pass
+
+    def bool extend(list l):
+        # ArrayList<E>.addAll
+        pass
+
+    def int index(object obj):
+        # ArrayList<E>.indexOf
+        pass
+
+    def void insert(int pos, object obj):
+        # ArrayList<E>.add
+        pass
+
+    def object pop(int pos):
+        # ArrayList<E>.remove
+        pass
+
+    def bool remove(object obj):
+        # ArrayList<E>.remove
+        pass
+
+    def void reverse():
+        # Collections.reverse
+        pass
+
+    def void sort():
+        # Collections.sort
+        pass
+
+
+class set(object):
+    # Java: HashSet<E>
+
+    def bool add(object obj):
+        # HashSet<E>.add
+        pass
+
+    def void clear():
+        # HashSet<E>.clear
+        pass
+
+    def set copy():
+        # HashSet<E>.clone
+        pass
+
+    def bool intersection_update(set s):
+        # HashSet<E>.retainAll
+        pass
+
+    def bool remove(object obj):
+        # HashSet<E>.remove
+        pass
+
+    def bool update(set s):
+        # HashSet<E>.addAll
+        pass
+
+
+class dict(object):
+    # Java: HashMap<K,V>
+
+    def bool clear():
+        # HashMap<K,V>.clear
+        pass
+
+    def dict copy():
+        # HashMap<K,V>.clone
+        pass
+
+    def object get(object key):
+        # HashMap<K,V>.get
+        pass
+
+    def bool has_key(object key):
+        # HashMap<K,V>.containsKey
+        pass
+
+    def set items():
+        # HashMap<K,V>.entrySet
+        pass
+
+    def set keys():
+        # HashMap<K,V>.keySet
+        pass
+
+    def object pop(object key):
+        # HashMap<K,V>.remove
+        pass
+
+    def void update(dict d):
+        # HashMap<K,V>.putAll
+        pass
+
+    def set values():
+        # HashMap<K,V>.values
+        pass
+
+
+class Graph(object):
+    pass
+
+
+class Node(object):
+
+    def NodeSet in_nodes():
+        pass
+
+    def NodeSet out_nodes():
+        pass
+
+    def EdgeSet in_edges():
+        pass
+
+    def EdgeSet out_edges():
+        pass
+
+    def Path shortest_path(Node target):
+        pass
+
+    def list paths(Node target):
+        pass
+
+
+class Edge(object):
+
+    def set get_attribute_set():
+        pass
+
+
+class NodeSet(set):
+
+    def EdgeSet in_edges():
+        pass
+
+    def EdgeSet out_edges():
+        pass
+
+    def NodeSet filter(list exprs):
+        pass
+
+    def list sort():
+        pass
+
+    # TODO: check this
+    def dict group_by(list fields):
+        pass
+
+
+class EdgeSet(set):
+
+    def NodeSet in_nodes():
+        pass
+
+    def NodeSet out_nodes():
+        pass
+
+    def EdgeSet filter(list exprs):
+        pass
+
+
+class Path(list):
+    pass
+
+
+def int len(object obj):
+    pass

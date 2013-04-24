@@ -26,10 +26,16 @@ public class Edge extends GraphElement{
 		this.id = id;
 	}
 
-	public void setId(int id) {
+	/**
+	 * Set Edge id
+	 */
+	public synchronized void setId(int id) {
 		this.id = id;
 	}
 	
+	/**
+	 * Get Edge id
+	 */
 	public int getId() {
 		return this.id;
 	}
@@ -50,19 +56,32 @@ public class Edge extends GraphElement{
 		return this.end;
 	}
 	
+	/**
+	 * Get all variables for describing Edge
+	 */
 	public Set<String> getVariables() {
 		return this.variableMap.keySet();
 	}
 	
+	/**
+	 * Get the variable map containing <varName, varValue> values
+	 * of Edge
+	 */
 	public HashMap<String, Object> getVariableMap() {
 		return this.variableMap;
 	}
 	
+	/**
+	 * Get the value for a specific variable
+	 */
 	public Object getVariableValue(String variable) {
 		return this.variableMap.get(variable);
 	}
 	
-	public void setVariableValue(String variable, Object value) {
+	/**
+	 * Set the value for a specific variable
+	 */
+	public synchronized void setVariableValue(String variable, Object value) {
 		this.variableMap.put(variable, value);
 	}
 	
@@ -70,7 +89,7 @@ public class Edge extends GraphElement{
 	 * Set the Edge parent of the current Edge. Mainly for path traversal.
 	 * @param pathParent the parent Edge object
 	 */
-	public void addParents(Edge pathParent) {
+	public synchronized void addParents(Edge pathParent) {
 		this.pathParent.add(pathParent);
 	}
 	
@@ -80,5 +99,35 @@ public class Edge extends GraphElement{
 	 */
 	public HashSet<Edge> getParents() {
 		return this.pathParent;
+	}
+	
+	/**
+	 * Return string containing start node id, edge id and end node id
+	 */
+	@Override
+	public String toString() {
+		return this.start.getId() + " =(" + this.id + ")=> " + this.end.getId(); 
+	}
+	
+	/**
+	 * Check if two Edge have the same id.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		
+		if (obj == this)
+			return true;
+		
+		if (!(obj instanceof Edge))
+			return false;
+		
+		Edge tmp = (Edge) obj;
+		
+		if (this.getId() == tmp.getId())
+			return true;
+		
+		return false;
 	}
 }
