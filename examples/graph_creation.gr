@@ -26,11 +26,10 @@ def void main():
 	g.Edge(n6, n4, {'type': 'member'})
 	g.Edge(n6, n5, {'type': 'member'})
 	
-	dump(g)
-	
 	g.Edge(g.Node({'name' : 'Claire'}), n2, {'type': 'fbfriend'})
 	g.Edge(g.Node({'name' : 'Judy'}), n2, {'type': 'fbfriend'})
 	g.Edge(g.Node({'name' : 'Jason'}), n4, {'type': 'fbfriend'})
 	g.Edge(g.Node({'name' : 'Jon'}), n4, {'type': 'fbfriend'})
 	g.Edge(g.Node({'name' : 'Bob'}), n4, {'type': 'fbfriend'})
 	
+	dump(g)
