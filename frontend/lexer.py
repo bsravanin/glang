@@ -61,8 +61,8 @@ class Lexer(object):
         # Literals (identifier, number literal, string literal)
         'NAME', 'NUMBER', 'STRING',
 
-        # Operators (+, -, *, **, /, %, <, <=, >, >=, ==, !=)
-        'PLUS', 'MINUS', 'STAR', 'DOUBLESTAR', 'SLASH', 'PERCENT',
+        # Operators (+, -, *, /, %, <, <=, >, >=, ==, !=)
+        'PLUS', 'MINUS', 'STAR', 'SLASH', 'PERCENT',
         'LESS', 'LESSEQUAL', 'GREATER', 'GREATEREQUAL', 'EQUAL', 'NOTEQUAL',
 
         # Delimiters , : . = ( ) [ ] { }
@@ -80,7 +80,6 @@ class Lexer(object):
     t_PLUS             = r'\+'
     t_MINUS            = r'-'
     t_STAR             = r'\*'
-    t_DOUBLESTAR       = r'\*\*'
     t_SLASH            = r'/'
     t_PERCENT          = r'%'
     t_LESS             = r'<'
