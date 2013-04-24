@@ -1,4 +1,4 @@
-# Date: 22nd April, 2013
+# Date: 24th April, 2013
 # Purpose: To test arithmetic operations supported by Gramola.
 
 bool b
@@ -10,12 +10,13 @@ b = True
 f = 3.14
 i = 42
 
-print b, f, i, s
+
+def void print_these():
+	print b, f, i, s
 
 
 def float identity(float f):
-	print "TODO: This should probably fail."
-	# return f
+	return f
 
 
 def void int_operations(int i):
@@ -24,7 +25,7 @@ def void int_operations(int i):
 	i = i * 2
 	i = i / 2
 	i = i % 3
-	i = i ** 2
+	# i = i ** 2
 	# i += 1
 	# i -= 1
 	# i *= 2
@@ -32,12 +33,31 @@ def void int_operations(int i):
 	# i **= 2
 
 
+def void float_operations(float f):
+	f = identity(f)
+	f = f + 1
+	f = f - 1
+	f = f * 2
+	f = f / 2
+	f = f % 3
+	f = f ** 2
+
+
+def void paranthesis():
+	int zero = 1 + 2 - 3
+	int one = (4 * 5) ** 0
+	zero = (7 / 6) % (9 / 8)
+	bool is_true = (zero == one) or (zero < one)
+	bool is_false = (zero > one) and (zero >= one)
+	is_false = not (zero <= one)
+
+
 def string comparisons(int i, float f):
 	if i == f:
 		return "equal"
-	else if i < f:
+	elif i < f:
 		return "less"
-	else if i > f:
+	elif i > f:
 		return "greater"
 	else:
 		return "wtf"
@@ -46,11 +66,15 @@ def string comparisons(int i, float f):
 def bool trichotomy(int i, float f):
 	if i == f or i < f or i > f:
 		return True
+	else:
+		return False
 
 
 def bool lobotomy(bool b, string s):
 	if b == s and b < s and b > s:
 		return False
+	else:
+		return True
 
 
 def list max_min(int i, int j):
@@ -65,3 +89,30 @@ def list max_min(int i, int j):
 		min = j
 
 	return [max, min]
+
+
+def int fibonacci(int i):
+	if n < 1:
+		return 0
+	elif n == 1:
+		return 1
+	else:
+		return fibonacci(n-1) + fibonacci(n-2)
+
+
+def bool identity2(bool b):
+	print "This should fail."
+
+
+def void main():
+	print_these()
+	print identity(f)
+	int_operations(i)
+	float_operations(f)
+	paranthesis()
+	print comparisons(i, f), comparisons(i, f*100)
+	print trichotomy(i, f)
+	print lobotomy(b, s)
+	print max_min(i, i+1)
+	print fibonacci(i)
+	identity2(b)

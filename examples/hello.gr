@@ -1,6 +1,8 @@
 def void main():
     Graph g = Graph()
     Node hello = g.Node({'name': 'Hello', 'age': 21})
-    g.Edge(hello, Node({'name': 'World', 'age': 20}), {'type': 'friend'})
+    g.Edge(hello, g.Node({'name': 'World', 'age': 20}), {'type': 'friend'})
     # Print the string repn. of hello Node and its friend the world Node
     print hello, hello.outV()
+
+	

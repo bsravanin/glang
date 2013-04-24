@@ -106,20 +106,37 @@ class CodeGenerator(object):
 
     def _Start(self, t):
         # TODO: add imports, etc. here
-        self.write('GENERATE IMPORTS, ETC. HERE')
-        self.dispatch(t.stmt_list)
+        #self.write('GENERATE IMPORTS, ETC. HERE')
+       	#Import generic header#
+	header = open("header.txt").read()
+	self.write(header)
+	self.fill("public class Test ")
+	self.enter()
+	for stmt in t.stmt_list:
+		if stmt.__class__.__name__=='FunctionDefNode':
+			# static method in the main class
+			self._FunctionDef(stmt, True)
+		elif stmt.__class__.__name__=='ClassDefNode':
+			# create a new file
+			self.dispatch(stmt)	
         self.fill()
+	self.leave()
+	self.fill()
 
-    def _FunctionDef(self, t):
+    def _FunctionDef(self, t, top=False):
         # TODO: find way to generate wrapper class around top-level Gramola
         # statements, possible with AST ops in the semantic analysis phase
         self.write('\n')
         self.fill('public ')
-        self.dispatch(t.return_type)
+        if top: self.write("static ")
+	self.dispatch(t.return_type)
         self.write(' ')
         self.dispatch(t.name)
         self.write('(')
-        interleave(lambda: self.write(', '), self.dispatch, t.params)
+	if t.name.value == 'main':
+		self.write("String args[]")
+	else:
+        	interleave(lambda: self.write(', '), self.dispatch, t.params)
         self.write(')')
         self.enter()
         self.dispatch(t.body)
@@ -272,12 +289,18 @@ class CodeGenerator(object):
         self.write(')))')
 
     def _Dict(self, t):
-        self.write('(new {0}('.format(convert_type('dict')))
+        def write_pair(item):
+            self.write(item[0].value.replace("'", '"'))
+            self.write(',')
+            self.write(item[1].value.replace("'", '"'))
+
+        self.write("GraphUtil.createVariableMap(")
+#        self.write('(new {0}('.format(convert_type('dict')))
         # TODO: find way to init HashMap without breaking up the statement,
         # maybe use an anonymous class?
-        self.write('GENERATE MAP CONTENT HERE')
-        #interleave(lambda: self.write(', '), write_pair, t.items)
-        self.write('))')
+#        self.write('GENERATE MAP CONTENT HERE')
+        interleave(lambda: self.write(', '), write_pair, t.items)
+        self.write(')')
 
     def _Set(self, t):
         self.write('(new {0}(Arrays.asList('.format(convert_type('set')))

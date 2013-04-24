@@ -15,19 +15,19 @@ public class PathTest {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Graph g = new Graph();
-		Node a = g.createNode("name", "a");
-		Node b = g.createNode("name", "b");
-		Node c = g.createNode("name", "c");
-		Node d = g.createNode("name", "d");
-		Node e = g.createNode("name", "e");
+		Node a = g.Node("name", "a");
+		Node b = g.Node("name", "b");
+		Node c = g.Node("name", "c");
+		Node d = g.Node("name", "d");
+		Node e = g.Node("name", "e");
 		
-		Edge ab = g.createEdge(a, b, "type", "test");
-		Edge bd = g.createEdge(b, d, "type", "test");
-		Edge de = g.createEdge(d, e, "type", "test");
+		Edge ab = g.Edge(a, b, "type", "test");
+		Edge bd = g.Edge(b, d, "type", "test");
+		Edge de = g.Edge(d, e, "type", "test");
 		
-		Edge ac = g.createEdge(a, c, "type", "test");
-		Edge cb = g.createEdge(c, b, "type", "test");
-		Edge cd = g.createEdge(c, d, "type", "test");
+		Edge ac = g.Edge(a, c, "type", "test");
+		Edge cb = g.Edge(c, b, "type", "test");
+		Edge cd = g.Edge(c, d, "type", "test");
 		
 		ArrayList<ArrayList<Edge>> paths = g.getPaths(a, e, "type", "test");
 		

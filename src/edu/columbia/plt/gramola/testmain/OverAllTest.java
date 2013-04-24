@@ -16,27 +16,24 @@ public class OverAllTest {
 		//Create graph
 		Graph g = new Graph();
 		
-		Node marko = g.createNode("name", "marko");
+		Node marko = g.Node("name", "marko");
 		marko.setVariableValue("age", 29);
 		
-		/*Two nodes that marko connects to*/
-		Node vadas = g.createNode("name", "vadas", "age", 27);
-		Edge e = g.createEdge(marko, vadas, "type", "knows");
+		Node vadas = g.Node("name", "vadas", "age", 27);
+		Edge e = g.Edge(marko, vadas, "type", "knows");
 		e.setVariableValue("weight", 0.5);
 		
-		Node john = g.createNode("name", "john", "age", 32);
-		Edge jEdge = g.createEdge(marko, john, "type", "admires");
+		Node john = g.Node("name", "john", "age", 32);
+		Edge jEdge = g.Edge(marko, john, "type", "admires");
 		
-		Node joseph = g.createNode("name", "joseph", "age", 22);
-		Edge joEdge = g.createEdge(marko, joseph, "type", "hates");
+		Node joseph = g.Node("name", "joseph", "age", 22);
+		Edge joEdge = g.Edge(marko, joseph, "type", "hates");
 		
+		Node mary = g.Node("name", "mary", "age", 22);
+		Edge mEdge = g.Edge(mary, marko, "type", "loves");
 		
-		/*Two nodes connect to marko*/
-		Node mary = g.createNode("name", "mary", "age", 22);
-		Edge mEdge = g.createEdge(mary, marko, "type", "loves");
-		
-		Node lisa = g.createNode("name", "lisa", "age", 32);
-		Edge lEdge = g.createEdge(lisa, marko, "type", "hates");
+		Node lisa = g.Node("name", "lisa", "age", 32);
+		Edge lEdge = g.Edge(lisa, marko, "type", "hates");
 		
 		// Dump
 		String dbPath = "/Users/mikefhsu/javaws/Gramola/neo4jdbs/mike2";
@@ -56,7 +53,7 @@ public class OverAllTest {
 		}
 		
 		//Draw
-		GraphVisualizer gv = new GraphVisualizer(g, "name", "type");
+		GraphVisualizer gv = new GraphVisualizer(reload, "name", "type");
 		gv.draw();
 		
 
