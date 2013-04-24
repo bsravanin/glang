@@ -173,12 +173,13 @@ class CodeGenerator(object):
     def _Print(self, t):
         if not t.values:
             self.fill('System.out.println()')
+            self.end_stmt()
         else:
             for e in t.values:
                 self.fill('System.out.println(')
                 self.dispatch(e)
                 self.write(')')
-        self.end_stmt()
+                self.end_stmt()
 
     def _Break(self, t):
         self.fill('break')
