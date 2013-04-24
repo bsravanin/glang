@@ -83,14 +83,14 @@ class Node(object):
 class StartNode(Node):
     'AST node for the start symbol.'
 
-    def __init__(self, stmt_list=None):
+    def __init__(self, stmt_list):
         Node.__init__(self, stmt_list=stmt_list)
 
 
 class FunctionDefNode(Node):
     'AST node for a function definition.'
 
-    def __init__(self, return_type=None, name=None, params=None, body=None):
+    def __init__(self, return_type, name, params, body):
         Node.__init__(self, return_type=return_type, name=name, params=params,
                       body=body)
 
@@ -98,56 +98,56 @@ class FunctionDefNode(Node):
 class TypeNode(Node):
     'AST node for a data type, either built-in or derived.'
 
-    def __init__(self, value=None):
-        Node.__init__(self, value=value)
+    def __init__(self, value, namespace):
+        Node.__init__(self, value=value, namespace=namespace)
 
 
 class NameNode(Node):
     'AST node for a variable or function identifier.'
 
-    def __init__(self, value=None):
-        Node.__init__(self, value=value)
+    def __init__(self, value, namespace):
+        Node.__init__(self, value=value, namespace=namespace)
 
 
 class DeclarationNode(Node):
     'AST node for a type-name pair.'
 
-    def __init__(self, var_type=None, name=None):
+    def __init__(self, var_type, name):
         Node.__init__(self, var_type=var_type, name=name)
 
 
 class ClassDefNode(Node):
     'AST node for a class definition.'
 
-    def __init__(self, name=None, base=None, body=None):
-        Node.__init__(self, name=name, base=base, body=body)
+    def __init__(self, name, body, base=None):
+        Node.__init__(self, name=name, body=body, base=base)
 
 
 class ExpressionStmtNode(Node):
     'AST node for an expression statement.'
 
-    def __init__(self, expr=None):
+    def __init__(self, expr):
         Node.__init__(self, expr=expr)
 
 
 class DeclarationStmtNode(Node):
     'AST node for a name declaration.'
 
-    def __init__(self, value=None):
+    def __init__(self, value):
         Node.__init__(self, value=value)
 
 
 class AssignmentNode(Node):
     'AST node for an assignment statement.'
 
-    def __init__(self, target=None, value=None):
+    def __init__(self, target, value):
         Node.__init__(self, target=target, value=value)
 
 
 class PrintNode(Node):
     'AST node for a print statement.'
 
-    def __init__(self, values=None):
+    def __init__(self, values):
         Node.__init__(self, values=values)
 
 
@@ -175,96 +175,96 @@ class ReturnNode(Node):
 class IfNode(Node):
     'AST node for an if statement.'
 
-    def __init__(self, test=None, body=None, elses=None):
+    def __init__(self, test, body, elses=None):
         Node.__init__(self, test=test, body=body, elses=elses)
 
 
 class WhileNode(Node):
     'AST node for a while statement.'
 
-    def __init__(self, test=None, body=None):
+    def __init__(self, test, body):
         Node.__init__(self, test=test, body=body)
 
 
 class ForNode(Node):
     'AST node for a for statement.'
 
-    def __init__(self, target=None, iterable=None, body=None):
+    def __init__(self, target, iterable, body):
         Node.__init__(self, target=target, iterable=iterable, body=body)
 
 
 class BinaryOpNode(Node):
     'AST node for a binary operation.'
 
-    def __init__(self, operator=None, left=None, right=None):
+    def __init__(self, operator, left, right):
         Node.__init__(self, operator=operator, left=left, right=right)
 
 
 class UnaryOpNode(Node):
     'AST node for a unary operation.'
 
-    def __init__(self, operator=None, operand=None):
+    def __init__(self, operator, operand):
         Node.__init__(self, operator=operator, operand=operand)
 
 
 class StringNode(Node):
     'AST node for a string object.'
 
-    def __init__(self, value=None):
+    def __init__(self, value):
         Node.__init__(self, value=value)
 
 
 class NumberNode(Node):
     'AST node for a number object.'
 
-    def __init__(self, value=None):
+    def __init__(self, value):
         Node.__init__(self, value=value)
 
 
 class ParenNode(Node):
     'AST node for a parenthesized expression.'
 
-    def __init__(self, expr=None):
+    def __init__(self, expr):
         Node.__init__(self, expr=expr)
 
 
 class ListNode(Node):
     'AST node for a list of expressions.'
 
-    def __init__(self, elts=None):
+    def __init__(self, elts):
         Node.__init__(self, elts=elts)
 
 
 class DictNode(Node):
     'AST node for a dict, stored as a list of (key, value) items.'
 
-    def __init__(self, items=None):
+    def __init__(self, items):
         Node.__init__(self, items=items)
 
 
 class SetNode(Node):
     'AST node for a set of expressions.'
 
-    def __init__(self, elts=None):
+    def __init__(self, elts):
         Node.__init__(self, elts=elts)
 
 
 class AttributeRefNode(Node):
     'AST node for an attribute reference.'
 
-    def __init__(self, value=None, attribute=None):
+    def __init__(self, value, attribute):
         Node.__init__(self, value=value, attribute=attribute)
 
 
 class SubscriptNode(Node):
     'AST node for a subscription.'
 
-    def __init__(self, value=None, index=None):
+    def __init__(self, value, index):
         Node.__init__(self, value=value, index=index)
 
 
 class CallNode(Node):
     'AST node for a function call.'
 
-    def __init__(self, func=None, args=None):
+    def __init__(self, func, args):
         Node.__init__(self, func=func, args=args)
