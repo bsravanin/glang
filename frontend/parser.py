@@ -21,9 +21,6 @@ from ply import yacc
 from lexer import Lexer
 
 
-BUILTINS_FILENAME = 'builtins.gr'
-
-
 class Error(Exception):
     'Generic error class for parser.py.'
 
@@ -69,14 +66,7 @@ class Parser(object):
 
     def parse(self, s, **kwargs):
         'Parses the given string of text.'
-        self._symbol_table.reset()
         lexer = kwargs.pop('lexer', self._lexer)
-        skip_builtins = kwargs.pop('skip_builtins', False)
-        if not skip_builtins:
-            # Populate symbol table with built-ins
-            with open(BUILTINS_FILENAME, 'r') as infile:
-                b = infile.read()
-            self._parser.parse(b, lexer=lexer, **kwargs)
         return self._parser.parse(s, lexer=lexer, **kwargs)
 
     def parse_file(self, filename, **kwargs):
@@ -95,6 +85,11 @@ class Parser(object):
         self._parser.restart()
         self._lexer.reset()
         self._symbol_table.reset()
+
+    @property
+    def symbol_table(self):
+        "Getter for this Parser's symbol table."
+        return self._symbol_table
 
     def _push_scope(self):
         'Pushes a new identifier onto the scope stack.'
@@ -153,8 +148,6 @@ class Parser(object):
     def p_function_def(self, p):
         ('function_def : DEF type new_func_name new_scope '
          'LPAREN opt_parameter_list RPAREN COLON suite')
-        # We verify/set types for this function symbol in a later pass, since we
-        # may not know about the types yet.
         p[0] = nodes.FunctionDefNode(return_type=p[2], name=p[3], params=p[6],
                                      body=p[9])
         self._pop_scope()
@@ -163,13 +156,13 @@ class Parser(object):
         'type : NAME'
         # We verify validity of this type in a later pass. For all we know, it
         # could be defined further on in the parsing pass.
-        p[0] = nodes.TypeNode(value=p[1])
+        p[0] = nodes.TypeNode(value=p[1], namespace=self._cur_namespace)
 
     def p_new_func_name(self, p):
         'new_func_name : NAME'
         name_token = p.slice[1]
         name = name_token.value
-        p[0] = nodes.NameNode(value=name)
+        p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
         self._cur_scope_name = name
 
         # Add this new function name to the symbol table, as long as it doesn't
@@ -177,7 +170,9 @@ class Parser(object):
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
-            symbol = symbols.FunctionSymbol(full_name, name_token)
+            # We set/check types for this function symbol in a later pass,
+            # since we may not know about its types yet.
+            symbol = symbols.FunctionSymbol(full_name, token=name_token)
             self._symbol_table.set(symbol)
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
@@ -207,15 +202,29 @@ class Parser(object):
         'new_var_name : NAME'
         name_token = p.slice[1]
         name = name_token.value
-        p[0] = nodes.NameNode(value=name)
+        p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
+
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
-            symbol = symbols.VariableSymbol(full_name, name_token)
+            symbol = symbols.VariableSymbol(full_name, token=name_token)
             self._symbol_table.set(symbol)
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
                 sym, name_token, self._cur_namespace)
+
+    def p_suite(self, p):
+        'suite : NEWLINE INDENT stmt_list DEDENT'
+        p[0] = p[3]
+
+    def p_stmt_list(self, p):
+        '''stmt_list : stmt
+                     | stmt_list stmt'''
+        if len(p) == 2:
+            p[0] = [p[1]] if p[1] else []
+        else:
+            p[0] = p[1]
+            p[0].append(p[2])
 
     ## CLASS DEFINITIONS ##
     def p_class_def(self, p):
@@ -224,13 +233,15 @@ class Parser(object):
         p[0] = nodes.ClassDefNode(name=p[2], base=p[5], body=p[8])
 
         # For each method in this new class, add "self" within its namespace
-        full_class_name = symbols.stringify_tuple(self._cur_namespace)
+        class_parent_scope = self._cur_namespace[:-1]
+        full_class_name = (class_parent_scope, self._cur_scope_name)
         for stmt in p[8]:
             if type(stmt) == nodes.FunctionDefNode:
                 func_name = stmt.name.value
-                namespace, name = self._get_qualified_name(func_name)
-                sym = symbols.VariableSymbol((namespace + (name,), 'self'),
-                                             var_type=full_class_name)
+                func_namespace, func_name = self._get_qualified_name(func_name)
+                sym = symbols.VariableSymbol(
+                    (func_namespace + (func_name,), 'self'),
+                    var_type=full_class_name)
                 self._symbol_table.set(sym)
         self._pop_scope()
 
@@ -238,6 +249,7 @@ class Parser(object):
         'new_type : NAME'
         name_token = p.slice[1]
         name = name_token.value
+        p[0] = nodes.TypeNode(value=name, namespace=self._cur_namespace)
         self._cur_scope_name = name
 
         # Add this type to the symbol table as long as it doesn't already exist
@@ -245,13 +257,11 @@ class Parser(object):
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
-            symbol = symbols.TypeSymbol(full_name, name_token)
+            symbol = symbols.TypeSymbol(full_name, token=name_token)
             self._symbol_table.set(symbol)
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
                 sym, name_token, self._cur_namespace)
-
-        p[0] = nodes.TypeNode(value=symbols.stringify_full_name(full_name))
 
     def p_opt_type(self, p):
         '''opt_type : type
@@ -318,22 +328,21 @@ class Parser(object):
 
     def p_var_opt_type(self, p):
         '''var_opt_type : declaration
-                        | variable'''
+                        | var_name'''
         p[0] = p[1]
 
-    def p_variable(self, p):
-        'variable : NAME'
-        var_token = p.slice[1]
-        name = var_token.value
-        p[0] = nodes.NameNode(value=name)
+    def p_var_name(self, p):
+        'var_name : NAME'
+        name = p.slice[1].value
+        p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
 
-        # Add this name to the symbol table if it doesn't already exist in the
-        # current scope
         sym = self._symbol_table.get(name)
         if sym is None:
             # While function names and class names can be used in a namespace
             # before they're declared, variable names cannot
-            raise symbols.UnknownSymbolError(var_token, self._cur_namespace)
+            raise symbols.UnknownSymbolError(
+                'Symbol {0} is known in in namespace {1}'.format(
+                    name, self._cur_namespace))
 
     def p_print_stmt(self, p):
         'print_stmt : PRINT opt_expr_list'
@@ -427,19 +436,6 @@ class Parser(object):
         'for : FOR'
         p[0] = p[1]
         self._cur_scope_name = 'for_{0}'.format(p.slice[1].lineno)
-
-    def p_suite(self, p):
-        'suite : NEWLINE INDENT stmt_list DEDENT'
-        p[0] = p[3]
-
-    def p_stmt_list(self, p):
-        '''stmt_list : stmt
-                     | stmt_list stmt'''
-        if len(p) == 2:
-            p[0] = [p[1]] if p[1] else []
-        else:
-            p[0] = p[1]
-            p[0].append(p[2])
 
     ## EXPRESSIONS ##
     def p_expr_list(self, p):
@@ -587,18 +583,19 @@ class Parser(object):
         'name : NAME'
         name_token = p.slice[1]
         name = name_token.value
-        p[0] = nodes.NameNode(value=name)
+        p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
 
+        # UPDATE: Resolve this name in a later pass, once it has been declared
         # Add this name to the symbol table if it doesn't already exist in the
         # current scope
-        sym = self._symbol_table.get(name)
-        if sym is None:
-            full_name = self._get_qualified_name(name)
-            # Using generic Symbol class because we don't know what kind of name
-            # this is out of context (type? variable? function?). We can update
-            # it to a Symbol subclass later once we know what it really is.
-            symbol = symbols.Symbol(full_name, name_token)
-            self._symbol_table.set(symbol)
+        #sym = self._symbol_table.get(name)
+        #if sym is None:
+        #    full_name = self._get_qualified_name(name)
+        #    # Using generic Symbol class because we don't know what kind of name
+        #    # this is out of context (type? variable? function?). We can update
+        #    # it to a Symbol subclass later once we know what it really is.
+        #    symbol = symbols.Symbol(full_name, name_token)
+        #    self._symbol_table.set(symbol)
 
     def p_string_list(self, p):
         '''string_list : STRING
@@ -610,7 +607,6 @@ class Parser(object):
 
     def p_number(self, p):
         'number : NUMBER'
-        value = p[1]
         p[0] = nodes.NumberNode(value=p[1])
 
     def p_enclosure(self, p):
@@ -618,8 +614,6 @@ class Parser(object):
                      | list_maker
                      | dict_maker
                      | set_maker'''
-        # TODO: create a separate grammar rule for each enclosure, wrap them in
-        # new nodes to help with generation
         p[0] = p[1]
 
     def p_paren_expr(self, p):
@@ -692,25 +686,28 @@ def main(args):
 
     debug = False
     prettify = False
-    skip_builtins = False
+    print_symbol_table = False
     for arg in args[:]:
         if arg == '-d':
             debug = True
         elif arg == '-p':
             prettify = True
-        elif arg == '-b':
-            skip_builtins = True
+        elif arg == '-s':
+            print_symbol_table = True
         if arg.startswith('-'):
             args.remove(arg)
 
     filename = args[0]
     p = Parser()
-    result = p.parse_file(filename, debug=debug, skip_builtins=skip_builtins)
+    ast = p.parse_file(filename, debug=debug)
 
     if prettify:
-        print nodes.prettify(result)
+        print nodes.prettify(ast)
     else:
-        print str(result)
+        print str(ast)
+
+    if print_symbol_table:
+        print p.symbol_table
 
 
 if __name__ == '__main__':
