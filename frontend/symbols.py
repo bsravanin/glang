@@ -15,13 +15,6 @@ class Error(Exception):
 class UnknownSymbolError(Error):
     'Requested an entry for an unknown symbol.'
 
-    def __init__(self, token, namespace):
-        Error.__init__(
-            self,
-            'Attemped to fetch table entry for unknown symbol {0} '
-            'using token {1} in namespace {2}'.format(
-                token.value, token, namespace))
-
 
 class ConflictingSymbolError(Error):
     'Attempted to add a symbol that already exists in the namespace.'
@@ -116,7 +109,7 @@ class Symbol(object):
         namespace, name = full_name
         self._namespace = namespace
         self._name = name
-        self._full_name = stringify_full_name(full_name)
+        self._full_name = full_name
         self._token = token
 
     def __str__(self):
@@ -161,7 +154,8 @@ class TypeSymbol(Symbol):
         Args:
           full_name: A (namespace, name) tuple.
           token: see Symbol.
-          base: (str) Base class for this type.
+          base: A (namespace, name) tuple representing the base class for this
+              type.
         '''
         Symbol.__init__(self, full_name, token=token)
         self.base = base
@@ -176,7 +170,8 @@ class VariableSymbol(Symbol):
         Args:
           full_name: A (namespace, name) tuple.
           token: see Symbol.
-          var_type: (str) Qualified type for the name represented by this object.
+          var_type: A (namespace, name) tuple representing the fully qualified
+              type for this variable.
         '''
         Symbol.__init__(self, full_name, token=token)
         self.type = var_type
@@ -192,9 +187,9 @@ class FunctionSymbol(Symbol):
         Args:
           full_name: A (namespace, name) tuple.
           token: see Symbol.
-          return_type: (str or None) Return type for the function represented
+          return_type: (tuple or None) Return type for the function represented
               by this object.
-          param_types: (tuple of str, or None) Types for this function's
+          param_types: (tuple of tuple, or None) Types for this function's
               parameters.
         '''
         Symbol.__init__(self, full_name, token=token)
@@ -224,7 +219,8 @@ class SymbolTable(object):
         items.sort()
         vals = []
         for _, sym in items:
-            vals.append('({0!r}, {1})'.format(sym.full_name, sym))
+            vals.append('({0!r}, {1})'.format(
+                    stringify_full_name(sym.full_name), sym))
         return '\n'.join(vals)
 
     def as_dict(self):
@@ -264,11 +260,14 @@ class SymbolTable(object):
         '''
         return get_qualified_name(self._scopes, name)
 
-    def get(self, name):
+    def get(self, name, namespace=None):
         '''Looks up an (unqualified) name in the symbol table.
 
         Args:
           name: (basestring)
+          namespace: A tuple of scope identifiers (str), or None. If present,
+              the symbol search begins in that namespace and works its way up.
+              If None, we start at the current namespace stored in this table.
 
         Returns:
           A Symbol, if an entry exists for the given name at some scoping level.
@@ -278,7 +277,9 @@ class SymbolTable(object):
           TypeError: If 'name' is not of type basestring.
         '''
         _validate_name(name)
-        cur_scopes = list(self._scopes)
+        cur_scopes = namespace
+        if cur_scopes is None:
+            cur_scopes = list(self._scopes)
         value = None
         while cur_scopes:
             full_name = get_qualified_name(cur_scopes, name)

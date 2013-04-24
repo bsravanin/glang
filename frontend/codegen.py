@@ -190,12 +190,13 @@ class CodeGenerator(object):
     def _Print(self, t):
         if not t.values:
             self.fill('System.out.println()')
+            self.end_stmt()
         else:
             for e in t.values:
                 self.fill('System.out.println(')
                 self.dispatch(e)
                 self.write(')')
-        self.end_stmt()
+                self.end_stmt()
 
     def _Break(self, t):
         self.fill('break')
@@ -269,7 +270,7 @@ class CodeGenerator(object):
         self.write(')')
 
     def _String(self, t):
-        self.write(t.value)
+        self.write(repr(t.value))
 
     def _Number(self, t):
         self.write(repr(t.value))
@@ -299,7 +300,6 @@ class CodeGenerator(object):
         self.write(')')
 
     def _Set(self, t):
-        assert t.elts  # t should contain at least one element
         self.write('(new {0}(Arrays.asList('.format(convert_type('set')))
         interleave(lambda: self.write(', '), self.dispatch, t.elts)
         self.write(')))')
