@@ -221,6 +221,7 @@ class Parser(object):
         '''stmt_list : stmt
                      | stmt_list stmt'''
         if len(p) == 2:
+            # If stmt is 'pass', p[1] is None
             p[0] = [p[1]] if p[1] else []
         else:
             p[0] = p[1]
@@ -430,7 +431,7 @@ class Parser(object):
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
 
     def p_for_stmt(self, p):
-        'for_stmt : for new_scope var_opt_type IN for_primary COLON suite'
+        'for_stmt : for new_scope var_opt_type IN for_iterable COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
         self._pop_scope()
 
@@ -439,12 +440,12 @@ class Parser(object):
         p[0] = p[1]
         self._cur_scope_name = 'for_{0}'.format(p.slice[1].lineno)
 
-    def p_for_primary(self, p):
-        '''for_primary : name
-                       | attribute_ref
-                       | subscription
-                       | call
-                       | enclosure'''
+    def p_for_iterable(self, p):
+        '''for_iterable : name
+                        | attribute_ref
+                        | subscription
+                        | call
+                        | enclosure'''
         p[0] = p[1]
 
     ## EXPRESSIONS ##
@@ -452,7 +453,7 @@ class Parser(object):
         '''expr_list : expr
                      | expr_list COMMA expr'''
         if len(p) == 2:
-            p[0] = [p[1]] if p[1] else []
+            p[0] = [p[1]]
         else:
             p[0] = p[1]
             p[0].append(p[3])
@@ -647,6 +648,7 @@ class Parser(object):
             p[0] = [p[1]]
         else:
             p[0] = p[1]
+            p[0].append(p[3])
 
     def p_key_datum(self, p):
         'key_datum : expr COLON expr'
@@ -654,6 +656,8 @@ class Parser(object):
 
     def p_attribute_ref(self, p):
         'attribute_ref : ref_primary DOT name'
+        # TODO: consider making a new AttributeNode
+        p[3].is_attribute = True
         p[0] = nodes.AttributeRefNode(value=p[1], attribute=p[3])
 
     def p_ref_primary(self, p):

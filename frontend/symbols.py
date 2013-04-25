@@ -264,7 +264,7 @@ class SymbolTable(object):
         '''
         return get_qualified_name(self._scopes, name)
 
-    def get(self, name, namespace=None):
+    def get(self, name, namespace=None, symbol_type=Symbol):
         '''Looks up an (unqualified) name in the symbol table.
 
         Args:
@@ -272,6 +272,7 @@ class SymbolTable(object):
           namespace: A tuple of scope identifiers (str), or None. If present,
               the symbol search begins in that namespace and works its way up.
               If None, we start at the current namespace stored in this table.
+          symbol_type: A Symbol (sub)class type to filter the search.
 
         Returns:
           A Symbol, if an entry exists for the given name at some scoping level.
@@ -287,7 +288,7 @@ class SymbolTable(object):
         while cur_scopes:
             full_name = get_qualified_name(cur_scopes, name)
             value = self.get_by_qualified_name(full_name)
-            if value:
+            if value and isinstance(value, symbol_type):
                 break
             cur_scopes.pop()
         else:
