@@ -243,6 +243,8 @@ class Parser(object):
                     (func_namespace + (func_name,), 'self'),
                     var_type=full_class_name)
                 self._symbol_table.set(sym)
+                # Also, tag it as a method
+                stmt.method = True
         self._pop_scope()
 
     def p_new_type(self, p):
@@ -659,6 +661,7 @@ class Parser(object):
                        | attribute_ref
                        | subscription
                        | call'''
+        p[0] = p[1]
 
     def p_subscription(self, p):
         'subscription : subs_primary LBRACKET expr RBRACKET'
