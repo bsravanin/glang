@@ -428,7 +428,7 @@ class Parser(object):
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
 
     def p_for_stmt(self, p):
-        'for_stmt : for new_scope var_opt_type IN primary COLON suite'
+        'for_stmt : for new_scope var_opt_type IN for_primary COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
         self._pop_scope()
 
@@ -436,6 +436,14 @@ class Parser(object):
         'for : FOR'
         p[0] = p[1]
         self._cur_scope_name = 'for_{0}'.format(p.slice[1].lineno)
+
+    def p_for_primary(self, p):
+        '''for_primary : name
+                       | attribute_ref
+                       | subscription
+                       | call
+                       | enclosure'''
+        p[0] = p[1]
 
     ## EXPRESSIONS ##
     def p_expr_list(self, p):
@@ -537,7 +545,7 @@ class Parser(object):
         p[0] = p[1]
 
     def p_unary_expr(self, p):
-        '''unary_expr : power
+        '''unary_expr : primary
                       | unary_op unary_expr'''
         if len(p) == 2:
             p[0] = p[1]
@@ -550,14 +558,6 @@ class Parser(object):
                     | MINUS'''
         p[0] = p[1]
 
-    def p_power(self, p):
-        '''power : primary
-                 | primary DOUBLESTAR unary_expr'''
-        if len(p) == 2:
-            p[0] = p[1]
-        else:
-            p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
-
     def p_primary(self, p):
         '''primary : atom
                    | attribute_ref
@@ -569,7 +569,6 @@ class Parser(object):
         # - called
         # - in an arithmetic expression
         # - a for-loop iterable
-        # TODO: considering splitting up primary types based on usage
         p[0] = p[1]
 
     def p_atom(self, p):
@@ -652,16 +651,33 @@ class Parser(object):
         p[0] = (p[1], p[3])
 
     def p_attribute_ref(self, p):
-        'attribute_ref : primary DOT name'
+        'attribute_ref : ref_primary DOT name'
         p[0] = nodes.AttributeRefNode(value=p[1], attribute=p[3])
 
+    def p_ref_primary(self, p):
+        '''ref_primary : name
+                       | attribute_ref
+                       | subscription
+                       | call'''
+
     def p_subscription(self, p):
-        'subscription : primary LBRACKET expr RBRACKET'
+        'subscription : subs_primary LBRACKET expr RBRACKET'
         p[0] = nodes.SubscriptNode(value=p[1], index=p[3])
 
+    def p_subs_primary(self, p):
+        '''subs_primary : name
+                        | attribute_ref
+                        | subscription'''
+        p[0] = p[1]
+
     def p_call(self, p):
-        'call : primary LPAREN opt_argument_list RPAREN'
+        'call : call_primary LPAREN opt_argument_list RPAREN'
         p[0] = nodes.CallNode(func=p[1], args=p[3])
+
+    def p_call_primary(self, p):
+        '''call_primary : name
+                        | attribute_ref'''
+        p[0] = p[1]
 
     def p_opt_argument_list(self, p):
         '''opt_argument_list : argument_list
