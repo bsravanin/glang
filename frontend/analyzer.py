@@ -94,7 +94,7 @@ class Analyzer(object):
 
         # Fill in the return type, which we couldn't resolve during parsing
         self.dispatch(t.return_type)
-        if getattr(t, 'method', False) and t.name.value == CONSTRUCTOR_NAME:
+        if getattr(t, 'is_method', False) and t.name.value == CONSTRUCTOR_NAME:
             # set constructor return type to the class
             class_name = t.name.namespace[-1]
             class_namespace = t.name.namespace[:-1]

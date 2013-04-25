@@ -251,7 +251,7 @@ class Parser(object):
                     var_type=full_class_name)
                 self._symbol_table.set(sym)
                 # Also, tag it as a method
-                stmt.method = True
+                stmt.is_method = True
         self._pop_scope()
 
     def p_new_type(self, p):
