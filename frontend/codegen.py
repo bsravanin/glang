@@ -215,8 +215,9 @@ class CodeGenerator(object):
         else:
             for e in t.values:
                 self.fill('System.out.println(')
+                self.write('(')
                 self.dispatch(e)
-                self.write(')')
+                self.write(').toString())')
                 self.end_stmt()
 
     def _Break(self, _):
@@ -268,13 +269,22 @@ class CodeGenerator(object):
 
     def _BinaryOp(self, t):
         op = t.operator
+        if op == '==':
+            # value equality
+            self.write('(')
+            self.dispatch(t.left)
+            self.write(').equals(')
+            self.dispatch(t.right)
+            self.write(')')
+            return
+
+        if op == 'is':
+            # object equality
+            op = '=='
         if op == 'and':
             op = '&&'
         elif op == 'or':
             op = '||'
-        elif op == 'is':
-            # TODO: make sure this does object identity
-            op = '=='
         self.dispatch(t.left)
         self.write(' {0} '.format(op))
         self.dispatch(t.right)
