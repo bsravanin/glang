@@ -170,8 +170,8 @@ class Analyzer(object):
         self.dispatch(t.value)
         if t.target.type != t.value.type:
             raise InconsistentTypeError(
-                'Target type {0} does not match value type {1}'.format(
-                    t.target.type, t.value.type))
+                '{2}: Target type {0} does not match value type {1}'.format(
+                    t.target.type, t.value.type, t.target.lineno))
 
     def _Print(self, t):
         for val in t.values:
