@@ -407,7 +407,6 @@ class Parser(object):
 
     def p_if_stmt(self, p):
         'if_stmt : IF expr COLON suite opt_elif_clauses opt_else_clause'
-        # TODO: new scopes here?
         elses = p[5]  # might be a list of "if" Nodes
         if p[6]:
             elses.append(p[6])
@@ -444,20 +443,18 @@ class Parser(object):
 
     def p_while_stmt(self, p):
         'while_stmt : WHILE expr COLON suite'
-        # TODO: new scope here?
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
         p[0].lineno = p.slice[1].lineno
 
     def p_for_stmt(self, p):
         'for_stmt : for new_scope var_opt_type IN for_iterable COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
-        p[0].lineno = p[1].lineno
+        p[0].lineno = p[3].lineno
         self._pop_scope()
 
     def p_for(self, p):
         'for : FOR'
         p[0] = p[1]
-        p[0].lineno = p.slice[1].lineno
         self._cur_scope_name = 'for_{0}'.format(p.slice[1].lineno)
 
     def p_for_iterable(self, p):
@@ -537,8 +534,6 @@ class Parser(object):
                    | LESSEQUAL
                    | GREATEREQUAL
                    | NOTEQUAL
-                   | IN
-                   | NOT IN
                    | IS
                    | IS NOT'''
         p[0] = '_'.join(x.value for x in p.slice[1:])
@@ -692,7 +687,6 @@ class Parser(object):
 
     def p_attribute_ref(self, p):
         'attribute_ref : ref_primary DOT name'
-        # TODO: consider making a new AttributeNode
         p[3].is_attribute = True
         p[0] = nodes.AttributeRefNode(value=p[1], attribute=p[3])
         p[0].lineno = p.slice[2].lineno
@@ -705,14 +699,14 @@ class Parser(object):
         p[0] = p[1]
 
     def p_subscription(self, p):
-        'subscription : subs_primary LBRACKET expr RBRACKET'
+        'subscription : sub_primary LBRACKET expr RBRACKET'
         p[0] = nodes.SubscriptNode(value=p[1], index=p[3])
         p[0].lineno = p.slice[2].lineno
 
-    def p_subs_primary(self, p):
-        '''subs_primary : name
-                        | attribute_ref
-                        | subscription'''
+    def p_sub_primary(self, p):
+        '''sub_primary : name
+                       | attribute_ref
+                       | subscription'''
         p[0] = p[1]
 
     def p_call(self, p):

@@ -220,7 +220,6 @@ class Analyzer(object):
         self.dispatch(t.body)
 
     def _BinaryOp(self, t):
-        # TODO: handle 'in' operator? (collection membership)
         op = t.operator
         self.dispatch(t.left)
         self.dispatch(t.right)
@@ -228,7 +227,6 @@ class Analyzer(object):
         #       if op is a comparison, left and right must have number type
         #       if op is arithmetic, left and right must have number type, and
         #           must be coerced
-        #       if op is 'in', right must be something on which we can call get()
         #       otherwise, error
         new_type = t.left.type
         t.type = new_type
