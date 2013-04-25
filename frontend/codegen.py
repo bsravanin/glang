@@ -107,18 +107,30 @@ class CodeGenerator(object):
     ########################################################
 
     def _Start(self, t):
-        # Import generic header #
-        #with open(JAVA_HEADER, 'r') as infile:
-        #    header = infile.read()
-        #self.write(header)
+        # Import header
+        with open(JAVA_HEADER, 'r') as infile:
+            header = infile.read()
+        class_defs = []
+        other_stmts = []
+        for stmt in t.stmt_list:
+            if stmt.__class__.__name__ == 'ClassDefNode':
+                class_defs.append(stmt)
+            else:
+                other_stmts.append(stmt)
+        for stmt in class_defs:
+            # Write a new .java file
+            with open(stmt.name.value + '.java', 'w') as outfile:
+                outfile.write(header)
+                CodeGenerator(stmt, output=outfile)
+
+        if not other_stmts:
+            return
+
+        self.write(header)
         self.fill('public class MainWrapper ')
         self.enter()
-        for stmt in t.stmt_list:
-            stmt_node_class = stmt.__class__.__name__
-            if stmt_node_class == 'ClassDefNode':
-                # create a new file
-                self.dispatch(stmt)
-            elif stmt_node_class == 'FunctionDefNode':
+        for stmt in other_stmts:
+            if stmt.__class__.__name__ == 'FunctionDefNode':
                 # static attributes in the main class
                 self._FunctionDef(stmt, top=True)
             else:
@@ -132,9 +144,13 @@ class CodeGenerator(object):
         self.fill('public ')
         if top:
             self.write('static ')
-        self.dispatch(t.return_type)
-        self.write(' ')
-        self.dispatch(t.name)
+        if (t.name.value == analyzer.CONSTRUCTOR_NAME and
+            getattr(t, 'is_method', False)):
+            self.write(t.return_type.value)
+        else:
+            self.dispatch(t.return_type)
+            self.write(' ')
+            self.dispatch(t.name)
         self.write('(')
         if t.name.value == 'main':
             # TODO: what if the user's 'main' definition is different?
@@ -151,7 +167,7 @@ class CodeGenerator(object):
 
     def _Name(self, t):
         value = t.value
-        if value in ('False', 'True'):
+        if value in ('False', 'True') and not getattr(t, 'is_attribute', False):
             value = value.lower()
         elif value == 'self':
             value = 'this'
@@ -276,6 +292,7 @@ class CodeGenerator(object):
     def _String(self, t):
         # Python allows multiple quote styles for strings, but other languages
         # (e.g. Java) require one. This normalizes to double-quotes.
+        # TODO: find solution that doesn't use escaping
         self.write('"{0}"'.format(re.escape(eval(t.value))))
 
     def _Number(self, t):
@@ -330,7 +347,14 @@ def main(args):
             'ERROR: Must provide code generator with a filename!')
         sys.exit(1)
 
-    ast, _ = analyzer.analyze_file(args[0])
+    debug = False
+    for arg in args[:]:
+        if arg == '-d':
+            debug = True
+        if arg.startswith('-'):
+            args.remove(arg)
+
+    ast, _ = analyzer.analyze_file(args[0], debug=debug)
     CodeGenerator(ast, output=sys.stdout)
 
 
