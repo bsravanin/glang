@@ -4,7 +4,7 @@
 bool b
 float f
 int i
-string s = "Rosebud"
+str s = "Rosebud"
 
 b = True
 f = 3.14
@@ -40,19 +40,18 @@ def void float_operations(float f):
 	f = f * 2
 	f = f / 2
 	f = f % 3
-	f = f ** 2
 
 
 def void paranthesis():
 	int zero = 1 + 2 - 3
-	int one = (4 * 5) ** 0
+	int one = (4 * 5) * 0
 	zero = (7 / 6) % (9 / 8)
 	bool is_true = (zero == one) or (zero < one)
 	bool is_false = (zero > one) and (zero >= one)
 	is_false = not (zero <= one)
 
 
-def string comparisons(int i, float f):
+def str comparisons(int i, float f):
 	if i == f:
 		return "equal"
 	elif i < f:
@@ -70,7 +69,7 @@ def bool trichotomy(int i, float f):
 		return False
 
 
-def bool lobotomy(bool b, string s):
+def bool lobotomy(bool b, str s):
 	if b == s and b < s and b > s:
 		return False
 	else:
