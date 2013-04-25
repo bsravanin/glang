@@ -12,7 +12,10 @@
 
 class object():
 
-	def void init(object obj):
+	def void __init__(object obj):
+		pass
+
+	def str __str__():
 		pass
 
 
@@ -22,14 +25,14 @@ class void():
 
 class int(object):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# Integer.parseInt(x.toString()) ???
 		pass
 
 
 class bool(int):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# TODO: not sure how to cast to boolean in Java
 		pass
 
@@ -40,15 +43,19 @@ bool True = bool(1)
 
 class float(object):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# Float.parseFloat(x.toString()) ???
 		pass
 
 
 class str(object):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# String.valueOf
+		pass
+
+	def int __len__():
+		# String.length
 		pass
 
 	def str copy():
@@ -98,8 +105,16 @@ class str(object):
 
 class list(object):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# ArrayList<Object>
+		pass
+
+	def bool __contains__(object obj):
+		# ArrayList<Object>.contains
+		pass
+
+	def int __len__():
+		# ArrayList<Object>.size
 		pass
 
 	def bool append(object obj):
@@ -145,8 +160,16 @@ class list(object):
 
 class set(object):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# HashSet<Object>
+		pass
+
+	def bool __contains__(object obj):
+		# HashSet<Object>.contains
+		pass
+
+	def int __len__():
+		# HashSet<Object>.size
 		pass
 
 	def bool add(object obj):
@@ -161,8 +184,19 @@ class set(object):
 		# HashSet<Object>.clone
 		pass
 
+	def bool difference_update(set s):
+		# HashSet<Object>.removeAll
+		pass
+
 	def bool intersection_update(set s):
 		# HashSet<Object>.retainAll
+		pass
+
+	def bool isEmpty():
+		pass
+
+	def bool issuperset(set s):
+		# HashSet<Object>.containsAll
 		pass
 
 	def bool remove(object obj):
@@ -176,8 +210,12 @@ class set(object):
 
 class dict(object):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		# HashMap<Object,Object>
+		pass
+
+	def int __len__():
+		# HashMap<Object,Object>.size
 		pass
 
 	def bool clear():
@@ -219,83 +257,167 @@ class dict(object):
 
 class Graph(object):
 
-	def void init(object obj):
+	def void __init__():
+		pass
+
+	# TODO: Java returns this as long. Should we translate all ints to long?
+	def int getGraphId():
+		pass
+
+	def Node Node(dict attr_dict):
+		pass
+
+	def Edge Edge(Node start, Node end, dict attr_dict):
+		pass
+
+	def void addNode(Node n):
+		pass
+
+	def Node getNode(str variable, object value):
+		pass
+
+	def NodeSet getNodes(str variable, object value):
+		pass
+
+	def Node getNodeById(int node_id):
+		pass
+
+	def list getAllNodes():
+		pass
+
+	def void addEdge(Edge e):
+		pass
+
+	def list getAllEdges():
+		pass
+
+	# TODO: fix this
+	def list getShortestPath(Node start, Node end, list alist):
+		pass
+
+	# TODO: fix this
+	def list getPaths(Node start, Node end, list alist):
+		pass
+
+	def str __str__():
 		pass
 
 
 class Node(object):
 
-	def void init(object obj):
+	def void __init__(dict attr_map):
 		pass
 
-	def NodeSet in_nodes():
+	def void setId(int node_id):
 		pass
 
-	def NodeSet out_nodes():
+	def int getId():
 		pass
 
-	def EdgeSet in_edges():
+	def object getVariableValue(str variable):
 		pass
 
-	def EdgeSet out_edges():
+	def void setVariableValue(str variable, object value):
 		pass
 
-	def Path shortest_path(Node target):
+	def set getVariables():
 		pass
 
-	def list paths(Node target):
+	def dict getVariableMap():
+		pass
+
+	def void setInE(Edge e):
+		pass
+
+	def void setOutE(Edge e):
+		pass
+
+	def EdgeSet outE():
+		pass
+
+	def EdgeSet inE():
+		pass
+
+	# TODO: uncomment this once "in" operator is no longer supported
+	#def NodeSet in():
+	#	pass
+
+	def NodeSet out():
+		pass
+
+	def void update(str variable, object new_value):
+		pass
+
+	def str __str__():
+		pass
+
+	def bool __eq__(object obj):
 		pass
 
 
 class Edge(object):
 
-	def void init(object obj):
+	def void __init__(Node start, Node end, dict var_map, int edge_id):
 		pass
 
-	def set get_attribute_set():
+	def void setId(int edge_id):
+		pass
+
+	def int getId():
+		pass
+
+	def Node inV():
+		pass
+
+	def Node outV():
+		pass
+
+	def set getVariables():
+		pass
+
+	def dict getVariableMap():
+		pass
+
+	def object getVariableValue(str variable):
+		pass
+
+	def void setVariableValue(str variable, object value):
+		pass
+
+	def void addParents(Edge path_parent):
+		pass
+
+	def dict getParents():
+		pass
+
+	def str __str__():
+		pass
+
+	def bool __eq__(object obj):
 		pass
 
 
 class NodeSet(set):
 
-	def void init(object obj):
+	def NodeSet filter(str variable, object value):
 		pass
 
-	def EdgeSet in_edges():
-		pass
-
-	def EdgeSet out_edges():
-		pass
-
-	def NodeSet filter(list exprs):
-		pass
-
-	def list sort():
-		pass
-
-	# TODO: check this
-	def dict group_by(list fields):
+	def EdgeSet outE():
 		pass
 
 
 class EdgeSet(set):
 
-	def void init(object obj):
+	def EdgeSet filter(str variable, object value):
 		pass
 
-	def NodeSet in_nodes():
-		pass
-
-	def NodeSet out_nodes():
-		pass
-
-	def EdgeSet filter(list exprs):
+	def NodeSet outV():
 		pass
 
 
 class Path(list):
 
-	def void init(object obj):
+	def void __init__(object obj):
 		pass
 
 
