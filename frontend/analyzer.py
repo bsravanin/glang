@@ -366,9 +366,21 @@ class Analyzer(object):
                     'found {2}'.format(param_type, arg, arg.type))
 
 
-def analyze(ast, symbol_table):
+def _analyze(ast, symbol_table):
     a = Analyzer(ast, symbol_table)
     a.analyze()
+
+
+def analyze_file(filename, debug=False):
+    p = parser.Parser()
+    # Populate symbol table with built-ins
+    builtin_ast = p.parse_file(BUILTINS_FILENAME, debug=debug)
+    # Resolve built-in names, run checks
+    _analyze(builtin_ast, p.symbol_table)
+    ast = p.parse_file(filename)
+    # Resolve names in the given file, run checks
+    _analyze(ast, p.symbol_table)
+    return ast, p.symbol_table
 
 
 def main(args):
@@ -390,23 +402,14 @@ def main(args):
             args.remove(arg)
 
     filename = args[0]
-
-    p = parser.Parser()
-    # Populate symbol table with built-ins
-    builtin_ast = p.parse_file(BUILTINS_FILENAME, debug=debug)
-    # Resolve built-in names, run checks
-    analyze(builtin_ast, p.symbol_table)
-    ast = p.parse_file(filename)
-    # Resolve names in the given file, run checks
-    analyze(ast, p.symbol_table)
-
+    ast, symtab = analyze_file(filename, debug=debug)
     if prettify:
         print nodes.prettify(ast)
     else:
         print str(ast)
 
     if print_symbol_table:
-        print p.symbol_table
+        print symtab
 
 
 if __name__ == '__main__':
