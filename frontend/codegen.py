@@ -292,8 +292,7 @@ class CodeGenerator(object):
     def _String(self, t):
         # Python allows multiple quote styles for strings, but other languages
         # (e.g. Java) require one. This normalizes to double-quotes.
-        # TODO: find solution that doesn't use escaping
-        self.write('"{0}"'.format(re.escape(eval(t.value))))
+        self.write('"{0}"'.format(re.sub('"', '\\"', eval(t.value))))
 
     def _Number(self, t):
         self.write(repr(t.value))
