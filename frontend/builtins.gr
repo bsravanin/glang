@@ -1,5 +1,9 @@
 # Initializes a SymbolTable with Gramola's builtin types, methods and functions.
+#
+# NOTE: return type for init's are ignored, but must be present anyway
 
+# TODO: what name to use for the constructor? init? __init__? type name?
+# TODO: finish adding builtins
 # TODO: include special functions like __len__, then replace top-level builtins
 # with those calls? Also, subscriptions, operators.
 # TODO: do we need a None type, i.e., an object with no value at all
@@ -7,19 +11,27 @@
 
 
 class object():
-    pass
+
+	def void init(object obj):
+		pass
 
 
 class void():
-    pass
+	pass
 
 
 class int(object):
-    pass
+
+	def void init(object obj):
+		# Integer.parseInt(x.toString()) ???
+		pass
 
 
 class bool(int):
-    pass
+
+	def void init(object obj):
+		# TODO: not sure how to cast to boolean in Java
+		pass
 
 
 bool False = bool(0)
@@ -27,234 +39,265 @@ bool True = bool(1)
 
 
 class float(object):
-    pass
+
+	def void init(object obj):
+		# Float.parseFloat(x.toString()) ???
+		pass
 
 
 class str(object):
-    # Java: String
 
-    def str copy():
-        # String.clone
-        pass
+	def void init(object obj):
+		# String.valueOf
+		pass
 
-    def bool ends_with(str s):
-        # String.endsWith
-        pass
+	def str copy():
+		# String.clone
+		pass
 
-    def list find(str s):
-        # String.indexOf
-        pass
+	def bool ends_with(str s):
+		# String.endsWith
+		pass
 
-    def str lower():
-        # String.toLowerCase
-        pass
+	def list find(str s):
+		# String.indexOf
+		pass
 
-    def str replace(str s, str t):
-        # String.replace
-        pass
+	def str lower():
+		# String.toLowerCase
+		pass
 
-    def int rfind(str s):
-        # String.lastIndexOf
-        pass
+	def str replace(str s, str t):
+		# String.replace
+		pass
 
-    def list split(str s):
-        # String.split
-        pass
+	def int rfind(str s):
+		# String.lastIndexOf
+		pass
 
-    def bool startswith(str s):
-        # String.startswith
-        pass
+	def list split(str s):
+		# String.split
+		pass
 
-    def str strip():
-        # String.trim
-        pass
+	def bool startswith(str s):
+		# String.startswith
+		pass
 
-    def str substring(int start, int end):
-        # String.substring
-        pass
+	def str strip():
+		# String.trim
+		pass
 
-    def str upper():
-        # String.toUpperCase
-        pass
+	def str substring(int start, int end):
+		# String.substring
+		pass
+
+	def str upper():
+		# String.toUpperCase
+		pass
 
 
 class list(object):
-    # Java: ArrayList<E>
 
-    def bool append(object obj):
-        # ArrayList<E>.add
-        pass
+	def void init(object obj):
+		# ArrayList<Object>
+		pass
 
-    def void clear():
-        # ArrayList<E>.clear
-        pass
+	def bool append(object obj):
+		# ArrayList<Object>.add
+		pass
 
-    def list clone():
-        # ArrayList<E>.clone
-        pass
+	def void clear():
+		# ArrayList<Object>.clear
+		pass
 
-    def bool extend(list l):
-        # ArrayList<E>.addAll
-        pass
+	def list clone():
+		# ArrayList<Object>.clone
+		pass
 
-    def int index(object obj):
-        # ArrayList<E>.indexOf
-        pass
+	def bool extend(list l):
+		# ArrayList<Object>.addAll
+		pass
 
-    def void insert(int pos, object obj):
-        # ArrayList<E>.add
-        pass
+	def int index(object obj):
+		# ArrayList<Object>.indexOf
+		pass
 
-    def object pop(int pos):
-        # ArrayList<E>.remove
-        pass
+	def void insert(int pos, object obj):
+		# ArrayList<Object>.add
+		pass
 
-    def bool remove(object obj):
-        # ArrayList<E>.remove
-        pass
+	def object pop(int pos):
+		# ArrayList<Object>.remove
+		pass
 
-    def void reverse():
-        # Collections.reverse
-        pass
+	def bool remove(object obj):
+		# ArrayList<Object>.remove
+		pass
 
-    def void sort():
-        # Collections.sort
-        pass
+	def void reverse():
+		# Collections.reverse
+		pass
+
+	def void sort():
+		# Collections.sort
+		pass
 
 
 class set(object):
-    # Java: HashSet<E>
 
-    def bool add(object obj):
-        # HashSet<E>.add
-        pass
+	def void init(object obj):
+		# HashSet<Object>
+		pass
 
-    def void clear():
-        # HashSet<E>.clear
-        pass
+	def bool add(object obj):
+		# HashSet<Object>.add
+		pass
 
-    def set copy():
-        # HashSet<E>.clone
-        pass
+	def void clear():
+		# HashSet<Object>.clear
+		pass
 
-    def bool intersection_update(set s):
-        # HashSet<E>.retainAll
-        pass
+	def set copy():
+		# HashSet<Object>.clone
+		pass
 
-    def bool remove(object obj):
-        # HashSet<E>.remove
-        pass
+	def bool intersection_update(set s):
+		# HashSet<Object>.retainAll
+		pass
 
-    def bool update(set s):
-        # HashSet<E>.addAll
-        pass
+	def bool remove(object obj):
+		# HashSet<Object>.remove
+		pass
+
+	def bool update(set s):
+		# HashSet<Object>.addAll
+		pass
 
 
 class dict(object):
-    # Java: HashMap<K,V>
 
-    def bool clear():
-        # HashMap<K,V>.clear
-        pass
+	def void init(object obj):
+		# HashMap<Object,Object>
+		pass
 
-    def dict copy():
-        # HashMap<K,V>.clone
-        pass
+	def bool clear():
+		# HashMap<Object,Object>.clear
+		pass
 
-    def object get(object key):
-        # HashMap<K,V>.get
-        pass
+	def dict copy():
+		# HashMap<Object,Object>.clone
+		pass
 
-    def bool has_key(object key):
-        # HashMap<K,V>.containsKey
-        pass
+	def object get(object key):
+		# HashMap<Object,Object>.get
+		pass
 
-    def set items():
-        # HashMap<K,V>.entrySet
-        pass
+	def bool has_key(object key):
+		# HashMap<Object,Object>.containsKey
+		pass
 
-    def set keys():
-        # HashMap<K,V>.keySet
-        pass
+	def set items():
+		# HashMap<Object,Object>.entrySet
+		pass
 
-    def object pop(object key):
-        # HashMap<K,V>.remove
-        pass
+	def set keys():
+		# HashMap<Object,Object>.keySet
+		pass
 
-    def void update(dict d):
-        # HashMap<K,V>.putAll
-        pass
+	def object pop(object key):
+		# HashMap<Object,Object>.remove
+		pass
 
-    def set values():
-        # HashMap<K,V>.values
-        pass
+	def void update(dict d):
+		# HashMap<Object,Object>.putAll
+		pass
+
+	def set values():
+		# HashMap<Object,Object>.values
+		pass
 
 
 class Graph(object):
-    pass
+
+	def void init(object obj):
+		pass
 
 
 class Node(object):
 
-    def NodeSet in_nodes():
-        pass
+	def void init(object obj):
+		pass
 
-    def NodeSet out_nodes():
-        pass
+	def NodeSet in_nodes():
+		pass
 
-    def EdgeSet in_edges():
-        pass
+	def NodeSet out_nodes():
+		pass
 
-    def EdgeSet out_edges():
-        pass
+	def EdgeSet in_edges():
+		pass
 
-    def Path shortest_path(Node target):
-        pass
+	def EdgeSet out_edges():
+		pass
 
-    def list paths(Node target):
-        pass
+	def Path shortest_path(Node target):
+		pass
+
+	def list paths(Node target):
+		pass
 
 
 class Edge(object):
 
-    def set get_attribute_set():
-        pass
+	def void init(object obj):
+		pass
+
+	def set get_attribute_set():
+		pass
 
 
 class NodeSet(set):
 
-    def EdgeSet in_edges():
-        pass
+	def void init(object obj):
+		pass
 
-    def EdgeSet out_edges():
-        pass
+	def EdgeSet in_edges():
+		pass
 
-    def NodeSet filter(list exprs):
-        pass
+	def EdgeSet out_edges():
+		pass
 
-    def list sort():
-        pass
+	def NodeSet filter(list exprs):
+		pass
 
-    # TODO: check this
-    def dict group_by(list fields):
-        pass
+	def list sort():
+		pass
+
+	# TODO: check this
+	def dict group_by(list fields):
+		pass
 
 
 class EdgeSet(set):
 
-    def NodeSet in_nodes():
-        pass
+	def void init(object obj):
+		pass
 
-    def NodeSet out_nodes():
-        pass
+	def NodeSet in_nodes():
+		pass
 
-    def EdgeSet filter(list exprs):
-        pass
+	def NodeSet out_nodes():
+		pass
+
+	def EdgeSet filter(list exprs):
+		pass
 
 
 class Path(list):
-    pass
+
+	def void init(object obj):
+		pass
 
 
 def int len(object obj):
-    pass
+	pass
