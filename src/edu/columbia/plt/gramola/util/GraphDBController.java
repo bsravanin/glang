@@ -71,6 +71,10 @@ public class GraphDBController {
 		return null;
 	}
 	
+	public void dump(Graph g) {
+		dump(g, "id", "id");
+	}
+	
 	/**
 	 * Store Graph object of Gramola into neo4j DB
 	 * Node==>Node

@@ -6,7 +6,7 @@ def void main():
 	Node n4 = g.Node ({'name': 'Tom', 'age': 26, 'birthday_month' : 5, 'popularity' : 4})
 	Node n5 = g.Node ({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3})
 
-	Node shop = g.Node({'name' : 'shop'})
+	Node n6 = g.Node({'name' : 'shop'})
 	g.Edge(g.Node({'name' : Cathy, 'birthday_month' : 10, 'age': 20}, n5, {'type': wife}))
 	g.Edge(n1, n2, {'type': 'fbfriend'})
 	g.Edge(n1, n3, {'type': 'fbfriend'})
