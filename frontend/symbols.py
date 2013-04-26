@@ -83,11 +83,15 @@ def get_qualified_name(namespace, name):
     return (namespace, name)
 
 
+def flatten_full_name(full_name):
+    'Flattens the given fully qualified name.'
+    _validate_full_name(full_name)
+    return full_name[0] + (full_name[1],)
+
+
 def stringify_full_name(full_name):
     'Returns a stringified version of the given qualified name.'
-    _validate_full_name(full_name)
-    namespace, name = full_name
-    return stringify_tuple(namespace + (name,))
+    return stringify_tuple(flatten_full_name(full_name))
 
 
 def stringify_tuple(tup):
@@ -174,7 +178,7 @@ class VariableSymbol(Symbol):
               type for this variable.
         '''
         Symbol.__init__(self, full_name, token=token)
-        self.type = var_type
+        self.var_type = var_type
 
 
 class FunctionSymbol(Symbol):
@@ -260,7 +264,7 @@ class SymbolTable(object):
         '''
         return get_qualified_name(self._scopes, name)
 
-    def get(self, name, namespace=None):
+    def get(self, name, namespace=None, symbol_type=Symbol):
         '''Looks up an (unqualified) name in the symbol table.
 
         Args:
@@ -268,6 +272,7 @@ class SymbolTable(object):
           namespace: A tuple of scope identifiers (str), or None. If present,
               the symbol search begins in that namespace and works its way up.
               If None, we start at the current namespace stored in this table.
+          symbol_type: A Symbol (sub)class type to filter the search.
 
         Returns:
           A Symbol, if an entry exists for the given name at some scoping level.
@@ -277,14 +282,13 @@ class SymbolTable(object):
           TypeError: If 'name' is not of type basestring.
         '''
         _validate_name(name)
-        cur_scopes = namespace
-        if cur_scopes is None:
-            cur_scopes = list(self._scopes)
+        namespace = namespace or self._scopes
+        cur_scopes = list(namespace)
         value = None
         while cur_scopes:
             full_name = get_qualified_name(cur_scopes, name)
             value = self.get_by_qualified_name(full_name)
-            if value:
+            if value and isinstance(value, symbol_type):
                 break
             cur_scopes.pop()
         else:

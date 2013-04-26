@@ -34,7 +34,8 @@ def prettify(obj, indent=''):
             start, end = '[', ']'
         elif isinstance(obj, tuple):
             pretty_iter = [prettify(x, indent=indent) for x in obj]
-            start, end = '(', ')'
+            # These are usually short (e.g. namespaces)
+            return '({0})'.format(', '.join(pretty_iter))
         elif isinstance(obj, dict):
             pretty_iter = ['{0}: {1}'.format(prettify(x, indent=indent),
                                              prettify(y, indent=indent))
@@ -266,5 +267,5 @@ class SubscriptNode(Node):
 class CallNode(Node):
     'AST node for a function call.'
 
-    def __init__(self, func, args):
-        Node.__init__(self, func=func, args=args)
+    def __init__(self, func, args, constructor=False):
+        Node.__init__(self, func=func, args=args, constructor=constructor)

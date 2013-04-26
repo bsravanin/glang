@@ -2,7 +2,9 @@
 
 'Code generator for Gramola.'
 
-import parser
+import analyzer
+import os
+import re
 import sys
 
 # pylint: disable=C0103
@@ -28,6 +30,7 @@ TYPE_MAP = {
     'EdgeSet': 'EdgeSet',
     'Path': 'Path',
     }
+JAVA_HEADER = os.path.join(os.path.curdir, 'header.txt')
 
 
 def convert_type(name):
@@ -104,38 +107,56 @@ class CodeGenerator(object):
     ########################################################
 
     def _Start(self, t):
-        # TODO: add imports, etc. here
-        #self.write('GENERATE IMPORTS, ETC. HERE')
-       	#Import generic header#
-	header = open("header.txt").read()
-	self.write(header)
-	self.fill("public class Test ")
-	self.enter()
-	for stmt in t.stmt_list:
-		if stmt.__class__.__name__=='FunctionDefNode':
-			# static method in the main class
-			self._FunctionDef(stmt, True)
-		elif stmt.__class__.__name__=='ClassDefNode':
-			# create a new file
-			self.dispatch(stmt)	
+        # Import header
+        with open(JAVA_HEADER, 'r') as infile:
+            header = infile.read()
+        class_defs = []
+        other_stmts = []
+        for stmt in t.stmt_list:
+            if stmt.__class__.__name__ == 'ClassDefNode':
+                class_defs.append(stmt)
+            else:
+                other_stmts.append(stmt)
+        for stmt in class_defs:
+            # Write a new .java file
+            with open(stmt.name.value + '.java', 'w') as outfile:
+                outfile.write(header)
+                CodeGenerator(stmt, output=outfile)
+
+        if not other_stmts:
+            return
+
+        self.write(header)
+        self.fill('public class MainWrapper ')
+        self.enter()
+        for stmt in other_stmts:
+            if stmt.__class__.__name__ == 'FunctionDefNode':
+                # static attributes in the main class
+                self._FunctionDef(stmt, top=True)
+            else:
+                self.dispatch(stmt)
         self.fill()
-	self.leave()
-	self.fill()
+        self.leave()
+        self.fill()
 
     def _FunctionDef(self, t, top=False):
-        # TODO: find way to generate wrapper class around top-level Gramola
-        # statements, possible with AST ops in the semantic analysis phase
         self.write('\n')
         self.fill('public ')
-        if top: self.write("static ")
-	self.dispatch(t.return_type)
-        self.write(' ')
-        self.dispatch(t.name)
+        if top:
+            self.write('static ')
+        if (t.name.value == analyzer.CONSTRUCTOR_NAME and
+            getattr(t, 'is_method', False)):
+            self.write(t.return_type.value)
+        else:
+            self.dispatch(t.return_type)
+            self.write(' ')
+            self.dispatch(t.name)
         self.write('(')
-	if t.name.value == 'main':
-		self.write("String args[]")
-	else:
-        	interleave(lambda: self.write(', '), self.dispatch, t.params)
+        if t.name.value == 'main':
+            # TODO: what if the user's 'main' definition is different?
+            self.write('String[] args')
+        else:
+            interleave(lambda: self.write(', '), self.dispatch, t.params)
         self.write(')')
         self.enter()
         self.dispatch(t.body)
@@ -146,7 +167,7 @@ class CodeGenerator(object):
 
     def _Name(self, t):
         value = t.value
-        if value in ('False', 'True'):
+        if value in ('False', 'True') and not getattr(t, 'is_attribute', False):
             value = value.lower()
         elif value == 'self':
             value = 'this'
@@ -194,15 +215,16 @@ class CodeGenerator(object):
         else:
             for e in t.values:
                 self.fill('System.out.println(')
+                self.write('(')
                 self.dispatch(e)
-                self.write(')')
+                self.write(').toString())')
                 self.end_stmt()
 
-    def _Break(self, t):
+    def _Break(self, _):
         self.fill('break')
         self.end_stmt()
 
-    def _Continue(self, t):
+    def _Continue(self, _):
         self.fill('continue')
         self.end_stmt()
 
@@ -246,15 +268,23 @@ class CodeGenerator(object):
         self.leave()
 
     def _BinaryOp(self, t):
-        # TODO: handle 'in' operator (collection membership)
         op = t.operator
+        if op == '==':
+            # value equality
+            self.write('(')
+            self.dispatch(t.left)
+            self.write(').equals(')
+            self.dispatch(t.right)
+            self.write(')')
+            return
+
+        if op == 'is':
+            # object equality
+            op = '=='
         if op == 'and':
             op = '&&'
         elif op == 'or':
             op = '||'
-        elif op == 'is':
-            # TODO: make sure this does object identity
-            op = '=='
         self.dispatch(t.left)
         self.write(' {0} '.format(op))
         self.dispatch(t.right)
@@ -270,7 +300,9 @@ class CodeGenerator(object):
         self.write(')')
 
     def _String(self, t):
-        self.write(repr(t.value))
+        # Python allows multiple quote styles for strings, but other languages
+        # (e.g. Java) require one. This normalizes to double-quotes.
+        self.write('"{0}"'.format(re.sub('"', '\\"', eval(t.value))))
 
     def _Number(self, t):
         self.write(repr(t.value))
@@ -287,11 +319,15 @@ class CodeGenerator(object):
 
     def _Dict(self, t):
         def write_pair(item):
-            self.write(item[0].value.replace("'", '"'))
-            self.write(',')
-            self.write(item[1].value.replace("'", '"'))
+            self.dispatch(item[0])
+            self.write(', ')
+            self.dispatch(item[1])
 
+<<<<<<< HEAD
         self.write("GraphUtil.createVarMap(")
+=======
+        self.write("GraphUtil.createVariableMap(")
+>>>>>>> 20b0e118b65419828207f8a4e85f366aff62b141
         interleave(lambda: self.write(', '), write_pair, t.items)
         self.write(')')
 
@@ -307,7 +343,6 @@ class CodeGenerator(object):
 
     def _Subscript(self, t):
         self.dispatch(t.value)
-        # TODO: depending on t.value_type, use a different indexing method
         self.write('.get(')
         self.dispatch(t.index)
         self.write(')')
@@ -320,10 +355,20 @@ class CodeGenerator(object):
 
 
 def main(args):
-    p = parser.Parser()
-    for filename in args:
-        tree = p.parse_file(filename)
-        CodeGenerator(tree, output=sys.stdout)
+    if not len(args):
+        print >> sys.stderr, (
+            'ERROR: Must provide code generator with a filename!')
+        sys.exit(1)
+
+    debug = False
+    for arg in args[:]:
+        if arg == '-d':
+            debug = True
+        if arg.startswith('-'):
+            args.remove(arg)
+
+    ast, _ = analyzer.analyze_file(args[0], debug=debug)
+    CodeGenerator(ast, output=sys.stdout)
 
 
 if __name__ == '__main__':

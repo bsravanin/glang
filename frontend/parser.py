@@ -150,6 +150,7 @@ class Parser(object):
          'LPAREN opt_parameter_list RPAREN COLON suite')
         p[0] = nodes.FunctionDefNode(return_type=p[2], name=p[3], params=p[6],
                                      body=p[9])
+        p[0].lineno = p.slice[1].lineno
         self._pop_scope()
 
     def p_type(self, p):
@@ -157,12 +158,14 @@ class Parser(object):
         # We verify validity of this type in a later pass. For all we know, it
         # could be defined further on in the parsing pass.
         p[0] = nodes.TypeNode(value=p[1], namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
 
     def p_new_func_name(self, p):
         'new_func_name : NAME'
         name_token = p.slice[1]
         name = name_token.value
         p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
         self._cur_scope_name = name
 
         # Add this new function name to the symbol table, as long as it doesn't
@@ -197,12 +200,14 @@ class Parser(object):
         # Set the type in the names' symbols in a later pass, since we may not
         # know about this type yet.
         p[0] = nodes.DeclarationNode(var_type=p[1], name=p[2])
+        p[0].lineno = p[1].lineno
 
     def p_new_var_name(self, p):
         'new_var_name : NAME'
         name_token = p.slice[1]
         name = name_token.value
         p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
 
         sym = self._symbol_table.get(name)
         if sym is None:
@@ -221,6 +226,7 @@ class Parser(object):
         '''stmt_list : stmt
                      | stmt_list stmt'''
         if len(p) == 2:
+            # If stmt is 'pass', p[1] is None
             p[0] = [p[1]] if p[1] else []
         else:
             p[0] = p[1]
@@ -231,6 +237,7 @@ class Parser(object):
         ('class_def : CLASS new_type new_scope '
          'LPAREN opt_type RPAREN COLON class_def_suite')
         p[0] = nodes.ClassDefNode(name=p[2], base=p[5], body=p[8])
+        p[0].lineno = p.slice[1].lineno
 
         # For each method in this new class, add "self" within its namespace
         class_parent_scope = self._cur_namespace[:-1]
@@ -243,6 +250,8 @@ class Parser(object):
                     (func_namespace + (func_name,), 'self'),
                     var_type=full_class_name)
                 self._symbol_table.set(sym)
+                # Also, tag it as a method
+                stmt.is_method = True
         self._pop_scope()
 
     def p_new_type(self, p):
@@ -250,6 +259,7 @@ class Parser(object):
         name_token = p.slice[1]
         name = name_token.value
         p[0] = nodes.TypeNode(value=name, namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
         self._cur_scope_name = name
 
         # Add this type to the symbol table as long as it doesn't already exist
@@ -311,14 +321,17 @@ class Parser(object):
     def p_expr_stmt(self, p):
         'expr_stmt : expr NEWLINE'
         p[0] = nodes.ExpressionStmtNode(expr=p[1])
+        p[0].lineno = p.slice[2].lineno
 
     def p_declaration_stmt(self, p):
         'declaration_stmt : declaration NEWLINE'
         p[0] = nodes.DeclarationStmtNode(value=p[1])
+        p[0].lineno = p[1].lineno
 
     def p_assignment_stmt(self, p):
         'assignment_stmt : target ASSIGN expr'
         p[0] = nodes.AssignmentNode(target=p[1], value=p[3])
+        p[0].lineno = p.slice[2].lineno
 
     def p_target(self, p):
         '''target : var_opt_type
@@ -335,6 +348,7 @@ class Parser(object):
         'var_name : NAME'
         name = p.slice[1].value
         p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
 
         sym = self._symbol_table.get(name)
         if sym is None:
@@ -347,6 +361,7 @@ class Parser(object):
     def p_print_stmt(self, p):
         'print_stmt : PRINT opt_expr_list'
         p[0] = nodes.PrintNode(values=p[2])
+        p[0].lineno = p.slice[1].lineno
 
     def p_opt_expr_list(self, p):
         '''opt_expr_list : expr_list
@@ -362,14 +377,17 @@ class Parser(object):
     def p_break_stmt(self, p):
         'break_stmt : BREAK'
         p[0] = nodes.BreakNode()
+        p[0].lineno = p.slice[1].lineno
 
     def p_continue_stmt(self, p):
         'continue_stmt : CONTINUE'
         p[0] = nodes.ContinueNode()
+        p[0].lineno = p.slice[1].lineno
 
     def p_return_stmt(self, p):
         'return_stmt : RETURN opt_expr'
         p[0] = nodes.ReturnNode(value=p[2])
+        p[0].lineno = p.slice[1].lineno
 
     def p_opt_expr(self, p):
         '''opt_expr : expr
@@ -389,11 +407,11 @@ class Parser(object):
 
     def p_if_stmt(self, p):
         'if_stmt : IF expr COLON suite opt_elif_clauses opt_else_clause'
-        # TODO: new scopes here?
         elses = p[5]  # might be a list of "if" Nodes
         if p[6]:
             elses.append(p[6])
         p[0] = nodes.IfNode(test=p[2], body=p[4], elses=elses)
+        p[0].lineno = p.slice[1].lineno
 
     def p_opt_elif_clauses(self, p):
         '''opt_elif_clauses : elif_clauses
@@ -417,6 +435,7 @@ class Parser(object):
     def p_elif_clause(self, p):
         'elif_clause : ELIF expr COLON suite'
         p[0] = nodes.IfNode(test=p[2], body=p[4])
+        p[0].lineno = p.slice[1].lineno
 
     def p_else_clause(self, p):
         'else_clause : ELSE COLON suite'
@@ -424,12 +443,13 @@ class Parser(object):
 
     def p_while_stmt(self, p):
         'while_stmt : WHILE expr COLON suite'
-        # TODO: new scope here?
         p[0] = nodes.WhileNode(test=p[2], body=p[4])
+        p[0].lineno = p.slice[1].lineno
 
     def p_for_stmt(self, p):
-        'for_stmt : for new_scope var_opt_type IN primary COLON suite'
+        'for_stmt : for new_scope var_opt_type IN for_iterable COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
+        p[0].lineno = p[3].lineno
         self._pop_scope()
 
     def p_for(self, p):
@@ -437,12 +457,20 @@ class Parser(object):
         p[0] = p[1]
         self._cur_scope_name = 'for_{0}'.format(p.slice[1].lineno)
 
+    def p_for_iterable(self, p):
+        '''for_iterable : name
+                        | attribute_ref
+                        | subscription
+                        | call
+                        | enclosure'''
+        p[0] = p[1]
+
     ## EXPRESSIONS ##
     def p_expr_list(self, p):
         '''expr_list : expr
                      | expr_list COMMA expr'''
         if len(p) == 2:
-            p[0] = [p[1]] if p[1] else []
+            p[0] = [p[1]]
         else:
             p[0] = p[1]
             p[0].append(p[3])
@@ -458,6 +486,7 @@ class Parser(object):
             p[0] = p[1]
         else:
             p[0] = nodes.BinaryOpNode(operator='or', left=p[1], right=p[3])
+        p[0].lineno = p[1].lineno
 
     def p_and_test(self, p):
         '''and_test : not_test
@@ -466,14 +495,17 @@ class Parser(object):
             p[0] = p[1]
         else:
             p[0] = nodes.BinaryOpNode(operator='and', left=p[1], right=p[3])
+        p[0].lineno = p[1].lineno
 
     def p_not_test(self, p):
         '''not_test : comparison
                     | NOT not_test'''
         if len(p) == 2:
             p[0] = p[1]
+            p[0].lineno = p[1].lineno
         else:
             p[0] = nodes.UnaryOpNode(operator='not', operand=p[2])
+            p[0].lineno = p[2].lineno
 
     def p_comparison(self, p):
         '''comparison : arith_expr
@@ -493,6 +525,7 @@ class Parser(object):
                 operand = nodes.BinaryOpNode(operator=op, left=left,
                                              right=right)
                 p[0] = nodes.UnaryOpNode(operator='not', operand=operand)
+        p[0].lineno = p[1].lineno
 
     def p_comp_op(self, p):
         '''comp_op : LESS
@@ -501,8 +534,6 @@ class Parser(object):
                    | LESSEQUAL
                    | GREATEREQUAL
                    | NOTEQUAL
-                   | IN
-                   | NOT IN
                    | IS
                    | IS NOT'''
         p[0] = '_'.join(x.value for x in p.slice[1:])
@@ -515,6 +546,7 @@ class Parser(object):
         else:
             # p[2] is a string, not a token
             p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
+        p[0].lineno = p[1].lineno
 
     def p_arith_op(self, p):
         '''arith_op : PLUS
@@ -529,6 +561,7 @@ class Parser(object):
         else:
             # p[2] is a string, not a token
             p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
+        p[0].lineno = p[1].lineno
 
     def p_mult_op(self, p):
         '''mult_op : STAR
@@ -537,26 +570,19 @@ class Parser(object):
         p[0] = p[1]
 
     def p_unary_expr(self, p):
-        '''unary_expr : power
+        '''unary_expr : primary
                       | unary_op unary_expr'''
         if len(p) == 2:
             p[0] = p[1]
         else:
             # p[2] is a string, not a token
             p[0] = nodes.UnaryOpNode(operator=p[1], operand=p[2])
+        p[0].lineno = p[1].lineno
 
     def p_unary_op(self, p):
         '''unary_op : PLUS
                     | MINUS'''
         p[0] = p[1]
-
-    def p_power(self, p):
-        '''power : primary
-                 | primary DOUBLESTAR unary_expr'''
-        if len(p) == 2:
-            p[0] = p[1]
-        else:
-            p[0] = nodes.BinaryOpNode(operator=p[2], left=p[1], right=p[3])
 
     def p_primary(self, p):
         '''primary : atom
@@ -569,7 +595,6 @@ class Parser(object):
         # - called
         # - in an arithmetic expression
         # - a for-loop iterable
-        # TODO: considering splitting up primary types based on usage
         p[0] = p[1]
 
     def p_atom(self, p):
@@ -584,6 +609,7 @@ class Parser(object):
         name_token = p.slice[1]
         name = name_token.value
         p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
 
         # UPDATE: Resolve this name in a later pass, once it has been declared
         # Add this name to the symbol table if it doesn't already exist in the
@@ -602,12 +628,15 @@ class Parser(object):
                        | string_list STRING'''
         if len(p) == 2:
             p[0] = nodes.StringNode(value=p[1])
+            p[0].lineno = p.slice[1].lineno
         else:
             p[0] = nodes.StringNode(value=p[1].value + p[2])
+            p[0].lineno = p[1].lineno
 
     def p_number(self, p):
         'number : NUMBER'
         p[0] = nodes.NumberNode(value=p[1])
+        p[0].lineno = p.slice[1].lineno
 
     def p_enclosure(self, p):
         '''enclosure : paren_expr
@@ -619,20 +648,24 @@ class Parser(object):
     def p_paren_expr(self, p):
         'paren_expr : LPAREN expr RPAREN'
         p[0] = nodes.ParenNode(expr=p[2])
+        p[0].lineno = p.slice[1].lineno
 
     def p_list_maker(self, p):
         'list_maker : LBRACKET opt_expr_list RBRACKET'
         p[0] = nodes.ListNode(elts=p[2])
+        p[0].lineno = p.slice[1].lineno
 
     def p_dict_maker(self, p):
         'dict_maker : LBRACE opt_key_datum_list RBRACE'
         p[0] = nodes.DictNode(items=p[2])
+        p[0].lineno = p.slice[1].lineno
 
     def p_set_maker(self, p):
         'set_maker : LBRACE expr_list RBRACE'
         # Note: expr_list is not optional. Otherwise, we'd have empty braces,
         # which create an empty dict, not a set.
         p[0] = nodes.SetNode(elts=p[2])
+        p[0].lineno = p.slice[1].lineno
 
     def p_opt_key_datum_list(self, p):
         '''opt_key_datum_list : key_datum_list
@@ -646,22 +679,45 @@ class Parser(object):
             p[0] = [p[1]]
         else:
             p[0] = p[1]
+            p[0].append(p[3])
 
     def p_key_datum(self, p):
         'key_datum : expr COLON expr'
         p[0] = (p[1], p[3])
 
     def p_attribute_ref(self, p):
-        'attribute_ref : primary DOT name'
+        'attribute_ref : ref_primary DOT name'
+        p[3].is_attribute = True
         p[0] = nodes.AttributeRefNode(value=p[1], attribute=p[3])
+        p[0].lineno = p.slice[2].lineno
+
+    def p_ref_primary(self, p):
+        '''ref_primary : name
+                       | attribute_ref
+                       | subscription
+                       | call'''
+        p[0] = p[1]
 
     def p_subscription(self, p):
-        'subscription : primary LBRACKET expr RBRACKET'
+        'subscription : sub_primary LBRACKET expr RBRACKET'
         p[0] = nodes.SubscriptNode(value=p[1], index=p[3])
+        p[0].lineno = p.slice[2].lineno
+
+    def p_sub_primary(self, p):
+        '''sub_primary : name
+                       | attribute_ref
+                       | subscription'''
+        p[0] = p[1]
 
     def p_call(self, p):
-        'call : primary LPAREN opt_argument_list RPAREN'
+        'call : call_primary LPAREN opt_argument_list RPAREN'
         p[0] = nodes.CallNode(func=p[1], args=p[3])
+        p[0].lineno = p.slice[2].lineno
+
+    def p_call_primary(self, p):
+        '''call_primary : name
+                        | attribute_ref'''
+        p[0] = p[1]
 
     def p_opt_argument_list(self, p):
         '''opt_argument_list : argument_list
