@@ -323,7 +323,11 @@ class CodeGenerator(object):
             self.write(', ')
             self.dispatch(item[1])
 
+<<<<<<< HEAD
+        self.write("GraphUtil.createVarMap(")
+=======
         self.write("GraphUtil.createVariableMap(")
+>>>>>>> 20b0e118b65419828207f8a4e85f366aff62b141
         interleave(lambda: self.write(', '), write_pair, t.items)
         self.write(')')
 
