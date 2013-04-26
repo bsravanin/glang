@@ -1,0 +1,4 @@
+#!/bin/sh
+
+python codegen.py $1 > MainWrapper.java
+mv *.java ../src/edu/columbia/plt/gramola/testmain
