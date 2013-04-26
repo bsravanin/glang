@@ -1,8 +1,9 @@
 # Initializes a SymbolTable with Gramola's builtin types, methods and functions.
 #
-# NOTE: return type for init's are ignored, but must be present anyway
+# NOTES:
+# - These are just prototypes for the symbol table, no implementations needed
+# - return type for init's are ignored, but must be present anyway
 
-# TODO: what name to use for the constructor? init? __init__? type name?
 # TODO: finish adding builtins
 # TODO: include special functions like __len__, then replace top-level builtins
 # with those calls? Also, subscriptions, operators.
@@ -422,4 +423,16 @@ class Path(list):
 
 
 def int len(object obj):
+	pass
+
+
+def Graph load(str path):
+	pass
+
+
+def void dump(Graph g, str path):
+	pass
+
+
+def void draw(Graph g):
 	pass
