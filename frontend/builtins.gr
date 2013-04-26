@@ -434,5 +434,5 @@ def void dump(Graph g, str path):
 	pass
 
 
-def void draw(Graph g):
+def void draw(Graph g, str node_attr, str edge_attr):
 	pass
