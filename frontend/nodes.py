@@ -267,5 +267,5 @@ class SubscriptNode(Node):
 class CallNode(Node):
     'AST node for a function call.'
 
-    def __init__(self, func, args, constructor=False):
-        Node.__init__(self, func=func, args=args, constructor=constructor)
+    def __init__(self, func, args, is_constructor=False):
+        Node.__init__(self, func=func, args=args, is_constructor=is_constructor)

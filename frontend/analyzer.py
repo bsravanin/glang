@@ -2,9 +2,11 @@
 
 '''Semantic analyzer for Gramola.
 
-Presumes that the Parser has already been run on the given file, adding
-declared classes, functions, and variables to the symbol table.
-Resolves any unresolved symbols and runs semantic checks.
+Important public attributes:
+  analyze_file: Initializes and runs a Parser and Analyzer on the given filename
+
+Usage:
+  ast, symbol_table = analyze_file('my_file.gr', debug=False)
 '''
 
 import nodes
@@ -21,6 +23,7 @@ import sys
 # "Method could be a function
 
 
+# TODO: break these out into a util file
 BUILTINS_FILENAME = os.path.join(os.path.curdir, 'builtins.gr')
 CONSTRUCTOR_NAME = '__init__'
 
@@ -46,15 +49,26 @@ class InvalidNameError(Error):
 
 
 class Analyzer(object):
+    '''Representation of a semantic analyzer.
+
+    Presumes that the Parser has already been run on the given file, adding
+    declared classes, functions, and variables to the symbol table.
+    Resolves any unresolved symbols and runs semantic checks.
+    Adds some auxiliary helper fields to the AST node instances, and may
+    propagate them up the tree, e.g., 'type'.
+
+    Important public attributes:
+      analyze: Method that performs AST analysis and completes the symbol table.
+    '''
 
     def __init__(self, tree, symbol_table):
         self._tree = tree
         self._symbol_table = symbol_table
 
     def analyze(self):
-        self.dispatch(self._tree)
+        self._dispatch(self._tree)
 
-    def dispatch(self, tree):
+    def _dispatch(self, tree):
         tree_class = tree.__class__.__name__
         if tree_class.endswith('Node'):
             meth = getattr(self, '_' + tree.__class__.__name__[:-4])
@@ -62,28 +76,28 @@ class Analyzer(object):
             return
         if isinstance(tree, list):
             for t in tree:
-                self.dispatch(t)
+                self._dispatch(t)
             return
 
-    def get_ancestor_types(self, full_name):
+    def _get_ancestor_types(self, full_name):
         types = [full_name]
         parent = full_name
         while True:
-            parent = self.get_parent_type(parent)
+            parent = self._get_parent_type(parent)
             if parent is None:
                 break
             types.append(parent)
         return types
 
-    def get_parent_type(self, full_name):
+    def _get_parent_type(self, full_name):
         sym = self._symbol_table.get_by_qualified_name(full_name)
         return getattr(sym, 'base', None)
 
     def _Start(self, t):
-        self.dispatch(t.stmt_list)
+        self._dispatch(t.stmt_list)
 
     def _FunctionDef(self, t):
-        self.dispatch(t.name)
+        self._dispatch(t.name)
         sym = self._symbol_table.get_by_qualified_name(
             (t.name.namespace, t.name.value))
         if sym is None:
@@ -93,7 +107,7 @@ class Analyzer(object):
                     t.name.value, t.name.namespace))
 
         # Fill in the return type, which we couldn't resolve during parsing
-        self.dispatch(t.return_type)
+        self._dispatch(t.return_type)
         if getattr(t, 'is_method', False) and t.name.value == CONSTRUCTOR_NAME:
             # set constructor return type to the class
             class_name = t.name.namespace[-1]
@@ -104,10 +118,10 @@ class Analyzer(object):
         sym.return_type = (t.return_type.namespace, t.return_type.value)
 
         # Ensure that param types are valid
-        self.dispatch(t.params)
+        self._dispatch(t.params)
         # Fill in the param types, which we couldn't resolve during parsing
         sym.param_types = tuple(x.type for x in t.params)
-        self.dispatch(t.body)
+        self._dispatch(t.body)
         # TODO: check that the return type matches the function declaration?
 
     def _Type(self, t):
@@ -143,31 +157,31 @@ class Analyzer(object):
 
     def _Declaration(self, t):
         # Note: this is simply a type-name pair, not the full statement
-        self.dispatch(t.var_type)
-        self.dispatch(t.name)
+        self._dispatch(t.var_type)
+        self._dispatch(t.name)
         sym = self._symbol_table.get(t.name.value, namespace=t.name.namespace)
         # Set the type in this variable's symbol, now that we know it
         sym.var_type = t.type = t.name.type = t.var_type.type
 
     def _ClassDef(self, t):
-        self.dispatch(t.name)
+        self._dispatch(t.name)
         if t.base:
-            self.dispatch(t.base)
+            self._dispatch(t.base)
             # Set the base field in this type's symbol
             sym = self._symbol_table.get_by_qualified_name(
                 (t.name.namespace, t.name.value))
             sym.base = t.base.type
-        self.dispatch(t.body)
+        self._dispatch(t.body)
 
     def _ExpressionStmt(self, t):
-        self.dispatch(t.expr)
+        self._dispatch(t.expr)
 
     def _DeclarationStmt(self, t):
-        self.dispatch(t.value)
+        self._dispatch(t.value)
 
     def _Assignment(self, t):
-        self.dispatch(t.target)
-        self.dispatch(t.value)
+        self._dispatch(t.target)
+        self._dispatch(t.value)
         if t.target.type != t.value.type:
             raise InconsistentTypeError(
                 '{2}: Target type {0} does not match value type {1}'.format(
@@ -175,7 +189,7 @@ class Analyzer(object):
 
     def _Print(self, t):
         for val in t.values:
-            self.dispatch(val)
+            self._dispatch(val)
 
     def _Break(self, t):
         pass
@@ -185,26 +199,26 @@ class Analyzer(object):
 
     def _Return(self, t):
         if t.value:
-            self.dispatch(t.value)
+            self._dispatch(t.value)
 
     def _If(self, t):
-        self.dispatch(t.test)
-        self.dispatch(t.body)
+        self._dispatch(t.test)
+        self._dispatch(t.body)
         for else_clause in t.elses:
-            self.dispatch(else_clause)
+            self._dispatch(else_clause)
 
     def _While(self, t):
-        self.dispatch(t.test)
-        self.dispatch(t.body)
+        self._dispatch(t.test)
+        self._dispatch(t.body)
 
     def _For(self, t):
         # "enhanced for" loop
-        self.dispatch(t.target)
-        self.dispatch(t.iterable)
+        self._dispatch(t.target)
+        self._dispatch(t.iterable)
         # check that t.iterable is of the correct type
         # TODO: either restrict for_primary to something whose type we always
         # know, e.g. name or enclosure, or don't check the type here
-        if not (set(self.get_ancestor_types(t.iterable.type)) &
+        if not (set(self._get_ancestor_types(t.iterable.type)) &
                 set([((), 'list'), ((), 'set')])):
             raise InvalidTypeError(
                 'Expected an iterable (list, set), found {0}'.format(
@@ -217,12 +231,12 @@ class Analyzer(object):
         #            'Target type ({0}) does not match '
         #            'iterable element type ({1})'.format(
         #                t.target.type, t.iterable.elt_type))
-        self.dispatch(t.body)
+        self._dispatch(t.body)
 
     def _BinaryOp(self, t):
         op = t.operator
-        self.dispatch(t.left)
-        self.dispatch(t.right)
+        self._dispatch(t.left)
+        self._dispatch(t.right)
         # TODO: if op is boolean, left and right must be coerced to bool
         #       if op is a comparison, left and right must have number type
         #       if op is arithmetic, left and right must have number type, and
@@ -233,7 +247,7 @@ class Analyzer(object):
 
     def _UnaryOp(self, t):
         op = t.operator
-        self.dispatch(t.operand)
+        self._dispatch(t.operand)
         # TODO: if op is boolean, operand must be coerced to bool
         #       if op is arithmetic, operand must be a number
         #       otherwise, error
@@ -247,11 +261,11 @@ class Analyzer(object):
         t.type = ((), t.value.__class__.__name__)
 
     def _Paren(self, t):
-        self.dispatch(t.expr)
+        self._dispatch(t.expr)
         t.type = t.expr.type
 
     def _List(self, t):
-        self.dispatch(t.elts)
+        self._dispatch(t.elts)
         t.type = ((), 'list')
         if not len(t.elts):
             #t.elt_type = None
@@ -265,7 +279,7 @@ class Analyzer(object):
         #t.elt_type = t.elts[0].type
 
     def _Dict(self, t):
-        self.dispatch(t.items)
+        self._dispatch(t.items)
         t.type = ((), 'dict')
         if not len(t.items):
             #t.key_type = None
@@ -280,7 +294,7 @@ class Analyzer(object):
 
     def _Set(self, t):
         assert t.elts  # t should contain at least one element
-        self.dispatch(t.elts)
+        self._dispatch(t.elts)
         t.type = ((), 'set')
         # NOTE: no longer enforcing consistent element types
         #types = set(x.type for x in t.elts)
@@ -291,8 +305,8 @@ class Analyzer(object):
         #t.elt_type = t.elts[0].type
 
     def _AttributeRef(self, t):
-        self.dispatch(t.value)
-        self.dispatch(t.attribute)
+        self._dispatch(t.value)
+        self._dispatch(t.attribute)
         # check that t.attribute is an attribute of t.value
         namespace = symbols.flatten_full_name(t.value.type)
         attr_sym = self._symbol_table.get_by_qualified_name(
@@ -311,15 +325,15 @@ class Analyzer(object):
         t.type = new_type
 
     def _Subscript(self, t):
-        self.dispatch(t.value)
-        # Can we actually index into t.value?
-        if ((), 'list') not in self.get_ancestor_types(t.type):
+        self._dispatch(t.value)
+        # Check that we can actually index into t.value
+        if ((), 'list') not in self._get_ancestor_types(t.type):
             raise InvalidTypeError(
                 'Type {0} is not subscriptable -- only type list'.format(
                     t.type))
-        self.dispatch(t.index)
-        # Is the index actually an integer?
-        if ((), 'int') not in self.get_ancestor_types(t.index.type):
+        self._dispatch(t.index)
+        # Check that the index is actually an integer
+        if ((), 'int') not in self._get_ancestor_types(t.index.type):
             raise InvalidTypeError(
                 'Invalid subscript type {0} for index {1}'.format(
                     t.index.type, t.index))
@@ -327,30 +341,32 @@ class Analyzer(object):
         t.type = ((), 'object')
 
     def _Call(self, t):
-        self.dispatch(t.func)
-        # Is t.func actually a name?
-        func_node_type = t.func.__class__.__name__
-        if func_node_type == 'AttributeRefNode':
+        self._dispatch(t.func)
+        # Check that t.func is actually a name
+        func_node_class = t.func.__class__.__name__
+        if func_node_class == 'AttributeRefNode':
             name_node = t.func.attribute
-        elif func_node_type in 'NameNode':
+        elif func_node_class in 'NameNode':
             name_node = t.func
         else:
-            raise InvalidNameError('Cannot call a {0}'.format(func_node_type))
+            raise InvalidNameError('Cannot call a {0}'.format(func_node_class))
 
-        # Is this name actually callable?
+        # Check that this name is actually callable
         # Also, if t.func is a type, then this is a constructor call
         func_sym = self._symbol_table.get(
             name_node.value, namespace=name_node.namespace)
         func_sym_class = func_sym.__class__.__name__
         if func_sym_class == 'TypeSymbol':
-            type_sym = func_sym
-            t.constructor = True
+            t.is_constructor = True
         elif func_sym_class != 'FunctionSymbol':
-            raise InvalidNameError('Cannot call a {0}'.format(func_sym_class))
+            raise InvalidNameError(
+                'Cannot call an instance of {0}'.format(func_sym_class))
 
-        self.dispatch(t.args)
+        self._dispatch(t.args)
         # check that arg types match param_types in function symbol
-        if t.constructor:
+        if t.is_constructor:
+            type_sym = func_sym
+            # Use the class's constructor method symbol instead
             func_sym = self._symbol_table.get_by_qualified_name(
                 (symbols.flatten_full_name(func_sym.full_name),
                  CONSTRUCTOR_NAME))
@@ -358,7 +374,7 @@ class Analyzer(object):
         else:
             t.type = func_sym.return_type
         for param_type, arg in zip(func_sym.param_types, t.args):
-            if param_type not in self.get_ancestor_types(arg.type):
+            if param_type not in self._get_ancestor_types(arg.type):
                 raise InconsistentTypeError(
                     'Expected type {0} for function argument {1}, '
                     'found {2}'.format(param_type, arg, arg.type))
