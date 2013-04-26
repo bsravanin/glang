@@ -32,6 +32,7 @@ TYPE_MAP = {
     }
 JAVA_HEADER = os.path.join(os.path.curdir, 'header.txt')
 
+BUILTINS = ['dump', 'draw']
 
 def convert_type(name):
     # TODO: print warning if name is known?
@@ -348,15 +349,16 @@ class CodeGenerator(object):
         # dispatching as we do for Node subclasses
         # TODO: should builtin functions be named like in Java, for our
         # convenience, or like in Python, for user convenience?
-        if t.is_constructor:
+	if t.is_constructor:
             self.write('(new ')
+	if t.func.value in BUILTINS:
+	    self.write('GraphUtil.')
         self.dispatch(t.func)
         self.write('(')
         interleave(lambda: self.write(', '), self.dispatch, t.args)
         self.write(')')
         if t.is_constructor:
             self.write(')')
-
 
 def main(args):
     if not len(args):
