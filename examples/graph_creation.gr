@@ -32,4 +32,4 @@ def void main():
 	g.Edge(g.Node({'name' : 'Jon'}), n4, {'type': 'fbfriend'})
 	g.Edge(g.Node({'name' : 'Bob'}), n4, {'type': 'fbfriend'})
 
-	dump(g)
+	dump(g, "graph_creation.gr")
