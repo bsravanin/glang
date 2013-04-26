@@ -40,12 +40,16 @@ class InconsistentElementTypeError(Error):
     'A sequence contains elements of different types.'
 
 
-class InvalidTypeError(Error):
-    'Type is invalid for the given context.'
-
-
 class InvalidNameError(Error):
     'Name is invalid in the current context.'
+
+
+class ParameterCountError(Error):
+    'Incorrect number of function parameters.'
+
+
+class InvalidTypeError(Error):
+    'Type is invalid for the given context.'
 
 
 class Analyzer(object):
@@ -373,11 +377,17 @@ class Analyzer(object):
             t.type = type_sym.full_name
         else:
             t.type = func_sym.return_type
-        for param_type, arg in zip(func_sym.param_types, t.args):
+        if len(func_sym.param_types) != len(t.args):
+            raise ParameterCountError(
+                '{0} expected {1} parameter(s), found {2}'.format(
+                    func_sym.name, len(func_sym.param_types), len(t.args)))
+        for i, (param_type, arg) in enumerate(zip(func_sym.param_types, t.args)):
             if param_type not in self._get_ancestor_types(arg.type):
                 raise InconsistentTypeError(
                     'Expected type {0} for function argument {1}, '
-                    'found {2}'.format(param_type, arg, arg.type))
+                    'found {2}'.format(
+                        symbols.stringify_full_name(param_type), i + 1,
+                        symbols.stringify_full_name(arg.type)))
 
 
 def _analyze(ast, symbol_table):
