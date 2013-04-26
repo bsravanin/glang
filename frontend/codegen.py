@@ -344,6 +344,10 @@ class CodeGenerator(object):
         self.write(')')
 
     def _Call(self, t):
+        # TODO: do function name conversion here, e.g., len(). Consider
+        # dispatching as we do for Node subclasses
+        # TODO: should builtin functions be named like in Java, for our
+        # convenience, or like in Python, for user convenience?
         self.dispatch(t.func)
         self.write('(')
         interleave(lambda: self.write(', '), self.dispatch, t.args)
