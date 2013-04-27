@@ -6,5 +6,3 @@ import edu.columbia.plt.gramola.datastruct.Node;
 import edu.columbia.plt.gramola.util.GraphDBController;
 import edu.columbia.plt.gramola.util.GraphVisualizer;
 import edu.columbia.plt.gramola.util.GraphUtil;
-
-
