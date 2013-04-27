@@ -74,7 +74,7 @@ class Node(object):
     def __str__(self):
         return '<{0}: {1}>'.format(
             self.__class__.__name__,
-            ', '.join('{0}={1}'.format(x, y)
+            ', '.join('{0}={1!r}'.format(x, y)
                       for x, y in self.__dict__.iteritems()))
 
     def __repr__(self):
