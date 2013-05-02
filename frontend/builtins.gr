@@ -4,19 +4,12 @@
 # - These are just prototypes for the symbol table, no implementations needed
 # - return type for init's are ignored, but must be present anyway
 
-# TODO: finish adding builtins
-# TODO: include special functions like __len__, then replace top-level builtins
-# with those calls? Also, subscriptions, operators.
-# TODO: do we need a None type, i.e., an object with no value at all
-# (not even bool)?
+# TODO: make sure all supported builtins are here
 
 
 class object():
 
 	def void __init__(object obj):
-		pass
-
-	def str __str__():
 		pass
 
 
@@ -34,7 +27,8 @@ class int(object):
 class bool(int):
 
 	def void __init__(object obj):
-		# TODO: not sure how to cast to boolean in Java
+		# Casting to boolean is a pain in Java, so we do it in Python
+		# before generating the result
 		pass
 
 
@@ -45,7 +39,8 @@ bool True = bool(1)
 class float(object):
 
 	def void __init__(object obj):
-		# Float.parseFloat(x.toString()) ???
+		# TODO: cast to float in codegen?
+		# Float.parseFloat(x.toString())
 		pass
 
 
@@ -53,10 +48,6 @@ class str(object):
 
 	def void __init__(object obj):
 		# String.valueOf
-		pass
-
-	def int __len__():
-		# String.length
 		pass
 
 	def str copy():
@@ -88,7 +79,7 @@ class str(object):
 		pass
 
 	def bool startswith(str s):
-		# String.startswith
+		# String.startsWith
 		pass
 
 	def str strip():
@@ -110,23 +101,15 @@ class list(object):
 		# ArrayList<Object>
 		pass
 
-	def bool __contains__(object obj):
-		# ArrayList<Object>.contains
-		pass
-
-	def int __len__():
-		# ArrayList<Object>.size
-		pass
-
 	def bool append(object obj):
 		# ArrayList<Object>.add
 		pass
 
-	def void clear():
-		# ArrayList<Object>.clear
+	def bool contains(object obj):
+		# ArrayList<Object>.contains
 		pass
 
-	def list clone():
+	def list copy():
 		# ArrayList<Object>.clone
 		pass
 
@@ -150,13 +133,14 @@ class list(object):
 		# ArrayList<Object>.remove
 		pass
 
-	def void reverse():
-		# Collections.reverse
-		pass
-
-	def void sort():
-		# Collections.sort
-		pass
+	# TODO: find a way to support non-ArrayList methods
+	#def void reverse():
+	#	# Collections.reverse
+	#	pass
+	#
+	#def void sort():
+	#	# Collections.sort
+	#	pass
 
 
 class set(object):
@@ -165,20 +149,12 @@ class set(object):
 		# HashSet<Object>
 		pass
 
-	def bool __contains__(object obj):
-		# HashSet<Object>.contains
-		pass
-
-	def int __len__():
-		# HashSet<Object>.size
-		pass
-
 	def bool add(object obj):
 		# HashSet<Object>.add
 		pass
 
-	def void clear():
-		# HashSet<Object>.clear
+	def bool contains(object obj):
+		# HashSet<Object>.contains
 		pass
 
 	def set copy():
@@ -193,7 +169,7 @@ class set(object):
 		# HashSet<Object>.retainAll
 		pass
 
-	def bool isEmpty():
+	def bool isempty():
 		pass
 
 	def bool issuperset(set s):
@@ -213,14 +189,6 @@ class dict(object):
 
 	def void __init__(object obj):
 		# HashMap<Object,Object>
-		pass
-
-	def int __len__():
-		# HashMap<Object,Object>.size
-		pass
-
-	def bool clear():
-		# HashMap<Object,Object>.clear
 		pass
 
 	def dict copy():
@@ -262,45 +230,40 @@ class Graph(object):
 		pass
 
 	# TODO: Java returns this as long. Should we translate all ints to long?
-	def int getGraphId():
+	def int get_id():
 		pass
 
-	def Node Node(dict attr_dict):
+	def Node node(dict attr_dict):
 		pass
 
-	def Edge Edge(Node start, Node end, dict attr_dict):
+	def Edge edge(Node start, Node end, dict attr_dict):
 		pass
 
-	def void addNode(Node n):
+	def void add_node(Node n):
 		pass
 
-	def Node getNode(str variable, object value):
+	def Node get_node(str variable, object value):
 		pass
 
-	def NodeSet getNodes(str variable, object value):
+	def NodeSet get_nodes(str variable, object value):
 		pass
 
-	def Node getNodeById(int node_id):
+	def Node get_node_by_id(int node_id):
 		pass
 
-	def list getAllNodes():
+	def list get_all_nodes():
 		pass
 
-	def void addEdge(Edge e):
+	def void add_edge(Edge e):
 		pass
 
-	def list getAllEdges():
+	def list get_all_edges():
 		pass
 
-	# TODO: fix this
-	def list getShortestPath(Node start, Node end, list alist):
+	def list get_shortest_path(Node start, Node end, dict attr_map):
 		pass
 
-	# TODO: fix this
-	def list getPaths(Node start, Node end, list alist):
-		pass
-
-	def str __str__():
+	def list get_paths(Node start, Node end, dict attr_map):
 		pass
 
 
@@ -309,50 +272,43 @@ class Node(object):
 	def void __init__(dict attr_map):
 		pass
 
-	def void setId(int node_id):
+	def void set_id(int node_id):
 		pass
 
-	def int getId():
+	def int get_id():
 		pass
 
-	def object getVariableValue(str variable):
+	def object get_attribute(str variable):
 		pass
 
-	def void setVariableValue(str variable, object value):
+	def void set_attribute(str variable, object value):
 		pass
 
-	def set getVariables():
+	def set get_attributes():
 		pass
 
-	def dict getVariableMap():
+	def dict get_attribute_dict():
 		pass
 
-	def void setInE(Edge e):
+	def void set_in_edge(Edge e):
 		pass
 
-	def void setOutE(Edge e):
+	def void set_out_edge(Edge e):
 		pass
 
-	def EdgeSet outE():
+	def EdgeSet out_edges():
 		pass
 
-	def EdgeSet inE():
+	def EdgeSet in_edges():
 		pass
 
-	# TODO: uncomment this once "in" operator is no longer supported
-	#def NodeSet in():
-	#	pass
+	def NodeSet in_neighbors():
+		pass
 
-	def NodeSet out():
+	def NodeSet out_neighbors():
 		pass
 
 	def void update(str variable, object new_value):
-		pass
-
-	def str __str__():
-		pass
-
-	def bool __eq__(object obj):
 		pass
 
 
@@ -361,40 +317,34 @@ class Edge(object):
 	def void __init__(Node start, Node end, dict var_map, int edge_id):
 		pass
 
-	def void setId(int edge_id):
+	def void set_id(int edge_id):
 		pass
 
-	def int getId():
+	def int get_id():
 		pass
 
-	def Node inV():
+	def Node in_node():
 		pass
 
-	def Node outV():
+	def Node out_node():
 		pass
 
-	def set getVariables():
+	def set get_attributes():
 		pass
 
-	def dict getVariableMap():
+	def dict get_attribute_dict():
 		pass
 
-	def object getVariableValue(str variable):
+	def object get_attribute(str variable):
 		pass
 
-	def void setVariableValue(str variable, object value):
+	def void set_attribute(str variable, object value):
 		pass
 
-	def void addParents(Edge path_parent):
+	def void add_parents(Edge path_parent):
 		pass
 
-	def dict getParents():
-		pass
-
-	def str __str__():
-		pass
-
-	def bool __eq__(object obj):
+	def dict get_parents():
 		pass
 
 
@@ -403,7 +353,7 @@ class NodeSet(set):
 	def NodeSet filter(str variable, object value):
 		pass
 
-	def EdgeSet outE():
+	def EdgeSet out_edges():
 		pass
 
 
@@ -412,7 +362,7 @@ class EdgeSet(set):
 	def EdgeSet filter(str variable, object value):
 		pass
 
-	def NodeSet outV():
+	def NodeSet out_nodes():
 		pass
 
 
@@ -422,17 +372,16 @@ class Path(list):
 		pass
 
 
-def int len(object obj):
-	pass
+class __builtins(object):
 
+	def int len(object obj):
+		pass
 
-def Graph load(str path):
-	pass
+	def Graph load(str path):
+		pass
 
+	def void dump(Graph g, str path):
+		pass
 
-def void dump(Graph g, str path):
-	pass
-
-
-def void draw(Graph g, str node_attr, str edge_attr):
-	pass
+	def void draw(Graph g, str node_attr, str edge_attr):
+		pass

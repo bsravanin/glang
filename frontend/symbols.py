@@ -3,6 +3,7 @@
 'Symbol table management for Gramola.'
 
 import sys
+import util
 
 # For creating prettier namespace strings
 NAMESPACE_SEP = '.'
@@ -19,12 +20,12 @@ class UnknownSymbolError(Error):
 class ConflictingSymbolError(Error):
     'Attempted to add a symbol that already exists in the namespace.'
 
-    def __init__(self, symbol_obj, token, namespace):
+    def __init__(self, symbol_obj, token, namespace, lineno):
         Error.__init__(
             self,
-            'Attempted to overwrite table entry {0} '
+            '{3}: Attempted to overwrite table entry {0} '
             'using token {1} in namespace {2}'.format(
-                symbol_obj, token, namespace))
+                symbol_obj, token, namespace, lineno))
 
 
 def _validate_full_name(full_name):
@@ -219,12 +220,11 @@ class SymbolTable(object):
         return self.get(arg)
 
     def __str__(self):
-        items = self._table.items()
+        items = [(stringify_full_name(x), y) for x, y in self._table.items()]
         items.sort()
         vals = []
-        for _, sym in items:
-            vals.append('({0!r}, {1})'.format(
-                    stringify_full_name(sym.full_name), sym))
+        for name, sym in items:
+            vals.append('({0!r}, {1})'.format(name, sym))
         return '\n'.join(vals)
 
     def as_dict(self):
@@ -293,6 +293,9 @@ class SymbolTable(object):
             cur_scopes.pop()
         else:
             full_name = get_qualified_name(cur_scopes, name)
+            value = self.get_by_qualified_name(full_name)
+        if value is None:
+            full_name = get_qualified_name((util.BUILTINS_CLASS_NAME,), name)
             value = self.get_by_qualified_name(full_name)
         return value
 
