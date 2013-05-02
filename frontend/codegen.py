@@ -5,13 +5,102 @@
 import analyzer
 import os
 import re
+import symbols
 import sys
+import util
 
 # pylint: disable=C0103
 # "Invalid name"
 # pylint: disable=C0111
 # "Missing docstring"
 
+
+JAVA_HEADER = os.path.join(os.path.curdir, 'header.txt')
+WRAPPER_CLASS_NAME = 'MainWrapper'
+JAVA_NAME_MAP = {
+    'Edge.add_parents': 'addParents',
+    'Edge.get_attribute': 'getVariableValue',
+    'Edge.get_attribute_map': 'getVariableMap',
+    'Edge.get_attributes': 'getVariables',
+    'Edge.get_id': 'getId',
+    'Edge.get_parents': 'getParents',
+    'Edge.in_node': 'inV',
+    'Edge.out_node': 'outV',
+    'Edge.set_attribute': 'setVariableValue',
+    'Edge.set_id': 'setId',
+    'EdgeSet.filter': 'filter',
+    'EdgeSet.out_nodes': 'outV',
+    'Graph.add_edge': 'addEdge',
+    'Graph.add_node': 'addNode',
+    'Graph.edge': 'Edge',
+    'Graph.get_all_edges': 'getAllEdges',
+    'Graph.get_id': 'getGraphId',
+    'Graph.get_node': 'getNode',
+    'Graph.get_node_by_id': 'getNodeById',
+    'Graph.get_all_nodes': 'getAllNodes',
+    'Graph.get_nodes': 'getNodes',
+    'Graph.get_paths': 'getPaths',
+    'Graph.get_shortest_path': 'getShortestPath',
+    'Graph.node': 'Node',
+    'Node.get_attribute': 'getVariableValue',
+    'Node.get_attribute_map': 'getVariableMap',
+    'Node.get_attributes': 'getVariables',
+    'Node.get_id': 'getId',
+    'Node.in_edges': 'inE',
+    'Node.in_neighbors': 'inNeighbors',
+    'Node.out_edges': 'outE',
+    'Node.out_neighbors': 'outNeighbors',
+    'Node.set_attribute': 'setVariableValue',
+    'Node.set_id': 'setId',
+    'Node.set_in_edge': 'setInE',
+    'Node.set_out_edge': 'setOutE',
+    'Node.update': 'update',
+    'NodeSet.filter': 'filter',
+    'NodeSet.out_edges': 'outE',
+    '__builtins.draw': 'GraphUtil.draw',
+    '__builtins.dump': 'GraphUtil.dump',
+    '__builtins.len': 'GraphUtil.len',
+    '__builtins.load': 'GraphUtil.load',
+    'dict.copy': 'clone',
+    'dict.get': 'get',
+    'dict.has_key': 'containsKey',
+    'dict.items': 'entrySet',
+    'dict.keys': 'keySet',
+    'dict.pop': 'remove',
+    'dict.update': 'putAll',
+    'dict.values': 'values',
+    'list.append': 'add',
+    'list.contains': 'contains',
+    'list.copy': 'clone',
+    'list.extend': 'addAll',
+    'list.index': 'indexOf',
+    'list.insert': 'add',
+    'list.pop': 'remove',
+    'list.remove': 'remove',
+    # TODO: support this somehow
+    #'list.reverse': 'Collections.reverse',
+    #'list.sort': 'sort',
+    'set.add': 'add',
+    'set.contains': 'contains',
+    'set.copy': 'clone',
+    'set.difference_update': 'removeAll',
+    'set.intersection_update': 'retainAll',
+    'set.isempty': 'isEmpty',
+    'set.issuperset': 'containsAll',
+    'set.remove': 'remove',
+    'set.update': 'addAll',
+    'str.copy': 'clone',
+    'str.ends_with': 'endsWith',
+    'str.find': 'indexOf',
+    'str.lower': 'toLowerCase',
+    'str.replace': 'replace',
+    'str.rfind': 'lastIndexOf',
+    'str.split': 'split',
+    'str.startswith': 'startsWith',
+    'str.strip': 'trim',
+    'str.substring': 'substring',
+    'str.upper': 'toUpperCase',
+    }
 
 TYPE_MAP = {
     'object': 'Object',
@@ -30,9 +119,7 @@ TYPE_MAP = {
     'EdgeSet': 'EdgeSet',
     'Path': 'Path',
     }
-JAVA_HEADER = os.path.join(os.path.curdir, 'header.txt')
 
-BUILTINS = ['dump', 'draw']
 
 def convert_type(name):
     # TODO: print warning if name is known?
@@ -57,8 +144,7 @@ class CodeGenerator(object):
     source code for the abstract syntax; original formatting is disregarded.'''
 
     def __init__(self, tree, output=sys.stdout):
-        '''CodeGenerator(tree, file_obj=sys.stdout) -> None.
-         Print the source for tree to file.'''
+        'Constructor for CodeGenerator.'
         self.f = output
         self._indent = 0
         self.dispatch(tree)
@@ -128,7 +214,7 @@ class CodeGenerator(object):
             return
 
         self.write(header)
-        self.fill('public class MainWrapper ')
+        self.fill('public class ' + WRAPPER_CLASS_NAME)
         self.enter()
         for stmt in other_stmts:
             if stmt.__class__.__name__ == 'FunctionDefNode':
@@ -145,20 +231,19 @@ class CodeGenerator(object):
         self.fill('public ')
         if top:
             self.write('static ')
-        if (t.name.value == analyzer.CONSTRUCTOR_NAME and
-            getattr(t, 'is_method', False)):
-            self.write(t.return_type.value)
-        else:
-            self.dispatch(t.return_type)
-            self.write(' ')
-            self.dispatch(t.name)
-        self.write('(')
         if t.name.value == 'main':
-            # TODO: what if the user's 'main' definition is different?
-            self.write('String[] args')
+            self.write('void main(String[] args)')
         else:
+            if (t.name.value == util.CONSTRUCTOR_NAME and
+                getattr(t, 'is_method', False)):
+                self.write(t.return_type.value)
+            else:
+                self.dispatch(t.return_type)
+                self.write(' ')
+                self.dispatch(t.name)
+            self.write('(')
             interleave(lambda: self.write(', '), self.dispatch, t.params)
-        self.write(')')
+            self.write(')')
         self.enter()
         self.dispatch(t.body)
         self.leave()
@@ -216,9 +301,13 @@ class CodeGenerator(object):
         else:
             for e in t.values:
                 self.fill('System.out.println(')
-                self.write('(')
-                self.dispatch(e)
-                self.write(').toString())')
+                if e.__class__.__name__ == 'StringNode':
+                    self.dispatch(e)
+                else:
+                    self.write('(')
+                    self.dispatch(e)
+                    self.write(').toString()')
+                self.write(')')
                 self.end_stmt()
 
     def _Break(self, _):
@@ -324,7 +413,7 @@ class CodeGenerator(object):
             self.write(', ')
             self.dispatch(item[1])
 
-        self.write("GraphUtil.createVarMap(")
+        self.write('GraphUtil.createVarMap(')
         interleave(lambda: self.write(', '), write_pair, t.items)
         self.write(')')
 
@@ -345,20 +434,31 @@ class CodeGenerator(object):
         self.write(')')
 
     def _Call(self, t):
-        # TODO: do function name conversion here, e.g., len(). Consider
-        # dispatching as we do for Node subclasses
-        # TODO: should builtin functions be named like in Java, for our
-        # convenience, or like in Python, for user convenience?
-	if t.is_constructor:
-            self.write('(new ')
-	if t.func.value in BUILTINS:
-	    self.write('GraphUtil.')
-        self.dispatch(t.func)
+        # Translate qualified function name to Java name
+        # - builtin function: prepend GraphUtil
+        # - constructor: prepend "new "
+        # - attribute ref: map attr (namespace, name) to Java attr
+        if t.is_constructor:
+            self.write('new ')
+        func_name_node = getattr(t.func, 'attribute', t.func)
+        func_full_name = symbols.stringify_full_name(
+            (func_name_node.namespace, func_name_node.value))
+        java_name = JAVA_NAME_MAP.get(func_full_name, func_name_node.value)
+        if func_name_node.namespace == (util.BUILTINS_CLASS_NAME,):
+            # Built-in functions have special handling
+            self.write(java_name)
+        elif func_name_node.namespace == ():
+            # Top-level functions need to be qualified with the wrapper class
+            self.write('{0}.{1}'.format(WRAPPER_CLASS_NAME, java_name))
+        else:
+            if getattr(t.func, 'attribute', False):
+                self.dispatch(t.func.value)
+                self.write('.')
+            self.write(java_name)
         self.write('(')
         interleave(lambda: self.write(', '), self.dispatch, t.args)
         self.write(')')
-        if t.is_constructor:
-            self.write(')')
+
 
 def main(args):
     if not len(args):

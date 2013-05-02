@@ -14,6 +14,7 @@ import os
 import parser
 import symbols
 import sys
+import util
 
 # pylint: disable=C0103
 # "Invalid name"
@@ -21,11 +22,8 @@ import sys
 # "Missing docstring"
 # pylint: disable=R0201
 # "Method could be a function
-
-
-# TODO: break these out into a util file
-BUILTINS_FILENAME = os.path.join(os.path.curdir, 'builtins.gr')
-CONSTRUCTOR_NAME = '__init__'
+# pylint: disable=R0903
+# "Too few public methods"
 
 
 class Error(Exception):
@@ -102,42 +100,29 @@ class Analyzer(object):
 
     def _FunctionDef(self, t):
         self._dispatch(t.name)
-        sym = self._symbol_table.get_by_qualified_name(
-            (t.name.namespace, t.name.value))
-        if sym is None:
-            raise symbols.UnknownSymbolError(
-                'Function name {0} should already have been defined '
-                'in namespace {1}. You have a problem.'.format(
-                    t.name.value, t.name.namespace))
 
-        # Fill in the return type, which we couldn't resolve during parsing
-        self._dispatch(t.return_type)
-        if getattr(t, 'is_method', False) and t.name.value == CONSTRUCTOR_NAME:
-            # set constructor return type to the class
+        # If this is a constructor, set its return type to its class name
+        if (getattr(t, 'is_method', False) and
+            t.name.value == util.CONSTRUCTOR_NAME):
             class_name = t.name.namespace[-1]
             class_namespace = t.name.namespace[:-1]
             t.return_type = nodes.TypeNode(
                 class_name, namespace=class_namespace)
-            t.return_type.type = (class_namespace, class_name)
+        # Update the symbol table entry to match
+        sym = self._symbol_table.get_by_qualified_name(
+            (t.name.namespace, t.name.value))
         sym.return_type = (t.return_type.namespace, t.return_type.value)
 
-        # Ensure that param types are valid
+        self._dispatch(t.return_type)
         self._dispatch(t.params)
-        # Fill in the param types, which we couldn't resolve during parsing
-        sym.param_types = tuple(x.type for x in t.params)
         self._dispatch(t.body)
         # TODO: check that the return type matches the function declaration?
 
     def _Type(self, t):
-        # Make sure this type exists in the symbol table
-        # If this type is defined as part of a class definition, the namespace
-        # in its symbol should match the namespace in its TypeNode.
         sym = self._symbol_table.get(t.value, namespace=t.namespace,
                                      symbol_type=symbols.TypeSymbol)
-        if sym is None:
-            raise symbols.UnknownSymbolError(t.value, t.namespace)
-        # Now that we've resolved the type name, we can update some outdated
-        # fields
+        # Now that we've resolved this type symbol, we can update this node's
+        # namespace and type
         t.namespace = sym.namespace
         t.type = sym.full_name
 
@@ -146,12 +131,9 @@ class Analyzer(object):
             # This name is taking part in an attribute reference, and we don't
             # have the LHS of the dot here, so we check later
             return
-        # Make sure this name exists in the symbol table
         sym = self._symbol_table.get(t.value, namespace=t.namespace)
-        if sym is None:
-            raise symbols.UnknownSymbolError(
-                'Name {0} is unknown in namespace {1}'.format(
-                    t.value, t.namespace))
+        # Now that we've resolved this type symbol, we can update this node's
+        # namespace
         t.namespace = sym.namespace
         # Either this variable has already been declared, in which case its
         # symbol's var_type is set, or it's about to be set in a declaration.
@@ -163,18 +145,13 @@ class Analyzer(object):
         # Note: this is simply a type-name pair, not the full statement
         self._dispatch(t.var_type)
         self._dispatch(t.name)
-        sym = self._symbol_table.get(t.name.value, namespace=t.name.namespace)
-        # Set the type in this variable's symbol, now that we know it
-        sym.var_type = t.type = t.name.type = t.var_type.type
+        # Make sure the AST node types are consistent
+        t.type = t.name.type = t.var_type.type
 
     def _ClassDef(self, t):
         self._dispatch(t.name)
         if t.base:
             self._dispatch(t.base)
-            # Set the base field in this type's symbol
-            sym = self._symbol_table.get_by_qualified_name(
-                (t.name.namespace, t.name.value))
-            sym.base = t.base.type
         self._dispatch(t.body)
 
     def _ExpressionStmt(self, t):
@@ -311,17 +288,20 @@ class Analyzer(object):
     def _AttributeRef(self, t):
         self._dispatch(t.value)
         self._dispatch(t.attribute)
-        # check that t.attribute is an attribute of t.value
-        namespace = symbols.flatten_full_name(t.value.type)
+        # check that t.attribute is actually an attribute of t.value
+        value_namespace = symbols.flatten_full_name(t.value.type)
         attr_sym = self._symbol_table.get_by_qualified_name(
-            (namespace, t.attribute.value))
+            (value_namespace, t.attribute.value))
         if attr_sym is None:
             raise symbols.UnknownSymbolError(
-                '{0} is not an attribute of type {1}'.format(
-                    t.attribute.value, t.value.type))
-        t.attribute.namespace = namespace
+                '{2}: {0} is not an attribute of type {1}'.format(
+                    t.attribute.value, t.value.type, t.lineno))
+
+        # We skipped setting the attribute's namespace in _Name() so that we
+        # could set it here
+        t.attribute.namespace = value_namespace
         if attr_sym.__class__.__name__ == 'FunctionSymbol':
-            # if the attribute isn't a VariableSymbol or TypeSymbol,
+            # If the attribute isn't a VariableSymbol or TypeSymbol,
             # type means nothing
             new_type = None
         else:
@@ -373,7 +353,7 @@ class Analyzer(object):
             # Use the class's constructor method symbol instead
             func_sym = self._symbol_table.get_by_qualified_name(
                 (symbols.flatten_full_name(func_sym.full_name),
-                 CONSTRUCTOR_NAME))
+                 util.CONSTRUCTOR_NAME))
             t.type = type_sym.full_name
         else:
             t.type = func_sym.return_type
@@ -398,9 +378,13 @@ def _analyze(ast, symbol_table):
 def analyze_file(filename, debug=False):
     p = parser.Parser()
     # Populate symbol table with built-ins
-    builtin_ast = p.parse_file(BUILTINS_FILENAME, debug=debug)
+    builtin_ast = p.parse_file(util.BUILTINS_FILENAME, debug=debug)
     # Resolve built-in names, run checks
     _analyze(builtin_ast, p.symbol_table)
+
+    if os.path.abspath(filename) == util.BUILTINS_FILENAME:
+        return builtin_ast, p.symbol_table
+
     ast = p.parse_file(filename)
     # Resolve names in the given file, run checks
     _analyze(ast, p.symbol_table)
@@ -427,12 +411,16 @@ def main(args):
 
     filename = args[0]
     ast, symtab = analyze_file(filename, debug=debug)
+
     if prettify:
         print nodes.prettify(ast)
     else:
         print str(ast)
 
     if print_symbol_table:
+        print
+        print
+        print '***** SYMBOL TABLE *****'
         print symtab
 
 
