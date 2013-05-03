@@ -3,6 +3,7 @@
 'Code generator for Gramola.'
 
 import analyzer
+import nodes
 import os
 import re
 import symbols
@@ -105,9 +106,9 @@ JAVA_NAME_MAP = {
 TYPE_MAP = {
     'object': 'Object',
     'void': 'void',
-    'int': 'int',
-    'bool': 'boolean',
-    'float': 'float',
+    'int': 'Integer',
+    'bool': 'Boolean',
+    'float': 'Float',
     'str': 'String',
     'list': 'ArrayList<Object>',
     'set': 'HashSet<Object>',
@@ -359,8 +360,10 @@ class CodeGenerator(object):
 
     def _BinaryOp(self, t):
         op = t.operator
-        if op == '==':
+        if op in ('==', '!='):
             # value equality
+            if op == '!=':
+                self.write('!')
             self.write('(')
             self.dispatch(t.left)
             self.write(').equals(')
@@ -438,6 +441,7 @@ class CodeGenerator(object):
         # - builtin function: prepend GraphUtil
         # - constructor: prepend "new "
         # - attribute ref: map attr (namespace, name) to Java attr
+        # TODO: handle casts like bool(), float()
         if t.is_constructor:
             self.write('new ')
         func_name_node = getattr(t.func, 'attribute', t.func)

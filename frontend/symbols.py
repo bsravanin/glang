@@ -341,7 +341,7 @@ class SymbolTable(object):
           TypeError: If 'symbol' is not a valid symbol.
         '''
         _validate_symbol(symbol)
-        self._table[(symbol.namespace, symbol.name)] = symbol
+        self._table[symbol.full_name] = symbol
 
     def set_all(self, symbols):
         'Set symbol table entries for all of the given symbols.'

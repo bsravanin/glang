@@ -34,20 +34,16 @@ class InconsistentTypeError(Error):
     'Types do not match as expected.'
 
 
-class InconsistentElementTypeError(Error):
-    'A sequence contains elements of different types.'
-
-
 class InvalidNameError(Error):
     'Name is invalid in the current context.'
 
 
+class InvalidTypeError(Error):
+    'Type is invalid in the given context.'
+
+
 class ParameterCountError(Error):
     'Incorrect number of function parameters.'
-
-
-class InvalidTypeError(Error):
-    'Type is invalid for the given context.'
 
 
 class Analyzer(object):
@@ -117,6 +113,7 @@ class Analyzer(object):
         self._dispatch(t.params)
         self._dispatch(t.body)
         # TODO: check that the return type matches the function declaration?
+        # look for return statement(s) in 'body'
 
     def _Type(self, t):
         sym = self._symbol_table.get(t.value, namespace=t.namespace,
@@ -132,6 +129,11 @@ class Analyzer(object):
             # have the LHS of the dot here, so we check later
             return
         sym = self._symbol_table.get(t.value, namespace=t.namespace)
+        if sym is None:
+            raise symbols.UnknownSymbolError(
+                '{0}: Could not resolve symbol name {1!r} '
+                'within namespace {2!r}'.format(
+                    t.lineno, t.value, symbols.stringify_tuple(t.namespace)))
         # Now that we've resolved this type symbol, we can update this node's
         # namespace
         t.namespace = sym.namespace
@@ -181,6 +183,9 @@ class Analyzer(object):
     def _Return(self, t):
         if t.value:
             self._dispatch(t.value)
+            t.type = t.value.type
+        else:
+            t.type = ((), 'void')
 
     def _If(self, t):
         self._dispatch(t.test)
@@ -204,27 +209,79 @@ class Analyzer(object):
             raise InvalidTypeError(
                 'Expected an iterable (list, set), found {0}'.format(
                     t.iterable.type))
-        # NOTE: no longer ensuring consistent element types, so this check is
-        # useless
-        #if t.iterable.elts:
-        #    if t.target.type != t.iterable.elt_type:
-        #        raise InconsistentTypeError(
-        #            'Target type ({0}) does not match '
-        #            'iterable element type ({1})'.format(
-        #                t.target.type, t.iterable.elt_type))
         self._dispatch(t.body)
 
     def _BinaryOp(self, t):
-        op = t.operator
         self._dispatch(t.left)
         self._dispatch(t.right)
-        # TODO: if op is boolean, left and right must be coerced to bool
-        #       if op is a comparison, left and right must have number type
-        #       if op is arithmetic, left and right must have number type, and
-        #           must be coerced
-        #       otherwise, error
-        new_type = t.left.type
-        t.type = new_type
+
+        boolean_ops = ('or', 'and')
+        comparison_ops = ('<', '>', '<=', '>=', '==', '!=', 'is')
+        arithmetic_ops = ('+', '-', '*', '/', '%')
+        bool_sym = self._symbol_table.get(
+            'bool', symbol_type=symbols.TypeSymbol)
+        bool_type = bool_sym.full_name
+        int_type = self._symbol_table.get(
+            'int', symbol_type=symbols.TypeSymbol).full_name
+        float_sym = self._symbol_table.get(
+            'float', symbol_type=symbols.TypeSymbol)
+        float_type = float_sym.full_name
+        str_type = self._symbol_table.get(
+            'str', symbol_type=symbols.TypeSymbol).full_name
+        numeric_types = set([int_type, float_type])
+        op = t.operator
+        if op in boolean_ops:
+            t.type = bool_type
+            # Coerce each side to bool if numeric or string
+            bool_node = nodes.NameNode(bool_sym.name, bool_sym.namespace)
+            if t.left.type in (int_type, float_type, str_type):
+                new_node = nodes.CallNode(func=bool_node, args=[t.left],
+                                          is_constructor=True)
+                new_node.type = bool_type
+                t.left = new_node
+            if t.right.type in (int_type, float_type, str_type):
+                new_node = nodes.CallNode(func=bool_node, args=[t.right],
+                                          is_constructor=True)
+                new_node.type = bool_type
+                t.right = new_node
+        elif op in comparison_ops:
+            t.type = bool_type
+            if (op not in ('==', '!=', 'is') and
+                not (t.left.type in numeric_types and
+                     t.right.type in numeric_types)):
+                raise InvalidTypeError(
+                    '{0}: either {1} or {2} types cannot take part in an '
+                    'arithmetic operation'.format(
+                        t.lineno,
+                        symbols.stringify_full_name(t.left.type),
+                        symbols.stringify_full_name(t.right.type)))
+        elif op in arithmetic_ops:
+            if not (t.left.type in numeric_types and
+                    t.right.type in numeric_types):
+                raise InvalidTypeError(
+                    '{0}: either {1} or {2} types cannot take part in an '
+                    'arithmetic operation'.format(
+                        t.lineno,
+                        symbols.stringify_full_name(t.left.type),
+                        symbols.stringify_full_name(t.right.type)))
+            if t.left.type != t.right.type:
+                t.type = float_type
+                # Coerce int to float (we only have 2 numeric types)
+                float_node = nodes.NameNode(float_sym.name, float_sym.namespace)
+                if t.left.type == int_type:
+                    new_node = nodes.CallNode(func=float_node, args=[t.left],
+                                              is_constructor=True)
+                    new_node.type = float_type
+                    t.left = new_node
+                else:
+                    new_node = nodes.CallNode(func=float_node, args=[t.right],
+                                              is_constructor=True)
+                    new_node.type = float_type
+                    t.right = new_node
+            else:
+                t.type = t.left.type
+        else:
+            raise Error('Unknown binary operation: {0}'.format(op))
 
     def _UnaryOp(self, t):
         op = t.operator
@@ -236,10 +293,16 @@ class Analyzer(object):
         t.type = new_type
 
     def _String(self, t):
-        t.type = ((), t.value.__class__.__name__)
+        #t.type = ((), t.value.__class__.__name__)
+        t.type = self._symbol_table.get(
+            t.value.__class__.__name__,
+            symbol_type=symbols.TypeSymbol).full_name
 
     def _Number(self, t):
-        t.type = ((), t.value.__class__.__name__)
+        #t.type = ((), t.value.__class__.__name__)
+        t.type = self._symbol_table.get(
+            t.value.__class__.__name__,
+            symbol_type=symbols.TypeSymbol).full_name
 
     def _Paren(self, t):
         self._dispatch(t.expr)
@@ -248,42 +311,15 @@ class Analyzer(object):
     def _List(self, t):
         self._dispatch(t.elts)
         t.type = ((), 'list')
-        if not len(t.elts):
-            #t.elt_type = None
-            return
-        # NOTE: no longer enforcing consistent element types
-        #types = set(x.type for x in t.elts)
-        #if len(types) > 1:
-        #    raise InconsistentElementTypeError(
-        #        'List elements have multiple types ({0}): {1}'.format(
-        #            types, t.elts))
-        #t.elt_type = t.elts[0].type
 
     def _Dict(self, t):
         self._dispatch(t.items)
         t.type = ((), 'dict')
-        if not len(t.items):
-            #t.key_type = None
-            return
-        # NOTE: no longer enforcing consistent element types
-        #types = set(key.type for key, value in t.items)
-        #if len(types) > 1:
-        #    raise InconsistentElementTypeError(
-        #        'Dict keys have multiple types ({0}): {1}'.format(
-        #            types, dict(t.items)))
-        #t.key_type = t.items[0][0].type
 
     def _Set(self, t):
         assert t.elts  # t should contain at least one element
         self._dispatch(t.elts)
         t.type = ((), 'set')
-        # NOTE: no longer enforcing consistent element types
-        #types = set(x.type for x in t.elts)
-        #if len(types) > 1:
-        #    raise InconsistentElementTypeError(
-        #        'Set elements have multiple types ({0}): {1}'.format(
-        #            types, t.elts))
-        #t.elt_type = t.elts[0].type
 
     def _AttributeRef(self, t):
         self._dispatch(t.value)
@@ -359,7 +395,7 @@ class Analyzer(object):
             t.type = func_sym.return_type
         if len(func_sym.param_types) != len(t.args):
             raise ParameterCountError(
-                '{0} expected {1} parameter(s), found {2}'.format(
+                '{0} expected {1} argument(s), found {2}'.format(
                     func_sym.name, len(func_sym.param_types), len(t.args)))
         for i, (param_type, arg) in enumerate(zip(func_sym.param_types, t.args)):
             if param_type not in self._get_ancestor_types(arg.type):

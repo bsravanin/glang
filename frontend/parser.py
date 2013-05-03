@@ -80,6 +80,7 @@ class Parser(object):
     def _correct_symbol_table(self):
         for sym in self._symbol_table.as_dict().itervalues():
             if getattr(sym, 'var_type', False):
+                # Fix VariableSymbol.var_type
                 temp_namespace = sym.var_type[0]
                 temp_name = sym.var_type[1]
                 temp_sym = self._symbol_table.get(
@@ -89,6 +90,7 @@ class Parser(object):
                     break
                 sym.var_type = temp_sym.full_name
             elif getattr(sym, 'base', False):
+                # Fix TypeSymbol.base
                 temp_namespace = sym.base[0]
                 temp_name = sym.base[1]
                 temp_sym = self._symbol_table.get(
@@ -98,6 +100,7 @@ class Parser(object):
                     break
                 sym.base = temp_sym.full_name
             elif getattr(sym, 'return_type', False):
+                # Fix FunctionSymbol.return_type and FunctionSymbol.param_types
                 temp_namespace = sym.return_type[0]
                 temp_name = sym.return_type[1]
                 temp_sym = self._symbol_table.get(
@@ -118,7 +121,9 @@ class Parser(object):
                     param_types.append(temp_sym.full_name)
                 sym.param_types = tuple(param_types)
         else:
+            # We've iterated through the table without errors
             return
+        # We've broken from the for-loop due to an error
         raise symbols.UnknownSymbolError(
             '{2}: Could not resolve symbol name {0!r} '
             'within namespace {1!r}'.format(
@@ -306,9 +311,9 @@ class Parser(object):
         p[0].lineno = p.slice[1].lineno
 
         # Set a dummy value for this TypeSymbol's base, to be correct later
-        sym = self._symbol_table.get(p[2].value)
         base_node = p[5]
         if base_node:
+            sym = self._symbol_table.get(p[2].value)
             sym.base = (base_node.namespace, base_node.value)
 
         # For each method in this new class, add "self" within its namespace

@@ -65,7 +65,7 @@ class Node(object):
     def __init__(self, **kwargs):
         for kwarg in kwargs:
             # These fields can be None
-            if kwarg in ('base', 'args', 'elses'):
+            if kwarg in ('base',):
                 continue
             if kwarg is None:
                 raise InvalidNodeConstructionError(self)
@@ -177,7 +177,7 @@ class IfNode(Node):
     'AST node for an if statement.'
 
     def __init__(self, test, body, elses=None):
-        Node.__init__(self, test=test, body=body, elses=elses)
+        Node.__init__(self, test=test, body=body, elses=elses or [])
 
 
 class WhileNode(Node):
@@ -268,4 +268,5 @@ class CallNode(Node):
     'AST node for a function call.'
 
     def __init__(self, func, args, is_constructor=False):
-        Node.__init__(self, func=func, args=args, is_constructor=is_constructor)
+        Node.__init__(self, func=func, args=args or [],
+                      is_constructor=is_constructor)
