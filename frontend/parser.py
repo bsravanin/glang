@@ -656,10 +656,11 @@ class Parser(object):
                       | unary_op unary_expr'''
         if len(p) == 2:
             p[0] = p[1]
+            p[0].lineno = p[1].lineno
         else:
             # p[2] is a string, not a token
             p[0] = nodes.UnaryOpNode(operator=p[1], operand=p[2])
-        p[0].lineno = p[1].lineno
+            p[0].lineno = p[2].lineno
 
     def p_unary_op(self, p):
         '''unary_op : PLUS

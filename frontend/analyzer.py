@@ -284,13 +284,41 @@ class Analyzer(object):
             raise Error('Unknown binary operation: {0}'.format(op))
 
     def _UnaryOp(self, t):
-        op = t.operator
         self._dispatch(t.operand)
-        # TODO: if op is boolean, operand must be coerced to bool
-        #       if op is arithmetic, operand must be a number
-        #       otherwise, error
-        new_type = t.operand.type
-        t.type = new_type
+
+        boolean_ops = ('not',)
+        arithmetic_ops = ('+', '-')
+        bool_sym = self._symbol_table.get(
+            'bool', symbol_type=symbols.TypeSymbol)
+        bool_type = bool_sym.full_name
+        int_type = self._symbol_table.get(
+            'int', symbol_type=symbols.TypeSymbol).full_name
+        float_sym = self._symbol_table.get(
+            'float', symbol_type=symbols.TypeSymbol)
+        float_type = float_sym.full_name
+        str_type = self._symbol_table.get(
+            'str', symbol_type=symbols.TypeSymbol).full_name
+        numeric_types = set([int_type, float_type])
+        op = t.operator
+        if op in boolean_ops:
+            t.type = bool_type
+            # Coerce operand to bool if numeric or string
+            bool_node = nodes.NameNode(bool_sym.name, bool_sym.namespace)
+            if t.operand.type in (int_type, float_type, str_type):
+                new_node = nodes.CallNode(func=bool_node, args=[t.operand],
+                                          is_constructor=True)
+                new_node.type = bool_type
+                t.operand = new_node
+        elif op in arithmetic_ops:
+            if t.operand.type not in numeric_types:
+                raise InvalidTypeError(
+                    '{0}: {1} type cannot take part in an '
+                    'arithmetic operation'.format(
+                        t.lineno,
+                        symbols.stringify_full_name(t.operand.type)))
+            t.type = t.operand.type
+        else:
+            raise Error('Unknown unary operation: {0}'.format(op))
 
     def _String(self, t):
         #t.type = ((), t.value.__class__.__name__)
@@ -364,7 +392,9 @@ class Analyzer(object):
         self._dispatch(t.func)
         # Check that t.func is actually a name
         func_node_class = t.func.__class__.__name__
+        is_attribute = False
         if func_node_class == 'AttributeRefNode':
+            is_attribute = True
             name_node = t.func.attribute
         elif func_node_class in 'NameNode':
             name_node = t.func
@@ -383,7 +413,7 @@ class Analyzer(object):
                 'Cannot call an instance of {0}'.format(func_sym_class))
 
         self._dispatch(t.args)
-        # check that arg types match param_types in function symbol
+
         if t.is_constructor:
             type_sym = func_sym
             # Use the class's constructor method symbol instead
@@ -391,13 +421,24 @@ class Analyzer(object):
                 (symbols.flatten_full_name(func_sym.full_name),
                  util.CONSTRUCTOR_NAME))
             t.type = type_sym.full_name
+            # Replace NameNode with TypeNode for the type being constructed
+            new_node = nodes.TypeNode(
+                type_sym.name, namespace=type_sym.namespace)
+            new_node.type = type_sym.full_name
+            if is_attribute:
+                t.func.attribute = new_node
+            else:
+                t.func = new_node
         else:
             t.type = func_sym.return_type
+
+        # Check that arg types match param_types in function symbol
         if len(func_sym.param_types) != len(t.args):
             raise ParameterCountError(
                 '{0} expected {1} argument(s), found {2}'.format(
                     func_sym.name, len(func_sym.param_types), len(t.args)))
-        for i, (param_type, arg) in enumerate(zip(func_sym.param_types, t.args)):
+        for i, (param_type, arg) in enumerate(
+            zip(func_sym.param_types, t.args)):
             if param_type not in self._get_ancestor_types(arg.type):
                 raise InconsistentTypeError(
                     'Expected type {0} for function argument {1}, '

@@ -27,8 +27,6 @@ class int(object):
 class bool(int):
 
 	def void __init__(object obj):
-		# Casting to boolean is a pain in Java, so we do it in Python
-		# before generating the result
 		pass
 
 

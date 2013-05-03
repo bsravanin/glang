@@ -3,7 +3,6 @@
 'Code generator for Gramola.'
 
 import analyzer
-import nodes
 import os
 import re
 import symbols
@@ -438,15 +437,52 @@ class CodeGenerator(object):
 
     def _Call(self, t):
         # Translate qualified function name to Java name
+        # - type casting: special handling
         # - builtin function: prepend GraphUtil
         # - constructor: prepend "new "
         # - attribute ref: map attr (namespace, name) to Java attr
-        # TODO: handle casts like bool(), float()
-        if t.is_constructor:
-            self.write('new ')
+
         func_name_node = getattr(t.func, 'attribute', t.func)
         func_full_name = symbols.stringify_full_name(
             (func_name_node.namespace, func_name_node.value))
+        # Special handling for casting
+        if func_full_name == 'bool':
+            self.write('Boolean.valueOf(')
+            self.write('(')
+            self.dispatch(t.args[0])
+            self.write(') != 0 ? "true" : "false"')
+            self.write(')')
+            return
+        if func_full_name == 'str':
+            self.write('String.valueOf(')
+            self.dispatch(t.args[0])
+            self.write(')')
+            return
+        if func_full_name == 'int':
+            self.write('Integer.valueOf(')
+            self.write('(')
+            self.dispatch(t.args[0])
+            self.write(').toString()')
+            self.write(')')
+            return
+        if func_full_name == 'float':
+            self.write('Float.valueOf(')
+            self.write('(')
+            self.dispatch(t.args[0])
+            self.write(').toString()')
+            self.write(')')
+            return
+
+        if t.is_constructor:
+            self.write('(')
+            self.write('new ')
+            self.dispatch(func_name_node)
+            self.write('(')
+            interleave(lambda: self.write(', '), self.dispatch, t.args)
+            self.write(')')
+            self.write(')')
+            return
+
         java_name = JAVA_NAME_MAP.get(func_full_name, func_name_node.value)
         if func_name_node.namespace == (util.BUILTINS_CLASS_NAME,):
             # Built-in functions have special handling
@@ -455,6 +491,7 @@ class CodeGenerator(object):
             # Top-level functions need to be qualified with the wrapper class
             self.write('{0}.{1}'.format(WRAPPER_CLASS_NAME, java_name))
         else:
+            # If called function is an object attribute, generate object first
             if getattr(t.func, 'attribute', False):
                 self.dispatch(t.func.value)
                 self.write('.')
