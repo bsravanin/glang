@@ -72,7 +72,7 @@ public class GraphApp {
 		}
 		
 		/*Test NodeSet outV of marko*/
-		NodeSet outN = test.out();
+		NodeSet outN = test.outNeighbors();
 		Iterator<Node> outNeighbors = outN.iterator();
 		Node tmpNode;
 		

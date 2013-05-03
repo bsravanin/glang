@@ -105,7 +105,7 @@ public class Node extends GraphElement{
 	 * Current Node is on the end side
 	 * @return a NodeSet containing all Nodes on the start side of incoming Edges
 	 */
-	public NodeSet in() {
+	public NodeSet inNeighbors() {
 		NodeSet ret = new NodeSet();
 		Iterator<Edge> eIT = this.incoming.iterator();
 		
@@ -121,7 +121,7 @@ public class Node extends GraphElement{
 	 * Current Node is on the start side
 	 * @return a NodeSet containing all Nodes on the end side of outgoing Edges
 	 */
-	public NodeSet out() {
+	public NodeSet outNeighbors() {
 		NodeSet ret = new NodeSet();
 		Iterator<Edge> eIT = this.outgoing.iterator();
 		
