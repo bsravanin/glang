@@ -25,12 +25,6 @@ def void int_operations(int i):
 	i = i * 2
 	i = i / 2
 	i = i % 3
-	# i = i ** 2
-	# i += 1
-	# i -= 1
-	# i *= 2
-	# i /= 2
-	# i **= 2
 
 
 def void float_operations(float f):
@@ -42,7 +36,7 @@ def void float_operations(float f):
 	f = f % 3
 
 
-def void paranthesis():
+def void parenthesis():
 	int zero = 1 + 2 - 3
 	int one = (4 * 5) * 0
 	zero = (7 / 6) % (9 / 8)
@@ -69,11 +63,12 @@ def bool trichotomy(int i, float f):
 		return False
 
 
-def bool lobotomy(bool b, str s):
-	if b == s and b < s and b > s:
-		return False
-	else:
-		return True
+# TODO: remove this, incompatible types for < and >
+#def bool lobotomy(bool b, str s):
+#	if b == s and b < s and b > s:
+#		return False
+#	else:
+#		return True
 
 
 def list max_min(int i, int j):
@@ -90,7 +85,7 @@ def list max_min(int i, int j):
 	return [max, min]
 
 
-def int fibonacci(int i):
+def int fibonacci(int n):
 	if n < 1:
 		return 0
 	elif n == 1:
@@ -108,10 +103,10 @@ def void main():
 	print identity(f)
 	int_operations(i)
 	float_operations(f)
-	paranthesis()
+	parenthesis()
 	print comparisons(i, f), comparisons(i, f*100)
 	print trichotomy(i, f)
-	print lobotomy(b, s)
+	#print lobotomy(b, s)
 	print max_min(i, i+1)
 	print fibonacci(i)
 	identity2(b)
