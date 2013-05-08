@@ -3,15 +3,19 @@ from adutil import * into graph
 
 def list customermaillist():
     Graph fbgraph = load('fbdata1')
-    Graph googlegraph = load('fbdata2')
+    Graph googlegraph = load('googledata1')
 	
 	Node fbnode_shop = fbgraph.get_node(name=="shop")
 	Node googlenode_shop = googlegraph.get_node(name=="shop")
 
+
 	#task1 : for birthday gift card
     Nodeset fbns = fbnode_shop.outE({'type' == 'member'}),outV().filter({'birthday_month' == 5})
+    Nodeset fbns = fbnode_shop.out_edges().filter('type','member').out_nodes().filter('birthday_month', '5')
+
+
     Nodeset googlens = googlenode_shop.outE({'type' == 'member'}) .outV().filter({'birthday_month' == 5})
-	Set give_gift_card = intersection(fbns, googlens)
+	Set give_gift_card = union(fbns, googlens)  # actually I want to union them by name
 	 
  	# friends who has more than 300 connections on fb
  	NodeSet high_connection_set = fbnode_shop.outE({'type'=='fbfriend'}).outV().filter({'numfriends' > 300})
