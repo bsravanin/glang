@@ -15,7 +15,8 @@ public class LoadTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		GraphDBController dbController = new GraphDBController("/Users/mikefhsu/javaws/Gramola/neo4jdbs/mike");
+		GraphDBController dbController = new GraphDBController("/Users/mikefhsu/javaws/Gramola/neo4jdbs/fbdata1");
+		dbController.initDB();
 		Graph g = dbController.load();
 		
 		System.out.println("Test load graph: " + g);

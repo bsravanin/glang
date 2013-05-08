@@ -38,19 +38,42 @@ public class GraphDBController {
 	 */
 	public GraphDBController(String dbPath) {
 		this.neo4jPath = dbPath;
-		this.createDBDir();
-		this.graphDB = new EmbeddedGraphDatabase(neo4jPath);
-		registerShutdownHook(graphDB);
 	}
 	
 	/**
 	 * Create directory for neo4j DB
 	 */
-	private void createDBDir() {
+	public void createDB() {
 		File graphDBFile = new File(this.neo4jPath);
 		
-		if (!graphDBFile.exists()) {
+		if (graphDBFile.exists()) {
+			this.deleteDBDir(graphDBFile);
+		} else {
 			graphDBFile.mkdir();
+		}
+	}
+	
+	/**
+	 * Initialize neo4j graph database
+	 */
+	public void initDB() {
+		this.graphDB = new EmbeddedGraphDatabase(neo4jPath);
+		registerShutdownHook(graphDB);
+	}
+	
+	/**
+	 * Delete directory for neo4j DB
+	 * @param graphDBFile
+	 */
+	public void deleteDBDir(File graphDBFile) {
+		if (graphDBFile.isDirectory()) {
+			File[] dirFiles = graphDBFile.listFiles();
+			
+			for (int i = 0; i < dirFiles.length; i++) {
+				deleteDBDir(dirFiles[i]);
+			}
+		} else if (graphDBFile.isFile()) {
+			graphDBFile.delete();
 		}
 	}
 	
