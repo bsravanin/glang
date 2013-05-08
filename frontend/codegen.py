@@ -57,6 +57,7 @@ JAVA_NAME_MAP = {
     'Node.update': 'update',
     'NodeSet.filter': 'filter',
     'NodeSet.out_edges': 'outE',
+    '__builtins.union': 'GraphUtil.union',
     '__builtins.draw': 'GraphUtil.draw',
     '__builtins.dump': 'GraphUtil.dump',
     '__builtins.len': 'GraphUtil.len',
