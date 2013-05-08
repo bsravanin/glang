@@ -2,16 +2,16 @@
 from adutil import * into graph
 
 def list customermaillist():
-        Graph fbgraph = load(¡¥fbdata1¡¦)
-        Graph googlegraph = load('fbdata2')
+    Graph fbgraph = load('fbdata1')
+    Graph googlegraph = load('fbdata2')
 	
-	fbnode_shop = fbgraph.get_node(name=="shop")
-	googlenode_shop = googlegraph.get_node(name=="shop")
+	Node fbnode_shop = fbgraph.get_node(name=="shop")
+	Node googlenode_shop = googlegraph.get_node(name=="shop")
 
 	#task1 : for birthday gift card
-        Nodeset fbns = fbnode_shop.outE({'type' == 'member'}),outV().filter({'birthday_month' = 5})
-        Nodeset googlens = googlenode_shop.outE({'type' == 'member'}) .outV().filter({'birthday_month' = 5})
-	give_gift_card = intersection(fbns, googlens)
+    Nodeset fbns = fbnode_shop.outE({'type' == 'member'}),outV().filter({'birthday_month' == 5})
+    Nodeset googlens = googlenode_shop.outE({'type' == 'member'}) .outV().filter({'birthday_month' == 5})
+	Set give_gift_card = intersection(fbns, googlens)
 	 
  	# friends who has more than 300 connections on fb
  	NodeSet high_connection_set = fbnode_shop.outE({'type'=='fbfriend'}).outV().filter({'numfriends' > 300})
@@ -20,6 +20,6 @@ def list customermaillist():
 	NodeSet potential_customer_set = myfbnode.outE({'type'=='fbfriend'], start=2, end=2).outV() 
 	return [give_gift_card, high_connection_set, potential_customer_set]           #list or sets
 
- def void main(args):
-     mailinglist = customermailinglist()
-     print mailinglist
+def void main(args):
+    list mailinglist = customermailinglist()
+    print mailinglist
