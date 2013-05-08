@@ -1,0 +1,18 @@
+class myNode(Node):
+        nodecolor = 'white'        # default color
+
+
+def void main():
+	Graph g = Graph()
+	myNode n1 = g.node({'name': 'Michael', 'age': 30, 'birthday_month' : 9, 'popularity' : 10 })
+        n1.color = 'red'
+	myNode n2 = g.node({'name': 'David', 'age': 25,'birthday_month' : 5, 'popularity' : 8})
+        n2.color = 'red'
+	myNode n3 = g.node({'name': 'Jack', 'age': 18, 'birthday_month' : 5, 'popularity' : 9})
+	n3.color = 'red'
+	myNode n4 = g.node({'name': 'Tom', 'age': 26, 'birthday_month' : 5, 'popularity' : 4})
+        n4.color = 'red'	
+	myNode n5 = g.node({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3})
+        n5.color = 'red'
+	myNode n6 = g.node({'name' : 'shop'})
+	n6.color = 'blue'
