@@ -1,0 +1,17 @@
+class Movie(Node):
+    str title
+    float rating
+    def void set_title(str name):
+        title = name
+    
+def void test(str name):
+    print name
+
+class Actor(Node):
+    str name
+
+class AnyClass():
+    str name
+
+def void main():
+    Graph g = Graph()
