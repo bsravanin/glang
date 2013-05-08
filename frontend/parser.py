@@ -171,7 +171,6 @@ class Parser(object):
 
     def p_error(self, p):
         'Handle parsing errors.'
-        # TODO: more robust error handling here
         if p:
             raise SyntaxError(str(p))
         else:

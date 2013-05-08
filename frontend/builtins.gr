@@ -52,7 +52,7 @@ class str(object):
 		# String.clone
 		pass
 
-	def bool ends_with(str s):
+	def bool endswith(str s):
 		# String.endsWith
 		pass
 

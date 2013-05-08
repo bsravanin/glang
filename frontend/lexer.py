@@ -242,7 +242,6 @@ class Lexer(object):
     def t_error(self, t):
         'Error handling.'
         print "Illegal character '{0}'".format(t.value)
-        # TODO: smarter error handling
         self._lexer.skip(1)
 
     def _find_column(self, token):

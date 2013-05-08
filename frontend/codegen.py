@@ -77,9 +77,9 @@ JAVA_NAME_MAP = {
     'list.insert': 'add',
     'list.pop': 'remove',
     'list.remove': 'remove',
-    # TODO: support this somehow
+    # Ideally, we'd support these....
     #'list.reverse': 'Collections.reverse',
-    #'list.sort': 'sort',
+    #'list.sort': 'Collections.sort',
     'set.add': 'add',
     'set.contains': 'contains',
     'set.copy': 'clone',
@@ -90,7 +90,7 @@ JAVA_NAME_MAP = {
     'set.remove': 'remove',
     'set.update': 'addAll',
     'str.copy': 'clone',
-    'str.ends_with': 'endsWith',
+    'str.endswith': 'endsWith',
     'str.find': 'indexOf',
     'str.lower': 'toLowerCase',
     'str.replace': 'replace',
@@ -122,7 +122,6 @@ TYPE_MAP = {
 
 
 def convert_type(name):
-    # TODO: print warning if name is known?
     return TYPE_MAP.get(name, name)
 
 
@@ -268,7 +267,6 @@ class CodeGenerator(object):
     def _ClassDef(self, t):
         self.write('\n')
         self.fill('class ')
-        # TODO: add type param to 'name' if base is parameterized
         self.dispatch(t.name)
         if t.base:
             self.write(' extends ')
@@ -348,6 +346,7 @@ class CodeGenerator(object):
 
     def _For(self, t):
         # "enhanced for" loop
+        # TODO: check that target and iterable element types match?
         self.fill('for (')
         self.dispatch(t.target)
         self.write(' : ')

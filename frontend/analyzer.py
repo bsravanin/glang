@@ -201,9 +201,8 @@ class Analyzer(object):
         # "enhanced for" loop
         self._dispatch(t.target)
         self._dispatch(t.iterable)
-        # check that t.iterable is of the correct type
-        # TODO: either restrict for_primary to something whose type we always
-        # know, e.g. name or enclosure, or don't check the type here
+        # At compile time, we don't know what element types are in t.iterable,
+        # so we generate runtime checks during translation
         if not (set(self._get_ancestor_types(t.iterable.type)) &
                 set([((), 'list'), ((), 'set')])):
             raise InvalidTypeError(
@@ -354,6 +353,7 @@ class Analyzer(object):
         self._dispatch(t.attribute)
         # check that t.attribute is actually an attribute of t.value
         value_namespace = symbols.flatten_full_name(t.value.type)
+        # TODO: check ancestor classes in method resolution
         attr_sym = self._symbol_table.get_by_qualified_name(
             (value_namespace, t.attribute.value))
         if attr_sym is None:
