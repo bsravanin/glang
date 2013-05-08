@@ -2,6 +2,7 @@
 
 SOURCE=$1
 TARGET=$2
+CLASSPATH=../lib/*:.
 
 python codegen.py $SOURCE $TARGET
-cp *.java ../src/edu/columbia/plt/gramola/testmain
+javac -cp $CLASSPATH *.java
