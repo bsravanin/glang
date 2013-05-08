@@ -39,6 +39,8 @@ public class GraphVisualizer {
 
 	private static String dotFileRoot = "/Users/mikefhsu/javaws/Gramola/dotdata/";
 	
+	private static String exportRoot = "/Users/mikefhsu/javaws/Gramola/export/";
+	
 	private String finalPath;
 	
 	private Graph g;
@@ -174,7 +176,7 @@ public class GraphVisualizer {
 				ExportController exporter = 
 						Lookup.getDefault().lookup(ExportController.class);
 				try {
-					exporter.exportFile(new File(dotFileRoot + g.getGraphId() + ".pdf"));
+					exporter.exportFile(new File(exportRoot + g.getGraphId() + ".pdf"));
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
