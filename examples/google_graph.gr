@@ -1,0 +1,22 @@
+def void main():
+	Graph g = Graph()
+	Node n1 = g.node({'name': 'Michael', 'age': 30, 'birthday_month' : 9, 'popularity' : 10, 'numfriends' : 311})
+	Node n2 = g.node({'name': 'Edward', 'age': 25,'birthday_month' : 5, 'popularity' : 8, 'numfriends' : 268})   #diff
+	Node n3 = g.node({'name': 'Jack', 'age': 18, 'birthday_month' : 5, 'popularity' : 9, 'numfriends' : 158})
+	Node n4 = g.node({'name': 'Cindy', 'age': 26, 'birthday_month' : 5, 'popularity' : 4, 'numfriends' : 372})   #diff
+	Node n5 = g.node({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3, 'numfriends' : 401})
+
+	Node n6 = g.node({'name' : 'shop'})
+	
+	g.edge(n6, n1, {'type': 'fbfriend'})
+	g.edge(n6, n2, {'type': 'fbfriend'})
+	g.edge(n6, n3, {'type': 'fbfriend'})
+	g.edge(n6, n4, {'type': 'fbfriend'})
+	g.edge(n6, n5, {'type': 'fbfriend'})
+
+	g.edge(n6, n2, {'type': 'member'})
+	g.edge(n6, n4, {'type': 'member'})
+	g.edge(n6, n5, {'type': 'member'})
+
+	dump(g, 'googledata1')
+	draw(g, 'name', 'type')

@@ -16,7 +16,7 @@ import util
 
 
 JAVA_HEADER = os.path.join(os.path.curdir, 'header.txt')
-WRAPPER_CLASS_NAME = 'MainWrapper'
+TARGET_PROGRAM_NAME = 'Test'
 JAVA_NAME_MAP = {
     'Edge.add_parents': 'addParents',
     'Edge.get_attribute': 'getVariableValue',
@@ -213,7 +213,7 @@ class CodeGenerator(object):
             return
 
         self.write(header)
-        self.fill('public class ' + WRAPPER_CLASS_NAME)
+        self.fill('public class ' + TARGET_PROGRAM_NAME)
         self.enter()
         for stmt in other_stmts:
             if stmt.__class__.__name__ == 'FunctionDefNode':
@@ -267,6 +267,7 @@ class CodeGenerator(object):
     def _ClassDef(self, t):
         self.write('\n')
         self.fill('class ')
+        # TODO: add type param to 'name' if base is parameterized
         self.dispatch(t.name)
         if t.base:
             self.write(' extends ')
@@ -488,7 +489,7 @@ class CodeGenerator(object):
             self.write(java_name)
         elif func_name_node.namespace == ():
             # Top-level functions need to be qualified with the wrapper class
-            self.write('{0}.{1}'.format(WRAPPER_CLASS_NAME, java_name))
+            self.write('{0}.{1}'.format(TARGET_PROGRAM_NAME, java_name))
         else:
             # If called function is an object attribute, generate object first
             if getattr(t.func, 'attribute', False):
@@ -506,6 +507,13 @@ def main(args):
             'ERROR: Must provide code generator with a filename!')
         sys.exit(1)
 
+    output = sys.stdout
+
+    if len(args) > 1:
+        global TARGET_PROGRAM_NAME
+        TARGET_PROGRAM_NAME = args[1]
+        output = open(TARGET_PROGRAM_NAME + ".java", 'w')
+
     debug = False
     for arg in args[:]:
         if arg == '-d':
@@ -514,8 +522,9 @@ def main(args):
             args.remove(arg)
 
     ast, _ = analyzer.analyze_file(args[0], debug=debug)
-    CodeGenerator(ast, output=sys.stdout)
-
+    CodeGenerator(ast, output)
+    
+    output.close()
 
 if __name__ == '__main__':
     main(sys.argv[1:])

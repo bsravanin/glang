@@ -1,10 +1,11 @@
+
 def void main():
 	Graph g = Graph()
-	Node n1 = g.node({'name': 'Michael', 'age': 30, 'birthday_month' : 9, 'popularity' : 10 })
-	Node n2 = g.node({'name': 'David', 'age': 25,'birthday_month' : 5, 'popularity' : 8})
-	Node n3 = g.node({'name': 'Jack', 'age': 18, 'birthday_month' : 5, 'popularity' : 9})
-	Node n4 = g.node({'name': 'Tom', 'age': 26, 'birthday_month' : 5, 'popularity' : 4})
-	Node n5 = g.node({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3})
+	Node n1 = g.node({'name': 'Michael', 'age': 30, 'birthday_month' : 9, 'popularity' : 10, 'numfriends' : 322})
+	Node n2 = g.node({'name': 'David', 'age': 25,'birthday_month' : 5, 'popularity' : 8, 'numfriends' : 273})
+	Node n3 = g.node({'name': 'Jack', 'age': 18, 'birthday_month' : 5, 'popularity' : 9, 'numfriends' : 158})
+	Node n4 = g.node({'name': 'Tom', 'age': 26, 'birthday_month' : 5, 'popularity' : 4, 'numfriends' : 368})
+	Node n5 = g.node({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3, 'numfriends' : 403})
 
 	Node n6 = g.node({'name' : 'shop'})
 	g.edge(g.node({'name' : 'Cathy', 'birthday_month' : 10, 'age': 20}), n5, {'type': 'wife'})
