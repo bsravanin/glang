@@ -23,7 +23,7 @@ def void main():
 	for a in b:
 		print a
 		if a > 3.14 and b != 100:
-			a = a**({[a + 1]})
+			a = a*({[a + 1]})
 	print "back at indentation level 1"
 
 
