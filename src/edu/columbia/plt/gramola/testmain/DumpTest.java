@@ -23,6 +23,8 @@ public class DumpTest {
 		
 		String dbPath = "/Users/mikefhsu/javaws/Gramola/neo4jdbs/mike";
 		GraphDBController dbController = new GraphDBController(dbPath);
+		dbController.createDB();
+		dbController.initDB();
 		System.out.println("Test db path " + dbController.getGraphDBDir());
 		
 		dbController.dump(g, "id", "id");

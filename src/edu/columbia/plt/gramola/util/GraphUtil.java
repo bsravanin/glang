@@ -10,7 +10,15 @@ public class GraphUtil {
 	
 	public static void dump(Graph g, String dir) {
 		GraphDBController gc = new GraphDBController(graphDBRoot + dir);
+		gc.createDB();
+		gc.initDB();
 		gc.dump(g);
+	}
+	
+	public static Graph load(String dir) {
+		GraphDBController gc = new GraphDBController(graphDBRoot + dir);
+		gc.initDB();
+		return gc.load();
 	}
 	
 	public static void draw(Graph g, String nodeVar, String edgeVar) {
