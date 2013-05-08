@@ -1,4 +1,7 @@
 #!/bin/sh
 
-python codegen.py $1 > MainWrapper.java
-mv *.java ../src/edu/columbia/plt/gramola/testmain
+SOURCE=$1
+TARGET=$2
+
+python codegen.py $SOURCE $TARGET
+cp *.java ../src/edu/columbia/plt/gramola/testmain
