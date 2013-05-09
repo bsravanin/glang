@@ -1,9 +1,8 @@
-#from adutil import * into graph
 
-def list customermaillist():
-    Graph fbgraph = load('fbdata1')
-    Graph googlegraph = load('googledata1')
-	
+
+
+def list customermaillist(Graph fbgraph, Graph googlegraph):
+ 
 	Node fbnode_shop = fbgraph.get_node("name", "shop")
 	Node googlenode_shop = googlegraph.get_node("name", "shop")
 
@@ -13,9 +12,9 @@ def list customermaillist():
 
 
     NodeSet googlens = googlenode_shop.out_edges().filter('type','member').out_nodes().filter('birthday_month', '5')
-    Set fbns_name = fbns.select('name')
-    Set googlens_name = googlens.select('name')
-	Set give_gift_card = union(fbns_name, googlens_name)  # actually I want to union them by name
+    set fbns_name = fbns.select('name')
+    set googlens_name = googlens.select('name')
+	set give_gift_card = union(fbns_name, googlens_name)  # actually I want to union them by name
 	 
  	# friends who has more than 300 connections on fb
  	NodeSet high_connection_set = fbnode_shop.out_edges().filter('type','fbfriend').out_nodes().filter('popular', 'yes')  
@@ -25,6 +24,18 @@ def list customermaillist():
 	
 	return [give_gift_card, high_connection_set, potential_customer_set]           #list or sets
 
+def int num_old_member(Graph fbgraph):
+	list nodelist = fbgraph.get_all_nodes()
+	int num = 0
+    	for n in nodelist:
+    		if n.'age' > 20 : 
+			num = num + 1
+	return num
+
 def void main():
-    list mailinglist = customermaillist()
+    Graph fbgraph = load('fbdata1')
+    Graph googlegraph = load('googledata1')
+    list mailinglist = customermaillist(fbgraph, googlegraph)
     print mailinglist
+    
+    int k = num_old_member(fbgraph)
