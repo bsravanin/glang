@@ -1,8 +1,12 @@
 package edu.columbia.plt.gramola.util;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import edu.columbia.plt.gramola.datastruct.Graph;
+import edu.columbia.plt.gramola.datastruct.Node;
+import edu.columbia.plt.gramola.datastruct.NodeSet;
 
 public class GraphUtil {
 	
@@ -24,6 +28,13 @@ public class GraphUtil {
 	public static void draw(Graph g, String nodeVar, String edgeVar) {
 		GraphVisualizer gv = new GraphVisualizer(g, nodeVar, edgeVar);
 		gv.draw();
+	}
+	
+	public static HashSet<String> union(HashSet<String> ns1, HashSet<String> ns2) {
+		HashSet<String> ret = new HashSet<String>(ns1);
+		ret.addAll(ns2);
+
+		return ret;
 	}
 
 	/**

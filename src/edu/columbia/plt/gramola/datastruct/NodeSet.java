@@ -142,4 +142,13 @@ public class NodeSet implements Set{
 		
 		return ret;
 	}
+	
+	public HashSet<Object> select(String attr) {
+		HashSet<Object> ret = new HashSet<Object>();
+		Iterator<Node> nIT = this.nodeSet.iterator();
+		while(nIT.hasNext()) {
+			ret.add(nIT.next().getVariableValue(attr).toString());
+		}
+		return ret;
+	}
 }

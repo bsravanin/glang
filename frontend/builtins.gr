@@ -347,6 +347,8 @@ class Edge(object):
 
 
 class NodeSet(set):
+    def set select(str attr):
+        pass
 
 	def NodeSet filter(str variable, object value):
 		pass
@@ -356,6 +358,8 @@ class NodeSet(set):
 
 
 class EdgeSet(set):
+    def set select(str attr):
+        pass
 
 	def EdgeSet filter(str variable, object value):
 		pass
@@ -383,3 +387,8 @@ class __builtins(object):
 
 	def void draw(Graph g, str node_attr, str edge_attr):
 		pass
+    
+    def set union(set lhs, set rhs):
+        pass
+
+

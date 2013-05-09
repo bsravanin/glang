@@ -1,0 +1,12 @@
+#!/bin/sh
+
+SOURCE=$1
+JTARGET=$2
+TARGET_DIR=../src/
+BIN_DIR=../bin/
+CLASSPATH=../lib/*:.
+
+python codegen.py $SOURCE $JTARGET
+mv *.java $TARGET_DIR
+javac -cp $CLASSPATH ${TARGET_DIR}*.java
+mv ${TARGET_DIR}*.class $BIN_DIR

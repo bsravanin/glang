@@ -1,0 +1,8 @@
+#/usr/sh
+
+TARGET=$1
+CLASSPATH=../lib/*:.
+
+cd ../bin
+
+java -cp $CLASSPATH $1
