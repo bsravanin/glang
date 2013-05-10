@@ -70,12 +70,12 @@ class Analyzer(object):
         tree_class = tree.__class__.__name__
         if tree_class.endswith('Node'):
             meth = getattr(self, '_' + tree.__class__.__name__[:-4])
-            meth(tree)
-            return
+            return meth(tree)
         if isinstance(tree, list):
+            alist = []
             for t in tree:
-                self._dispatch(t)
-            return
+                alist.append(self._dispatch(t))
+            return alist
 
     def _get_ancestor_types(self, full_name):
         types = [full_name]
@@ -104,6 +104,23 @@ class Analyzer(object):
     def _Start(self, t):
         self._dispatch(t.stmt_list)
 
+    def _get_return_types(self, t):
+        return_types = []
+        if isinstance(t, list):
+            for x in t:
+                return_types.extend(self._get_return_types(x))
+            return return_types
+
+        if t.__class__.__name__ == 'ReturnNode':
+            return_types.append(t.type)
+            return return_types
+
+        for x in getattr(t, '__dict__', []):
+            attr = getattr(t, x)
+            return_types.extend(self._get_return_types(attr))
+
+        return return_types
+
     def _FunctionDef(self, t):
         self._dispatch(t.name)
 
@@ -117,13 +134,24 @@ class Analyzer(object):
         # Update the symbol table entry to match
         sym = self._symbol_table.get_by_qualified_name(
             (t.name.namespace, t.name.value))
+        self._dispatch(t.return_type)
         sym.return_type = (t.return_type.namespace, t.return_type.value)
 
-        self._dispatch(t.return_type)
         self._dispatch(t.params)
         self._dispatch(t.body)
-        # TODO: check that the return type matches the function declaration?
-        # look for return statement(s) in 'body'
+
+        # Check that the return types matches the function declaration.
+        # Look for return statement(s) in 'body'.
+        return_types = self._get_return_types(t.body)
+        for return_type in return_types:
+            if return_type != sym.return_type:
+                raise InconsistentTypeError(
+                    '{0}: expected return type {1} in definition of '
+                    'function {2}, found return type {3}'.format(
+                        t.lineno,
+                        symbols.stringify_full_name(sym.return_type),
+                        t.name.value,
+                        symbols.stringify_full_name(return_type)))
 
     def _Type(self, t):
         sym = self._symbol_table.get(t.value, namespace=t.namespace,
@@ -178,7 +206,8 @@ class Analyzer(object):
         if t.target.type != t.value.type:
             raise InconsistentTypeError(
                 '{2}: Target type {0} does not match value type {1}'.format(
-                    t.target.type, t.value.type, t.target.lineno))
+                    symbols.stringify_full_name(t.target.type),
+                    symbols.stringify_full_name(t.value.type), t.target.lineno))
 
     def _Print(self, t):
         for val in t.values:
@@ -217,7 +246,7 @@ class Analyzer(object):
                 set([((), 'list'), ((), 'set')])):
             raise InvalidTypeError(
                 'Expected an iterable (list, set), found {0}'.format(
-                    t.iterable.type))
+                    symbols.stringify_full_name(t.iterable.type)))
         self._dispatch(t.body)
 
     def _BinaryOp(self, t):
@@ -366,7 +395,9 @@ class Analyzer(object):
         if attr_sym is None:
             raise symbols.UnknownSymbolError(
                 '{2}: {0} is not an attribute of type {1} or any of its '
-                'ancestors'.format(t.attribute.value, t.value.type, t.lineno))
+                'ancestors'.format(
+                    t.attribute.value,
+                    symbols.stringify_full_name(t.value.type), t.lineno))
 
         # We skipped setting the attribute's namespace in _Name() so that we
         # could set it here
@@ -385,13 +416,14 @@ class Analyzer(object):
         if ((), 'list') not in self._get_ancestor_types(t.type):
             raise InvalidTypeError(
                 'Type {0} is not subscriptable -- only type list'.format(
-                    t.type))
+                    symbols.stringify_full_name(t.type)))
         self._dispatch(t.index)
         # Check that the index is actually an integer
         if ((), 'int') not in self._get_ancestor_types(t.index.type):
             raise InvalidTypeError(
                 'Invalid subscript type {0} for index {1}'.format(
-                    t.index.type, t.index))
+                    symbols.stringify_full_name(t.index.type),
+                    t.index))
         # An iterable can contain elements of any type
         t.type = ((), 'object')
 
@@ -436,8 +468,12 @@ class Analyzer(object):
                 t.func.attribute = new_node
             else:
                 t.func = new_node
+            if func_sym is None:
+                # There's no init method to check, so we're done here
+                return
         else:
             t.type = func_sym.return_type
+
 
         # Check that arg types match param_types in function symbol
         if len(func_sym.param_types) != len(t.args):
