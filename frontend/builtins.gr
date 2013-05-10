@@ -29,10 +29,6 @@ class bool(int):
 		pass
 
 
-bool False = bool(0)
-bool True = bool(1)
-
-
 class float(object):
 
 	def void __init__(object obj):
@@ -374,6 +370,9 @@ class Path(list):
 
 
 class __builtins(object):
+
+	bool False = bool(0)
+	bool True = bool(1)
 
 	def int len(object obj):
 		pass
