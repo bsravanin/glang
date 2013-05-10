@@ -491,7 +491,8 @@ class Analyzer(object):
         if len(func_sym.param_types) != len(t.args):
             raise ParameterCountError(
                 '{0} expected {1} argument(s), found {2}'.format(
-                    func_sym.name, len(func_sym.param_types), len(t.args)))
+                    symbols.stringify_full_name(func_sym.full_name),
+                    len(func_sym.param_types), len(t.args)))
         for i, (param_type, arg) in enumerate(
             zip(func_sym.param_types, t.args)):
             if param_type not in self._get_ancestor_types(arg.type):

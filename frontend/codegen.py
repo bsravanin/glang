@@ -519,11 +519,6 @@ def main(args):
 
     output = sys.stdout
 
-    if len(args) > 1:
-        global TARGET_PROGRAM_NAME
-        TARGET_PROGRAM_NAME = args[1]
-        output = open(TARGET_PROGRAM_NAME + ".java", 'w')
-
     debug = False
     for arg in args[:]:
         if arg == '-d':
@@ -531,10 +526,17 @@ def main(args):
         if arg.startswith('-'):
             args.remove(arg)
 
+    if len(args) > 1:
+        global TARGET_PROGRAM_NAME
+        TARGET_PROGRAM_NAME = args[1]
+        output = open(TARGET_PROGRAM_NAME + ".java", 'w')
+
     ast, _ = analyzer.analyze_file(args[0], debug=debug)
     CodeGenerator(ast, output)
-    
-    output.close()
+
+    if output != sys.stdout:
+        output.close()
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
