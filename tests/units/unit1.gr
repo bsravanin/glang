@@ -1,0 +1,9 @@
+# TEST: Primitive declarations
+
+bool b
+float f
+int i
+str s
+
+def void main():
+	return

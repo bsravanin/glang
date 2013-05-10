@@ -112,7 +112,7 @@ TYPE_MAP = {
     'void': 'void',
     'int': 'Integer',
     'bool': 'Boolean',
-    'float': 'Float',
+    'float': 'Double',
     'str': 'String',
     'list': 'ArrayList<Object>',
     'set': 'HashSet',

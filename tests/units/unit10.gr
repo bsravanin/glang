@@ -1,0 +1,9 @@
+# TEST: Boolean algebra.
+
+def void main():
+	bool is_true = (1 == 2) or (1 < 2) or (1 > 2)
+	print is_true
+	bool is_false = (1 == 2) and (1 < 2) and (1 > 2)
+	print is_false
+	is_false = not (3.14 <= 42)
+	print is_false

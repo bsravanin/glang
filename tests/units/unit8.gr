@@ -1,0 +1,15 @@
+# TEST: Floating-point arithmetic.
+
+def void main():
+	float f = 3.14
+	print f
+	f = f + 1
+	print f
+	f = f - 1
+	print f
+	f = f * 2
+	print f
+	f = f / 3
+	print f
+	f = f % 4
+	print f
