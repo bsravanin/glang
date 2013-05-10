@@ -358,7 +358,7 @@ class Analyzer(object):
             t.type = t.operand.type
         else:
             raise Error('{1}: Unknown unary operation: {0}'.format(
-                    op, lineno))
+                    op, t.lineno))
 
     def _String(self, t):
         #t.type = ((), t.value.__class__.__name__)
