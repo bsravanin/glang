@@ -263,8 +263,11 @@ class CodeGenerator(object):
             value = 'this'
         self.write(value)
 
-    def _Declaration(self, t):
+    def _Declaration(self, t, class_level=False):
         # Note: this is simply a type-name pair, not the full statement
+        if class_level:
+            # Class-level variables must be public static
+            self.write('public static ')
         self.dispatch(t.var_type)
         self.write(' ')
         self.dispatch(t.name)
@@ -277,8 +280,12 @@ class CodeGenerator(object):
             self.write(' extends ')
             self.dispatch(t.base)
         self.enter()
-        # TODO: make class variable declarations static
-        self.dispatch(t.body)
+        self.write('\n')
+        for stmt in t.body:
+            if stmt.__class__.__name__ == 'DeclarationStmtNode':
+                self._DeclarationStmt(stmt, class_level=True)
+            else:
+                self.dispatch(stmt)
         self.leave()
 
     def _ExpressionStmt(self, t):
@@ -286,9 +293,9 @@ class CodeGenerator(object):
         self.dispatch(t.expr)
         self.end_stmt()
 
-    def _DeclarationStmt(self, t):
+    def _DeclarationStmt(self, t, class_level=False):
         self.fill()
-        self.dispatch(t.value)
+        self._Declaration(t.value, class_level=class_level)
         self.end_stmt()
 
     def _Assignment(self, t):
