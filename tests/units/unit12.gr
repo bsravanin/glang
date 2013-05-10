@@ -1,0 +1,12 @@
+# TEST: If-Else clause
+
+def void compare(int i, float f):
+	if i <= f:
+		print "equal"
+	else:
+		print "unequal"
+
+def void main():
+	compare(42, 42.0)
+	compare(42, 3.14)
+	compare(4, 6.28)

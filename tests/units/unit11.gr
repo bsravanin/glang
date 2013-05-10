@@ -1,0 +1,10 @@
+# TEST: If clause
+
+def void compare(int i, float f):
+	if i <= f:
+		print "less or equal"
+
+def void main():
+	compare(42, 42.0)
+	compare(42, 3.14)
+	compare(4, 6.28)

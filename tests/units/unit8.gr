@@ -3,7 +3,7 @@
 def void main():
 	float f = 3.14
 	print f
-	f = f + 1
+	f = f + 1.0
 	print f
 	f = f - 1
 	print f
