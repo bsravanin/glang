@@ -1,0 +1,13 @@
+# TEST: Primitive definitions
+
+def void main():
+	bool b
+	float f
+	int i
+	str s
+
+	b = True
+	f = 3.14
+	i = 42
+	s = "Rosebud"
+	print b, f, i, s

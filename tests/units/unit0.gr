@@ -1,0 +1,4 @@
+# TEST: Built-in print.
+
+def void main():
+	print "Hello, World!"

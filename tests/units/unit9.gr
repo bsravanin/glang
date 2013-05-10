@@ -1,0 +1,14 @@
+# TEST: Basic paranthesis usages.
+
+def void main():
+	int i1 = 1 + 2 - 3
+	print i1
+	int i2 = (4 * 5) / 6
+	print i2
+	int i3 = (((80 / 7)) % (90 / 10))
+	print i3
+	bool is_true = (i1 == i2) or (i1 < i2) or (i1 > i2)
+	print is_true
+	bool is_false = (i1 == i2) and (i1 < i2) and (i1 > i2)
+	print is_false
+	is_false = not (zero <= one)

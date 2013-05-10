@@ -1,0 +1,19 @@
+# TEST: Primitive re-definitions
+
+def void main():
+	bool b
+	float f
+	int i
+	str s
+
+	b = True
+	f = 3.14
+	i = 42
+	s = "Rosebud"
+	print b, f, i, s
+
+	b = False
+	f = 6.28
+	i = 21
+	s = "Citizen Kane"
+	print b, f, i, s

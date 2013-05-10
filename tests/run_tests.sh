@@ -32,12 +32,13 @@ function test_result {
 function fast_test {
 	unit=$1
 	base=`basename $unit`
-	out=${base/%.gr/.out}
-	err=${base/%.gr/.err}
+	class=${base/%.gr/}
+	out=$class.out
+	err=$class.err
 
 	cd $FRONTEND
 
-	bash gcompile $unit	$base 2>$ERROR/gcompile/$err
+	bash gcompile $unit	$class 2>$ERROR/gcompile/$err
 	exit_status=$?
 	test_result $exit_status gcompile $base
 
@@ -79,8 +80,9 @@ function fast_all {
 function full_test {
 	unit=$1
 	base=`basename $unit`
-	out=${base/%.gr/.out}
-	err=${base/%.gr/.err}
+	class=${base/%.gr/}
+	out=$class.out
+	err=$class.err
 
 	cd $FRONTEND
 
@@ -90,7 +92,7 @@ function full_test {
 		test_result $? $phase $base
 	done
 
-	bash gcompile $unit	$base 2>$ERROR/gcompile/$err
+	bash gcompile $unit	$class 2>$ERROR/gcompile/$err
 	test_result $? gcompile $base
 
 	cd $TESTS

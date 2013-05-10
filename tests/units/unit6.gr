@@ -1,0 +1,16 @@
+# TEST: Primitive return values.
+
+def bool bidentity(bool b):
+	return b
+
+def float fidentity(float f):
+	return f
+
+def int iidentity(int i):
+	return i
+
+def str sidentity(str s):
+	return s
+
+def void main():
+	print bidentity(True), fidentity(3.14), iidentity(42), sidentity("Rosebud")
