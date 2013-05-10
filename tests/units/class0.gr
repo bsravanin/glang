@@ -1,0 +1,13 @@
+# Basic class test
+
+class MyClass():
+    int i
+    float f
+
+def void main():
+    MyClass c = MyClass()
+    c.i = 0
+    c.f = 3.14
+
+    print c.i
+    print c.f
