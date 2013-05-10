@@ -1,0 +1,10 @@
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.modules.openide.filesystems.declmime.MIMEResolverProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.modules.openide.util.NbBundleProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.modules.openide.util.ServiceProviderProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.modules.openide.util.NamedServiceProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.modules.openide.modules.PatchedPublicProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.modules.openide.awt.ActionProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.netbeans.api.annotations.common.proc.StaticResourceProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.neo4j.kernel.impl.annotations.ServiceProcessor' less than -source '1.7'
+warning: Supported source version 'RELEASE_6' from annotation processor 'org.neo4j.kernel.impl.annotations.DocumentationProcessor' less than -source '1.7'
+9 warnings

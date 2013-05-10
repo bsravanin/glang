@@ -1,0 +1,35 @@
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.ArrayList;
+
+import edu.columbia.plt.gramola.datastruct.Edge;
+import edu.columbia.plt.gramola.datastruct.Graph;
+import edu.columbia.plt.gramola.datastruct.Node;
+import edu.columbia.plt.gramola.datastruct.NodeSet;
+import edu.columbia.plt.gramola.datastruct.EdgeSet;
+import edu.columbia.plt.gramola.util.GraphDBController;
+import edu.columbia.plt.gramola.util.GraphVisualizer;
+import edu.columbia.plt.gramola.util.GraphUtil;
+
+
+public class Test {
+
+	public static void main(String[] args) {
+		Double f = Double(3.14);
+		System.out.println((f).toString());
+		f = f + Float.valueOf((Integer(1)).toString());
+		System.out.println((f).toString());
+		f = f - Float.valueOf((Integer(1)).toString());
+		System.out.println((f).toString());
+		f = f * Float.valueOf((Integer(2)).toString());
+		System.out.println((f).toString());
+		f = f / Float.valueOf((Integer(3)).toString());
+		System.out.println((f).toString());
+		f = f % Float.valueOf((Integer(4)).toString());
+		System.out.println((f).toString());
+	}
+	
+}

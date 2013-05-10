@@ -1,0 +1,35 @@
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.ArrayList;
+
+import edu.columbia.plt.gramola.datastruct.Edge;
+import edu.columbia.plt.gramola.datastruct.Graph;
+import edu.columbia.plt.gramola.datastruct.Node;
+import edu.columbia.plt.gramola.datastruct.NodeSet;
+import edu.columbia.plt.gramola.datastruct.EdgeSet;
+import edu.columbia.plt.gramola.util.GraphDBController;
+import edu.columbia.plt.gramola.util.GraphVisualizer;
+import edu.columbia.plt.gramola.util.GraphUtil;
+
+
+public class Test {
+
+	public static void main(String[] args) {
+		Integer i = 42;
+		System.out.println((i).toString());
+		i = i + 1;
+		System.out.println((i).toString());
+		i = i - 1;
+		System.out.println((i).toString());
+		i = i * 2;
+		System.out.println((i).toString());
+		i = i / 3;
+		System.out.println((i).toString());
+		i = i % 4;
+		System.out.println((i).toString());
+	}
+	
+}
