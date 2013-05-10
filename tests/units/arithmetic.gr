@@ -1,0 +1,108 @@
+# Date: 24th April, 2013
+# Purpose: To test arithmetic operations supported by Gramola.
+
+bool b = True
+float f = 3.14
+int i = 42
+str s = "Rosebud"
+
+
+def void print_these():
+	print b, f, i, s
+
+
+def float identity(float f):
+	return f
+
+
+def void int_operations(int i):
+	i = i + 1
+	i = i - 1
+	i = i * 2
+	i = i / 2
+	i = i % 3
+
+
+def void float_operations(float f):
+	f = identity(f)
+	f = f + 1
+	f = f - 1
+	f = f * 2
+	f = f / 2
+	f = f % 3
+
+
+def void parenthesis():
+	int zero = 1 + 2 - 3
+	int one = (4 * 5) * 0
+	zero = (7 / 6) % (9 / 8)
+	bool is_true = (zero == one) or (zero < one)
+	bool is_false = (zero > one) and (zero >= one)
+	is_false = not (zero <= one)
+
+
+def str comparisons(int i, float f):
+	if i == f:
+		return "equal"
+	elif i < f:
+		return "less"
+	elif i > f:
+		return "greater"
+	else:
+		return "wtf"
+
+
+def bool trichotomy(int i, float f):
+	if i == f or i < f or i > f:
+		return True
+	else:
+		return False
+
+
+# TODO: remove this, incompatible types for < and >
+#def bool lobotomy(bool b, str s):
+#	if b == s and b < s and b > s:
+#		return False
+#	else:
+#		return True
+
+
+def list max_min(int i, int j):
+	int max
+	int min
+
+	if i < j:
+		max = j
+		min = i
+	else:
+		max = i
+		min = j
+
+	return [max, min]
+
+
+def int fibonacci(int n):
+	if n < 1:
+		return 0
+	elif n == 1:
+		return 1
+	else:
+		return fibonacci(n-1) + fibonacci(n-2)
+
+
+def bool identity2(bool b):
+	print "This should fail."
+
+
+def void main():
+	print_these()
+	print identity(f)
+	int_operations(i)
+	float_operations(f)
+	parenthesis()
+	print comparisons(i, f), comparisons(i, f*100)
+	print trichotomy(i, f)
+	#print lobotomy(b, s)
+	print max_min(i, i+1)
+	print fibonacci(i)
+	identity2(b)
