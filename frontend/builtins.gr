@@ -347,8 +347,9 @@ class Edge(object):
 
 
 class NodeSet(set):
-    def set select(str attr):
-        pass
+
+	def set select(str attr):
+		pass
 
 	def NodeSet filter(str variable, object value):
 		pass
@@ -358,8 +359,9 @@ class NodeSet(set):
 
 
 class EdgeSet(set):
-    def set select(str attr):
-        pass
+
+	def set select(str attr):
+		pass
 
 	def EdgeSet filter(str variable, object value):
 		pass
