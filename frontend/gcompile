@@ -1,4 +1,9 @@
-#!/bin/sh
+#! /bin/bash
+
+if [ $# -ne 2 ]; then
+	echo "Usage: $0 <gramola_src_prog> <java_target_class_name>"
+	exit 65
+fi
 
 SOURCE=$1
 JTARGET=$2
@@ -6,6 +11,15 @@ TARGET_DIR=../src/
 BIN_DIR=../bin/
 CLASSPATH=../lib/*:.
 
+if [ ! -d ../bin ]; then
+	mkdir ../bin
+fi
+
+if [ ! -e ../lib/gramola.jar ]; then
+	echo "ERROR: Could not find gramola.jar."
+	exit 1
+fi
+	
 python codegen.py $SOURCE $JTARGET
 mv *.java $TARGET_DIR
 javac -cp $CLASSPATH ${TARGET_DIR}*.java

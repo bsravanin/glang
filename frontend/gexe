@@ -1,8 +1,18 @@
-#/usr/sh
+#! /bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <java_class_name>"
+	exit 65
+fi
 
 TARGET=$1
 CLASSPATH=../lib/*:.
 
+if [ ! -e ../bin/$TARGET ]; then
+	echo "ERROR: Could not find ../bin/$TARGET.class"
+	exit 1
+fi
+
 cd ../bin
 
-java -cp $CLASSPATH $1
+java -cp $CLASSPATH $TARGET
