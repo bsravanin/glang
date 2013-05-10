@@ -1,0 +1,29 @@
+# TEST: Nested If-Then-Else clause.
+
+def void dumb_compare(float f):
+	if f == 3:
+		print "f is 3"
+	elif f > 3:
+		if f == 4:
+			print "f is 4"
+		elif f > 4:
+			print "f is >4"
+		else:
+			print "f is >3 and <4"
+	else:
+		if f == 2:
+			print "f is 2"
+		elif f > 2:
+			print "f is >2 and <3"
+		else:
+			print "f is <2"
+
+
+def void main():
+	dumb_compare(1)
+	dumb_compare(2)
+	dumb_compare(2.5)
+	dumb_compare(3)
+	dumb_compare(3.5)
+	dumb_compare(4)
+	dumb_compare(5)

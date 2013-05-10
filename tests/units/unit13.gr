@@ -1,0 +1,16 @@
+# TEST: If-Then-Else clause.
+
+def void compare(int i, float f):
+	if i == f:
+		print "equal"
+	elif i < f:
+		print "less"
+	elif i > f:
+		print "greater"
+	else:
+		print "wtf"
+
+def void main():
+	compare(42, 42.0)
+	compare(42, 3.14)
+	compare(4, 6.28)
