@@ -36,6 +36,38 @@ public class GraphUtil {
 
 		return ret;
 	}
+	
+	public static Graph getFB(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToGraph();
+		return g;
+	}
+	
+	public static Graph getFBFriend(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToFriendGraph();
+		return g;
+	}
+	
+	public static Graph getFBFeed(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToFeedGraph();
+		return g;
+	}
+	
+	public static Graph getFBPage(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToPageGraph();
+		return g;
+	}
 
 	/**
 	 * Helper method to convert var-value array into a variable map

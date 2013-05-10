@@ -381,6 +381,18 @@ class __builtins(object):
 
 	def Graph load(str path):
 		pass
+		
+	def Graph get_fb(str token):
+		pass
+	
+	def Graph get_fb_friend(str token):
+		pass
+		
+	def Graph get_fb_feed(str token):
+		pass
+		
+	def Graph get_fb_page(str token):
+		pass
 
 	def void dump(Graph g, str path):
 		pass
