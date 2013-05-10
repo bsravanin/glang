@@ -89,6 +89,18 @@ class Parser(object):
                 if not temp_sym:
                     break
                 sym.var_type = temp_sym.full_name
+
+                type_params = []
+                for temp in sym.var_type_params:
+                    temp_namespace = temp[0]
+                    temp_name = temp[1]
+                    temp_sym = self._symbol_table.get(
+                        temp_name, namespace=temp_namespace,
+                        symbol_type=symbols.TypeSymbol)
+                    if not temp_sym:
+                        break
+                    type_params.append(temp_sym.full_name)
+                sym.var_type_params = tuple(type_params)
             elif getattr(sym, 'base', False):
                 # Fix TypeSymbol.base
                 temp_namespace = sym.base[0]
@@ -109,6 +121,7 @@ class Parser(object):
                 if not temp_sym:
                     break
                 sym.return_type = temp_sym.full_name
+
                 param_types = []
                 for temp in sym.param_types:
                     temp_namespace = temp[0]
@@ -216,13 +229,33 @@ class Parser(object):
         self._pop_scope()
 
     def p_type(self, p):
-        'type : NAME'
+        '''type : bare_type
+                | parameterized_type'''
+        p[0] = p[1]
+
+    def p_bare_type(self, p):
+        'bare_type : NAME'
         # We verify validity of this type in a later pass. For all we know, it
         # could be defined further on in the parsing pass.
         # We don't yet know the proper namespace for this type, but we store the
         # current namespace so that we can do a symbol table lookup later
         p[0] = nodes.TypeNode(value=p[1], namespace=self._cur_namespace)
         p[0].lineno = p.slice[1].lineno
+
+    def p_parameterized_type(self, p):
+        '''parameterized_type : NAME LESS type_param_list GREATER'''
+        p[0] = nodes.TypeNode(value=p[1], namespace=self._cur_namespace,
+                              params=p[3])
+        p[0].lineno = p.slice[1].lineno
+
+    def p_type_param_list(self, p):
+        '''type_param_list : bare_type
+                           | type_param_list ',' bare_type'''
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1]
+            p[0].append(p[3])
 
     def p_new_func_name(self, p):
         'new_func_name : NAME'
@@ -266,10 +299,19 @@ class Parser(object):
         p[0] = nodes.DeclarationNode(var_type=p[1], name=p[2])
         p[0].lineno = p[1].lineno
 
-        # We set a dummy var_type for the VariableSymbol, to be corrected later
-        sym = self._symbol_table.get(p[2].value)
+        # Add a new VariableSymbol to the symbol table
+        name = p[2].value
         type_node = p[1]
-        sym.var_type = (type_node.namespace, type_node.value)
+        sym = self._symbol_table.get(name)
+        if sym is None:
+            full_name = self._get_qualified_name(name)
+            # We'll correct this symbol's var_type in a later pass
+            var_type = (type_node.namespace, type_node.value)
+            symbol = symbols.VariableSymbol(full_name, var_type=var_type)
+            self._symbol_table.set(symbol)
+        elif sym.namespace == self._cur_namespace:
+            raise symbols.ConflictingSymbolError(
+                sym, self._cur_namespace, p[0].lineno)
 
     def p_new_var_name(self, p):
         'new_var_name : NAME'
@@ -277,16 +319,6 @@ class Parser(object):
         name = name_token.value
         p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
         p[0].lineno = p.slice[1].lineno
-
-        sym = self._symbol_table.get(name)
-        if sym is None:
-            full_name = self._get_qualified_name(name)
-            # We'll set this symbol's var_type in a later pass
-            symbol = symbols.VariableSymbol(full_name, token=name_token)
-            self._symbol_table.set(symbol)
-        elif sym.namespace == self._cur_namespace:
-            raise symbols.ConflictingSymbolError(
-                sym, name_token, self._cur_namespace, p[0].lineno)
 
     def p_suite(self, p):
         'suite : NEWLINE INDENT stmt_list DEDENT'
@@ -332,11 +364,10 @@ class Parser(object):
         self._pop_scope()
 
     def p_new_type(self, p):
-        'new_type : NAME'
-        name_token = p.slice[1]
-        name = name_token.value
-        p[0] = nodes.TypeNode(value=name, namespace=self._cur_namespace)
-        p[0].lineno = p.slice[1].lineno
+        'new_type : type'
+        p[0] = p[1]
+        p[0].lineno = p[1].lineno
+        name = p[1].value
         self._cur_scope_name = name
 
         # Add this type to the symbol table as long as it doesn't already exist
@@ -344,12 +375,12 @@ class Parser(object):
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
-            # We'll set this symbols base type in a later pass
-            symbol = symbols.TypeSymbol(full_name, token=name_token)
+            # We'll set this symbol's base type in a later pass
+            symbol = symbols.TypeSymbol(full_name)
             self._symbol_table.set(symbol)
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
-                sym, name_token, self._cur_namespace, p[0].lineno)
+                sym, self._cur_namespace, p[0].lineno)
 
     def p_opt_type(self, p):
         '''opt_type : type
@@ -789,6 +820,7 @@ class Parser(object):
 
     def p_call_primary(self, p):
         '''call_primary : name
+                        | parameterized_type
                         | attribute_ref'''
         p[0] = p[1]
 

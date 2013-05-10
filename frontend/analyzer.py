@@ -159,6 +159,12 @@ class Analyzer(object):
         # Now that we've resolved this type symbol, we can update this node's
         # namespace and type
         t.namespace = sym.namespace
+        for param in t.params:
+            param_sym = self._symbol_table.get(
+                param.value, namespace=param.namespace,
+                symbol_type=symbols.TypeSymbol)
+            param.namespace = param_sym.namespace
+            param.type = param_sym.full_name
         t.type = sym.full_name
 
     def _Name(self, t):
@@ -409,16 +415,16 @@ class Analyzer(object):
                     t.attribute.value,
                     symbols.stringify_full_name(t.value.type), t.lineno))
 
-        # We skipped setting the attribute's namespace in _Name() so that we
-        # could set it here
+        # We skipped setting the attribute's namespace and type in _Name() so
+        # that we could set it here
         t.attribute.namespace = attr_sym.namespace
         if attr_sym.__class__.__name__ == 'FunctionSymbol':
             # If the attribute isn't a VariableSymbol or TypeSymbol,
             # type means nothing
-            new_type = None
+            t.attribute.type = None
         else:
-            new_type = t.attribute.type
-        t.type = new_type
+            t.attribute.type = attr_sym.var_type
+        t.type = t.attribute.type
 
     def _Subscript(self, t):
         self._dispatch(t.value)
@@ -445,7 +451,7 @@ class Analyzer(object):
         if func_node_class == 'AttributeRefNode':
             is_attribute = True
             name_node = t.func.attribute
-        elif func_node_class in 'NameNode':
+        elif func_node_class in ('NameNode', 'TypeNode'):
             name_node = t.func
         else:
             raise InvalidNameError('{1}: Cannot call a {0}'.format(
@@ -473,13 +479,14 @@ class Analyzer(object):
                 util.CONSTRUCTOR_NAME)
             t.type = type_sym.full_name
             # Replace NameNode with TypeNode for the type being constructed
-            new_node = nodes.TypeNode(
-                type_sym.name, namespace=type_sym.namespace)
-            new_node.type = type_sym.full_name
-            if is_attribute:
-                t.func.attribute = new_node
-            else:
-                t.func = new_node
+            if func_node_class == 'NameNode':
+                new_node = nodes.TypeNode(
+                    type_sym.name, namespace=type_sym.namespace)
+                new_node.type = type_sym.full_name
+                if is_attribute:
+                    t.func.attribute = new_node
+                else:
+                    t.func = new_node
             if func_sym is None:
                 # There's no init method to check, so we're done here
                 return
