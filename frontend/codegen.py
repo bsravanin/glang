@@ -409,7 +409,7 @@ class CodeGenerator(object):
     def _Number(self, t):
         number_type = t.type[1]
         # TODO: make sure this works
-        self.write('{0}({1})'.format(convert_type(number_type), repr(t.value)))
+        self.write('({0}){1}'.format(convert_type(number_type), repr(t.value)))
 
     def _Paren(self, t):
         self.write('(')
