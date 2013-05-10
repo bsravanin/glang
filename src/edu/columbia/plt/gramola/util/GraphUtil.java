@@ -10,7 +10,7 @@ import edu.columbia.plt.gramola.datastruct.NodeSet;
 
 public class GraphUtil {
 	
-	public static String graphDBRoot = "/Users/mikefhsu/javaws/Gramola/neo4jdbs/";
+  public static String graphDBRoot = "../db/";
 	
 	public static void dump(Graph g, String dir) {
 		GraphDBController gc = new GraphDBController(graphDBRoot + dir);
