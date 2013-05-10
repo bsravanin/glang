@@ -1,5 +1,10 @@
 #! /bin/bash
 
+if [[ $PWD != *"/glang/frontend" ]]; then
+	echo "ERROR: Please run this script from glang/frontend directory."
+	exit 65
+fi
+
 if [ $# -ne 2 ]; then
 	echo "Usage: $0 <gramola_src_prog> <java_target_class_name>"
 	exit 65

@@ -1,25 +1,17 @@
-#/usr/sh
+#! /bin/bash
+
+if [[ $PWD != *"/glang" ]]; then
+	echo "ERROR: Please run this script from glang directory."
+	exit 65
+fi
 
 rm src/*.java
 ant -buildfile build.xml
 mv build/jar/gramola.jar lib
 
-
-if [ ! -d "bin" ]; then
-   mkdir bin
-fi
-
-if [ ! -d "db" ]; then
-   mkdir db
-fi
-
-
-if [ ! -d "dotdata" ]; then
-   mkdir dotdata
-fi
-
-
-if [ ! -d "export" ]; then
-   mkdir export
-fi
-
+for dir in bin db dotdata export
+do
+	if [ ! -d $dir ]; then
+	   mkdir $dir
+	fi
+done
