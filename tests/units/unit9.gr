@@ -7,8 +7,3 @@ def void main():
 	print i2
 	int i3 = (((80 / 7)) % (90 / 10))
 	print i3
-	bool is_true = (i1 == i2) or (i1 < i2) or (i1 > i2)
-	print is_true
-	bool is_false = (i1 == i2) and (i1 < i2) and (i1 > i2)
-	print is_false
-	is_false = not (zero <= one)

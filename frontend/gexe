@@ -11,10 +11,11 @@ if [ $# -ne 1 ]; then
 fi
 
 TARGET=$1
+TARGET_CLASS=../bin/$TARGET.class
 CLASSPATH=../lib/*:.
 
-if [ ! -e ../bin/$TARGET ]; then
-	echo "ERROR: Could not find ../bin/$TARGET.class"
+if [ ! -e $TARGET_CLASS ]; then
+	echo "ERROR: Could not find $TARGET in bin."
 	exit 1
 fi
 
