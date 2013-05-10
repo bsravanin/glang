@@ -266,8 +266,8 @@ class CodeGenerator(object):
     def _Declaration(self, t, class_level=False):
         # Note: this is simply a type-name pair, not the full statement
         if class_level:
-            # Class-level variables must be public static
-            self.write('public static ')
+            # Class-level variables must be public
+            self.write('public ')
         self.dispatch(t.var_type)
         self.write(' ')
         self.dispatch(t.name)
@@ -415,8 +415,7 @@ class CodeGenerator(object):
 
     def _Number(self, t):
         number_type = t.type[1]
-        # TODO: make sure this works
-        self.write('({0}){1}'.format(convert_type(number_type), repr(t.value)))
+        self.write('(({0}) {1})'.format(convert_type(number_type), repr(t.value)))
 
     def _Paren(self, t):
         self.write('(')
