@@ -20,12 +20,11 @@ class UnknownSymbolError(Error):
 class ConflictingSymbolError(Error):
     'Attempted to add a symbol that already exists in the namespace.'
 
-    def __init__(self, symbol_obj, token, namespace, lineno):
+    def __init__(self, symbol_obj, namespace, lineno):
         Error.__init__(
             self,
-            '{3}: Attempted to overwrite table entry {0} '
-            'using token {1} in namespace {2}'.format(
-                symbol_obj, token, namespace, lineno))
+            '{0}: Attempted to overwrite table entry {1} '
+            'in namespace {2}'.format(lineno, symbol_obj, namespace))
 
 
 def _validate_full_name(full_name):
@@ -160,16 +159,19 @@ class TypeSymbol(Symbol):
           full_name: A (namespace, name) tuple.
           token: see Symbol.
           base: A (namespace, name) tuple representing the base class for this
-              type.
+              type, or None.
         '''
         Symbol.__init__(self, full_name, token=token)
+        if base is not None:
+            _validate_full_name(base)
         self.base = base
 
 
 class VariableSymbol(Symbol):
     'Simple subclass of Symbol, for variable names.'
 
-    def __init__(self, full_name, token=None, var_type=None):
+    def __init__(self, full_name, token=None, var_type=None,
+                 var_type_params=None):
         '''Constructor for VariableSymbol.
 
         Args:
@@ -177,9 +179,16 @@ class VariableSymbol(Symbol):
           token: see Symbol.
           var_type: A (namespace, name) tuple representing the fully qualified
               type for this variable.
+          var_type_params: A list of (namespace, name) tuples representing
+              parameters for this variable's type, or None.
         '''
         Symbol.__init__(self, full_name, token=token)
+        _validate_full_name(var_type)
         self.var_type = var_type
+        params = var_type_params or []
+        for param in params:
+            _validate_full_name(param)
+        self.var_type_params = params
 
 
 class FunctionSymbol(Symbol):
@@ -192,13 +201,19 @@ class FunctionSymbol(Symbol):
         Args:
           full_name: A (namespace, name) tuple.
           token: see Symbol.
-          return_type: (tuple or None) Return type for the function represented
-              by this object.
-          param_types: (tuple of tuple, or None) Types for this function's
-              parameters.
+          return_type: A (namespace, name) tuple representing the return type
+              of this function, or None.
+          param_types: A list of (namespace, name) tuples representing the
+              parameter types of this function, or None.
         '''
         Symbol.__init__(self, full_name, token=token)
+        if return_type is not None:
+            _validate_full_name(return_type)
         self.return_type = return_type
+        if param_types is None:
+            param_types = []
+        for param_type in param_types:
+            _validate_full_name(param_type)
         self.param_types = param_types
 
 

@@ -99,8 +99,9 @@ class FunctionDefNode(Node):
 class TypeNode(Node):
     'AST node for a data type, either built-in or derived.'
 
-    def __init__(self, value, namespace):
-        Node.__init__(self, value=value, namespace=namespace)
+    def __init__(self, value, namespace, params=None):
+        Node.__init__(self, value=value, namespace=namespace,
+                      params=params or [])
 
 
 class NameNode(Node):
