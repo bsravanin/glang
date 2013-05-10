@@ -245,8 +245,8 @@ class Analyzer(object):
         if not (set(self._get_ancestor_types(t.iterable.type)) &
                 set([((), 'list'), ((), 'set')])):
             raise InvalidTypeError(
-                'Expected an iterable (list, set), found {0}'.format(
-                    symbols.stringify_full_name(t.iterable.type)))
+                '{1}: Expected an iterable (list, set), found {0}'.format(
+                    symbols.stringify_full_name(t.iterable.type), t.lineno))
         self._dispatch(t.body)
 
     def _BinaryOp(self, t):
@@ -319,7 +319,8 @@ class Analyzer(object):
             else:
                 t.type = t.left.type
         else:
-            raise Error('Unknown binary operation: {0}'.format(op))
+            raise Error('{1}: Unknown binary operation: {0}'.format(
+                    op, t.lineno))
 
     def _UnaryOp(self, t):
         self._dispatch(t.operand)
@@ -356,7 +357,8 @@ class Analyzer(object):
                         symbols.stringify_full_name(t.operand.type)))
             t.type = t.operand.type
         else:
-            raise Error('Unknown unary operation: {0}'.format(op))
+            raise Error('{1}: Unknown unary operation: {0}'.format(
+                    op, lineno))
 
     def _String(self, t):
         #t.type = ((), t.value.__class__.__name__)
@@ -415,15 +417,15 @@ class Analyzer(object):
         # Check that we can actually index into t.value
         if ((), 'list') not in self._get_ancestor_types(t.type):
             raise InvalidTypeError(
-                'Type {0} is not subscriptable -- only type list'.format(
-                    symbols.stringify_full_name(t.type)))
+                '{1}: Type {0} is not subscriptable -- only type list'.format(
+                    symbols.stringify_full_name(t.type), t.lineno))
         self._dispatch(t.index)
         # Check that the index is actually an integer
         if ((), 'int') not in self._get_ancestor_types(t.index.type):
             raise InvalidTypeError(
-                'Invalid subscript type {0} for index {1}'.format(
+                '{2}: Invalid subscript type {0} for index {1}'.format(
                     symbols.stringify_full_name(t.index.type),
-                    t.index))
+                    t.index, t.lineno))
         # An iterable can contain elements of any type
         t.type = ((), 'object')
 
@@ -438,7 +440,8 @@ class Analyzer(object):
         elif func_node_class in 'NameNode':
             name_node = t.func
         else:
-            raise InvalidNameError('Cannot call a {0}'.format(func_node_class))
+            raise InvalidNameError('{1}: Cannot call a {0}'.format(
+                    func_node_class, t.lineno))
 
         # Check that this name is actually callable
         # Also, if t.func is a type, then this is a constructor call
@@ -449,7 +452,8 @@ class Analyzer(object):
             t.is_constructor = True
         elif func_sym_class != 'FunctionSymbol':
             raise InvalidNameError(
-                'Cannot call an instance of {0}'.format(func_sym_class))
+                '{1}: Cannot call an instance of {0}'.format(
+                    func_sym_class, t.lineno))
 
         self._dispatch(t.args)
 
@@ -484,10 +488,11 @@ class Analyzer(object):
             zip(func_sym.param_types, t.args)):
             if param_type not in self._get_ancestor_types(arg.type):
                 raise InconsistentTypeError(
-                    'Expected type {0} for function argument {1}, '
+                    '{3}: Expected type {0} for function argument {1}, '
                     'found {2}'.format(
                         symbols.stringify_full_name(param_type), i + 1,
-                        symbols.stringify_full_name(arg.type)))
+                        symbols.stringify_full_name(arg.type),
+                        t.lineno))
 
 
 def _analyze(ast, symbol_table):
