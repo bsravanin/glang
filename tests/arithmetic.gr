@@ -1,14 +1,10 @@
 # Date: 24th April, 2013
 # Purpose: To test arithmetic operations supported by Gramola.
 
-bool b
-float f
-int i
+bool b = True
+float f = 3.14
+int i = 42
 str s = "Rosebud"
-
-b = True
-f = 3.14
-i = 42
 
 
 def void print_these():

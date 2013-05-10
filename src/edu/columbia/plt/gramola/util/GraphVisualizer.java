@@ -37,9 +37,9 @@ import edu.columbia.plt.gramola.datastruct.Graph;
 
 public class GraphVisualizer {
 
-	private static String dotFileRoot = "/Users/mikefhsu/javaws/Gramola/dotdata/";
+	private static String dotFileRoot = "../dotdata/";
 	
-	private static String exportRoot = "/Users/mikefhsu/javaws/Gramola/export/";
+	private static String exportRoot = "../export/";
 	
 	private String finalPath;
 	

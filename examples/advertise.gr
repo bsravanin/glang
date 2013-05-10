@@ -1,9 +1,5 @@
-#from adutil import * into graph
-
-def list customermaillist():
-    Graph fbgraph = load('fbdata1')
-    Graph googlegraph = load('googledata1')
-	
+def list customermaillist(Graph fbgraph, Graph googlegraph):
+ 
 	Node fbnode_shop = fbgraph.get_node("name", "shop")
 	Node googlenode_shop = googlegraph.get_node("name", "shop")
 
@@ -25,6 +21,19 @@ def list customermaillist():
 	
 	return [give_gift_card, high_connection_set, potential_customer_set]           #list or sets
 
+def int num_old_member(Graph fbgraph):
+    list nodelist = fbgraph.get_all_nodes()
+    int num = 0
+    for Node n in nodelist:
+        if n.get_attribute("age") != "20":
+            num = num + 1
+    return num
+
 def void main():
-    list mailinglist = customermaillist()
+    Graph fbgraph = load('fbdata1')
+    Graph googlegraph = load('googledata1')
+    list mailinglist = customermaillist(fbgraph, googlegraph)
     print mailinglist
+    
+    int k = num_old_member(fbgraph)
+    print k

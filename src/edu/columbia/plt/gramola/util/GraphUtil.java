@@ -10,7 +10,7 @@ import edu.columbia.plt.gramola.datastruct.NodeSet;
 
 public class GraphUtil {
 	
-	public static String graphDBRoot = "/Users/mikefhsu/javaws/Gramola/neo4jdbs/";
+  public static String graphDBRoot = "../db/";
 	
 	public static void dump(Graph g, String dir) {
 		GraphDBController gc = new GraphDBController(graphDBRoot + dir);
@@ -35,6 +35,38 @@ public class GraphUtil {
 		ret.addAll(ns2);
 
 		return ret;
+	}
+	
+	public static Graph getFB(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToGraph();
+		return g;
+	}
+	
+	public static Graph getFBFriend(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToFriendGraph();
+		return g;
+	}
+	
+	public static Graph getFBFeed(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToFeedGraph();
+		return g;
+	}
+	
+	public static Graph getFBPage(String token) {
+		FBManager fbManager = new FBManager(token);
+		fbManager.connect();
+		fbManager.retrieveMyRelations();
+		Graph g = fbManager.convertToPageGraph();
+		return g;
 	}
 
 	/**
