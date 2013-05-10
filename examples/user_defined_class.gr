@@ -4,7 +4,7 @@ class Cofriend():
     
     set cofriend
     
-    def set find_co_friends(name1, name2):
+    def set find_co_friends(str name1, str name2):
           Node owner1 = fbgraph1.get_node("name", name1)
 	      Node owner2 = fbgraph2.get_node("name", name2)
           NodeSet ns1 = owner1.out_edges().filter('type','friend').out_nodes()
@@ -12,10 +12,10 @@ class Cofriend():
           set ns1_name = ns1.select('name')
           set ns2_name = ns2.select('name')
           cofriend = union(ns1_name, ns2_name)
+          return cofriend
           
-    def get_cofriend:
+    def set get_cofriend():
           return cofriend
           
 def void main():
-    
-          
+    Cofriend c = Cofriend()
