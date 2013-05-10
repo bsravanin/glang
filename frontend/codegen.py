@@ -277,6 +277,7 @@ class CodeGenerator(object):
             self.write(' extends ')
             self.dispatch(t.base)
         self.enter()
+        # TODO: make class variable declarations static
         self.dispatch(t.body)
         self.leave()
 
@@ -357,7 +358,6 @@ class CodeGenerator(object):
 
     def _For(self, t):
         # "enhanced for" loop
-        # TODO: check that target and iterable element types match?
         self.fill('for (')
         self.dispatch(t.target)
         self.write(' : ')
@@ -407,7 +407,9 @@ class CodeGenerator(object):
         self.write('"{0}"'.format(re.sub('"', '\\"', eval(t.value))))
 
     def _Number(self, t):
-        self.write(repr(t.value))
+        number_type = t.type[1]
+        # TODO: make sure this works
+        self.write('{0}({1})'.format(convert_type(number_type), repr(t.value)))
 
     def _Paren(self, t):
         self.write('(')
