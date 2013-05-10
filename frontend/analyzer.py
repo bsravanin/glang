@@ -91,6 +91,16 @@ class Analyzer(object):
         sym = self._symbol_table.get_by_qualified_name(full_name)
         return getattr(sym, 'base', None)
 
+    def _resolve_attribute(self, start_type, attr):
+        ancestor_types = self._get_ancestor_types(start_type)
+        for atype in ancestor_types:
+            namespace = symbols.flatten_full_name(atype)
+            attr_sym = self._symbol_table.get_by_qualified_name(
+                (namespace, attr))
+            if attr_sym is not None:
+                return attr_sym
+        return None
+
     def _Start(self, t):
         self._dispatch(t.stmt_list)
 
@@ -352,18 +362,15 @@ class Analyzer(object):
         self._dispatch(t.value)
         self._dispatch(t.attribute)
         # check that t.attribute is actually an attribute of t.value
-        value_namespace = symbols.flatten_full_name(t.value.type)
-        # TODO: check ancestor classes in method resolution
-        attr_sym = self._symbol_table.get_by_qualified_name(
-            (value_namespace, t.attribute.value))
+        attr_sym = self._resolve_attribute(t.value.type, t.attribute.value)
         if attr_sym is None:
             raise symbols.UnknownSymbolError(
-                '{2}: {0} is not an attribute of type {1}'.format(
-                    t.attribute.value, t.value.type, t.lineno))
+                '{2}: {0} is not an attribute of type {1} or any of its '
+                'ancestors'.format(t.attribute.value, t.value.type, t.lineno))
 
         # We skipped setting the attribute's namespace in _Name() so that we
         # could set it here
-        t.attribute.namespace = value_namespace
+        t.attribute.namespace = attr_sym.namespace
         if attr_sym.__class__.__name__ == 'FunctionSymbol':
             # If the attribute isn't a VariableSymbol or TypeSymbol,
             # type means nothing
@@ -417,9 +424,9 @@ class Analyzer(object):
         if t.is_constructor:
             type_sym = func_sym
             # Use the class's constructor method symbol instead
-            func_sym = self._symbol_table.get_by_qualified_name(
-                (symbols.flatten_full_name(func_sym.full_name),
-                 util.CONSTRUCTOR_NAME))
+            func_sym = self._resolve_attribute(
+                type_sym.full_name,
+                util.CONSTRUCTOR_NAME)
             t.type = type_sym.full_name
             # Replace NameNode with TypeNode for the type being constructed
             new_node = nodes.TypeNode(
