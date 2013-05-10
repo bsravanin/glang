@@ -240,13 +240,21 @@ class Analyzer(object):
         # "enhanced for" loop
         self._dispatch(t.target)
         self._dispatch(t.iterable)
-        # At compile time, we don't know what element types are in t.iterable,
-        # so we generate runtime checks during translation
+        # Check that t.iterable is an instance of list or set
         if not (set(self._get_ancestor_types(t.iterable.type)) &
                 set([((), 'list'), ((), 'set')])):
             raise InvalidTypeError(
                 '{1}: Expected an iterable (list, set), found {0}'.format(
                     symbols.stringify_full_name(t.iterable.type), t.lineno))
+        # At compile time, we don't know what element types are in t.iterable,
+        # unless it's a manually constructed list
+        for item in getattr(t.iterable, 'elts', []):
+            ancestor_types = self._get_ancestor_types(item.type)
+            if t.target.type not in ancestor_types:
+                raise InconsistentTypeError(
+                    '{0}: Expected type {1}, found type {2}'.format(
+                        item.lineno, symbols.stringify_full_name(t.target.type),
+                        symbols.stringify_full_name(item.type)))
         self._dispatch(t.body)
 
     def _BinaryOp(self, t):

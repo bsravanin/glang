@@ -272,7 +272,6 @@ class CodeGenerator(object):
     def _ClassDef(self, t):
         self.write('\n')
         self.fill('class ')
-        # TODO: add type param to 'name' if base is parameterized
         self.dispatch(t.name)
         if t.base:
             self.write(' extends ')

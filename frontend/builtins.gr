@@ -4,8 +4,6 @@
 # - These are just prototypes for the symbol table, no implementations needed
 # - return type for init's are ignored, but must be present anyway
 
-# TODO: make sure all supported builtins are here
-
 
 class object():
 
@@ -20,13 +18,14 @@ class void():
 class int(object):
 
 	def void __init__(object obj):
-		# Integer.parseInt(x.toString()) ???
+		# Integer.valueOf(x.toString())
 		pass
 
 
 class bool(int):
 
 	def void __init__(object obj):
+		# Boolean.valueOf(x != 0 ? "true" : "false")
 		pass
 
 
@@ -37,15 +36,14 @@ bool True = bool(1)
 class float(object):
 
 	def void __init__(object obj):
-		# TODO: cast to float in codegen?
-		# Float.parseFloat(x.toString())
+		# Float.valueOf(x.toString())
 		pass
 
 
 class str(object):
 
 	def void __init__(object obj):
-		# String.valueOf
+		# String.valueOf(x)
 		pass
 
 	def str copy():
@@ -131,7 +129,7 @@ class list(object):
 		# ArrayList<Object>.remove
 		pass
 
-	# TODO: find a way to support non-ArrayList methods
+	# Ideally, we'd support these....
 	#def void reverse():
 	#	# Collections.reverse
 	#	pass
@@ -227,7 +225,6 @@ class Graph(object):
 	def void __init__():
 		pass
 
-	# TODO: Java returns this as long. Should we translate all ints to long?
 	def int get_id():
 		pass
 
