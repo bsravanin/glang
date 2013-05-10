@@ -95,7 +95,7 @@ class str(object):
 
 class list(object):
 
-	def void __init__(object obj):
+	def void __init__(list obj):
 		# ArrayList<Object>
 		pass
 
@@ -143,7 +143,7 @@ class list(object):
 
 class set(object):
 
-	def void __init__(object obj):
+	def void __init__(list obj):
 		# HashSet<Object>
 		pass
 
@@ -185,7 +185,7 @@ class set(object):
 
 class dict(object):
 
-	def void __init__(object obj):
+	def void __init__(list obj):
 		# HashMap<Object,Object>
 		pass
 
