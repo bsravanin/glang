@@ -329,8 +329,11 @@ class CodeGenerator(object):
             self.dispatch(t.value)
         self.end_stmt()
 
-    def _If(self, t):
-        self.fill('if (')
+    def _If(self, t, is_else=False):
+        if is_else:
+            self.write(' if (')
+        else:
+            self.fill('if (')
         self.dispatch(t.test)
         self.write(')')
         self.enter()
@@ -338,9 +341,12 @@ class CodeGenerator(object):
         self.leave()
         for else_clause in t.elses:
             self.write(' else')
-            self.enter()
-            self.dispatch(else_clause)
-            self.leave()
+            if else_clause.__class__.__name__ == 'IfNode':
+                self._If(else_clause, is_else=True)
+            else:
+                self.enter()
+                self.dispatch(else_clause)
+                self.leave()
 
     def _While(self, t):
         self.fill('while (')
