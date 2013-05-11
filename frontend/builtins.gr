@@ -207,6 +207,10 @@ class dict<object,object>(object):
 		# HashMap<Object,Object>.remove
 		return ''
 
+	def object set(object key, object value):
+		# HashMap<Object,Object>.put
+		return value
+
 	def void update(dict<object,object> d):
 		# HashMap<Object,Object>.putAll
 		pass
