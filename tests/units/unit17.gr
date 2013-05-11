@@ -1,6 +1,6 @@
 # TEST: List operations.
 
-def list<bool> bool_list_ops(<list<bool> lb):
+def list<bool> bool_list_ops(list<bool> lb):
 	print lb.index(True)
 
 	if lb.contains(True):
@@ -26,11 +26,13 @@ def list<bool> bool_list_ops(<list<bool> lb):
 	print lb2
 	lb2.pop(2)
 	print lb2
-	lbs.remove(True)
+	lb2.remove(True)
 	print lb2
 	
 	for bool b in lb:
 		print b
+
+	return lb
 
 
 def list<float> float_list_ops(list<float> lf):
@@ -49,7 +51,7 @@ def list<float> float_list_ops(list<float> lf):
 	lf.append(3.14)
 	print lf
 
-	list<bool> lf2 = lf.copy()
+	list<float> lf2 = lf.copy()
 	print lf2
 
 	lf.extend(lf2)
@@ -59,11 +61,13 @@ def list<float> float_list_ops(list<float> lf):
 	print lf2
 	lf2.pop(2)
 	print lf2
-	lfs.remove(3.14)
+	lf2.remove(3.14)
 	print lf2
 	
 	for float f in lf:
 		print f
+
+	return lf
 
 
 def list<int> int_list_ops(list<int> li):
@@ -82,7 +86,7 @@ def list<int> int_list_ops(list<int> li):
 	li.append(42)
 	print li
 
-	list<bool> li2 = li.copy()
+	list<int> li2 = li.copy()
 	print li2
 
 	li.extend(li2)
@@ -92,11 +96,13 @@ def list<int> int_list_ops(list<int> li):
 	print li2
 	li2.pop(2)
 	print li2
-	lis.remove(42)
+	li2.remove(42)
 	print li2
 	
 	for int i in li:
 		print i
+
+	return li
 
 
 def list<str> str_list_ops(list<str> ls):
@@ -115,7 +121,7 @@ def list<str> str_list_ops(list<str> ls):
 	ls.append("Rosebud")
 	print ls
 
-	lsst<bool> ls2 = ls.copy()
+	list<str> ls2 = ls.copy()
 	print ls2
 
 	ls.extend(ls2)
@@ -125,11 +131,13 @@ def list<str> str_list_ops(list<str> ls):
 	print ls2
 	ls2.pop(2)
 	print ls2
-	lss.remove("Rosebud")
+	ls2.remove("Rosebud")
 	print ls2
 	
 	for str s in ls:
 		print s
+
+	return ls
 
 
 def void main():
