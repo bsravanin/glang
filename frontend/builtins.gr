@@ -406,3 +406,6 @@ class __builtins(object):
 
 	def set<object> union(set<object> lhs, set<object> rhs):
 		return set<object>([])
+
+	def bool isinstance(object obj, str type_name):
+		return False

@@ -516,10 +516,17 @@ class CodeGenerator(object):
             self.write(')')
             return
         if func_full_name == 'float':
-            self.write('Float.valueOf(')
+            self.write('Double.valueOf(')
             self.write('(')
             self.dispatch(t.args[0])
             self.write(').toString()')
+            self.write(')')
+            return
+        if func_full_name == '__builtins.isinstance':
+            self.write('(')
+            self.dispatch(t.args[0])
+            self.write(' instanceof ')
+            self.dispatch(t.args[1])
             self.write(')')
             return
 
