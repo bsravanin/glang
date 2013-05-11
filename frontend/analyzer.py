@@ -270,6 +270,7 @@ class Analyzer(object):
             raise InvalidTypeError(
                 '{1}: expected an iterable (list, set), found {0}'.format(
                     symbols.stringify_full_name(t.iterable.type), t.lineno))
+        # TODO: check that iterable's type param is compatible with target type
         # At compile time, we don't know what element types are in t.iterable,
         # unless it's a manually constructed list
         for item in getattr(t.iterable, 'elts', []):
@@ -388,6 +389,19 @@ class Analyzer(object):
                         t.lineno,
                         symbols.stringify_full_name(t.operand.type)))
             t.type = t.operand.type
+        elif op.__class__.__name__ == 'TypeNode':
+            # Type cast
+            self._dispatch(op)
+            op_ancestor_types = self._get_ancestor_types(op.type)
+            operand_ancestor_types = self._get_ancestor_types(t.operand.type)
+            if (op.type not in operand_ancestor_types and
+                t.operand.type not in op_ancestor_types):
+                raise InconsistentTypeError(
+                    '{0}: operator type {1} not incompatible with '
+                    'operand type {2}'.format(
+                        t.lineno, symbols.stringify_full_name(op.type),
+                        symbols.stringify_full_name(t.operand.type)))
+            t.type = t.operand.type = op.type
         else:
             raise Error('{1}: Unknown unary operation: {0}'.format(
                     op, t.lineno))

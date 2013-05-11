@@ -699,8 +699,14 @@ class Parser(object):
 
     def p_unary_op(self, p):
         '''unary_op : PLUS
-                    | MINUS'''
+                    | MINUS
+                    | cast'''
         p[0] = p[1]
+
+    def p_cast(self, p):
+        'cast : LPAREN type RPAREN'
+        p[0] = p[2]
+        p[0].lineno = p.slice[1].lineno
 
     def p_primary(self, p):
         '''primary : atom

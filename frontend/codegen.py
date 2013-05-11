@@ -428,7 +428,12 @@ class CodeGenerator(object):
         op = t.operator
         if op == 'not':
             op = '!'
-        self.write(op)
+        if op.__class__.__name__ == 'TypeNode':
+            self.write('(')
+            self.dispatch(op)
+            self.write(') ')
+        else:
+            self.write(op)
         # In case of unary minus, we need to parenthesize the operand.
         self.write('(')
         self.dispatch(t.operand)
