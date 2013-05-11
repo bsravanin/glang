@@ -528,7 +528,12 @@ class CodeGenerator(object):
         if func_full_name == '__builtins.isinstance':
             self.write('(')
             self.dispatch(t.args[0])
-            new_type = convert_type(eval(t.args[1].value))
+            type_node = t.args[1]
+            if type_node.__class__.__name__ == 'StringNode':
+                value = eval(type_node.value)
+            else:
+                value = symbols.stringify_full_name(type_node.type)
+            new_type = convert_type(value)
             self.write(' instanceof {0}'.format(new_type))
             self.write(')')
             return
