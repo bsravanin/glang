@@ -267,7 +267,7 @@ class Parser(object):
 
         # Add this new function name to the symbol table, as long as it doesn't
         # already exist in the current scope
-        sym = self._symbol_table.get(name)
+        sym = self._symbol_table.get_in_current_scope(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
             # We set return_type and param_types for this symbol in a later pass

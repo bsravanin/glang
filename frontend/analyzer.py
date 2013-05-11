@@ -413,7 +413,6 @@ class Analyzer(object):
             symbol_type=symbols.TypeSymbol).full_name
 
     def _Number(self, t):
-        #t.type = ((), t.value.__class__.__name__)
         t.type = self._symbol_table.get(
             t.value.__class__.__name__,
             symbol_type=symbols.TypeSymbol).full_name
@@ -427,7 +426,9 @@ class Analyzer(object):
         t.type = ((), 'list')
 
     def _Dict(self, t):
-        self._dispatch(t.items)
+        for item in t.items:
+            self._dispatch(item[0])
+            self._dispatch(item[1])
         t.type = ((), 'dict')
 
     def _Set(self, t):
