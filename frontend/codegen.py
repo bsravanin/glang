@@ -461,7 +461,7 @@ class CodeGenerator(object):
 
     def _Dict(self, t):
         keys = []
-        value = []
+        values = []
         for item in t.items:
             keys.append(item[0])
             values.append(item[1])
