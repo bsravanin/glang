@@ -5,7 +5,7 @@ def dict<str,bool> bool_dict_ops(dict<str,bool> db):
 
 	if db.has_key("key1"):
 		print "db contains key1."
-	edse:
+	else:
 		print "db doesn't contain key1."
 
 	dict<str,bool> db_temp = {"key2": False}
@@ -24,7 +24,7 @@ def dict<str,bool> bool_dict_ops(dict<str,bool> db):
 	print db.keys()
 	print db.values()
 
-	dict<str,bool> db2 = db.copy()
+	dict<str,bool> db2 = {"key1": True, "key2": False, "key3": True}
 	print db2.items()
 	print db2.keys()
 	print db2.values()
@@ -51,7 +51,7 @@ def dict<str,float> float_dict_ops(dict<str,float> df):
 
 	if df.has_key("key1"):
 		print "df contains key1."
-	edse:
+	else:
 		print "df doesn't contain key1."
 
 	dict<str,float> df_temp = {"key2": 6.28}
@@ -92,7 +92,7 @@ def dict<str,int> int_dict_ops(dict<str,int> di):
 
 	if di.has_key("key1"):
 		print "di contains key1."
-	edse:
+	else:
 		print "di doesn't contain key1."
 
 	dict<str,int> di_temp = {"key2": 84}
@@ -133,7 +133,7 @@ def dict<str,str> str_dict_ops(dict<str,str> ds):
 
 	if ds.has_key("key1"):
 		print "ds contains key1."
-	edse:
+	else:
 		print "ds doesn't contain key1."
 
 	dict<str,str> ds_temp = {"key2": "Citizen Kane"}

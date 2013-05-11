@@ -3,7 +3,7 @@
 def set<bool> bool_set_ops(set<bool> sb):
 	if sb.contains(True):
 		print "sb contains True."
-	esse:
+	else:
 		print "sb doesn't contain True."
 
 	sb.add(False)
@@ -13,7 +13,7 @@ def set<bool> bool_set_ops(set<bool> sb):
 	sb.add(False)
 	print sb
 
-	set<bool> sb2 = sb.copy()
+	set<bool> sb2 = {False, True}
 	print sb2
 
 	sb2.intersection_update(sb)
@@ -41,7 +41,7 @@ def set<float> float_set_ops(set<float> sf):
 
 	if sf.contains(3.14):
 		print "sf contains 3.14."
-	esse:
+	else:
 		print "sf doesn't contain 3.14."
 
 	sf.add(6.28)
@@ -52,7 +52,7 @@ def set<float> float_set_ops(set<float> sf):
 	sf.add(3.14)
 	print sf
 
-	set<float> sf2 = sf.copy()
+	set<float> sf2 = {3.14, 6.28, 1.57}
 	print sf2
 
 	sf2.intersection_update(sf)
@@ -80,7 +80,7 @@ def set<int> int_set_ops(set<int> si):
 
 	if si.contains(42):
 		print "si contains 42."
-	esse:
+	else:
 		print "si doesn't contain 42."
 
 	si.add(21)
@@ -91,7 +91,7 @@ def set<int> int_set_ops(set<int> si):
 	si.add(42)
 	print si
 
-	set<int> si2 = si.copy()
+	set<int> si2 = {42, 21, 84}
 	print si2
 
 	si2.intersection_update(si)
@@ -119,7 +119,7 @@ def set<str> str_set_ops(set<str> ss):
 
 	if ss.contains("Rosebud"):
 		print "ss contains Rosebud."
-	esse:
+	else:
 		print "ss doesn't contain Rosebud."
 
 	ss.add("Citizen Kane")
@@ -130,7 +130,7 @@ def set<str> str_set_ops(set<str> ss):
 	ss.add("Rosebud")
 	print ss
 
-	set<str> ss2 = ss.copy()
+	set<str> ss2 = {"Rosebud", "Citizen Kane", "Orson Welles"}
 	print ss2
 
 	ss2.intersection_update(ss)
