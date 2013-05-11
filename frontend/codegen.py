@@ -346,7 +346,7 @@ class CodeGenerator(object):
                 else:
                     self.write('(')
                     self.dispatch(e)
-                    self.write(').toString()')
+                    self.write(')')
                 self.write(')')
                 self.end_stmt()
 
