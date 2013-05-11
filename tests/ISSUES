@@ -1,0 +1,13 @@
+<
+unit10_2.gr:4
+Alternative: if not == and <=
+
+copy
+Removed from unit16.gr, unit17.gr, unit18.gr
+Java clone(). No alternative.
+
+insert
+unit17.gr:64
+
+Dicts
+unit19.gr
