@@ -49,6 +49,7 @@ class Lexer(object):
         'in': 'IN',
         'is': 'IS',
         'not': 'NOT',
+        'null': 'NULL',
         'or': 'OR',
         'print': 'PRINT',
         'return': 'RETURN',

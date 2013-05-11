@@ -271,3 +271,10 @@ class CallNode(Node):
     def __init__(self, func, args, is_constructor=False):
         Node.__init__(self, func=func, args=args or [],
                       is_constructor=is_constructor)
+
+
+class NullNode(Node):
+    'AST node for a null reference.'
+
+    def __init__(self):
+        Node.__init__(self)

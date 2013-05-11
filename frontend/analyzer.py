@@ -140,7 +140,14 @@ class Analyzer(object):
             raise InconsistentTypeError(
                 '{0}: found no return type(s) for function {1}'.format(
                     t.lineno, symbols.stringify_full_name(sym.full_name)))
+        if sym.return_type == ((), 'void') and return_types:
+            raise InconsistentTypeError(
+                '{0}: found return type(s) for function {1}, '
+                'expected none'.format(
+                    t.lineno, symbols.stringify_full_name(sym.full_name)))
         for return_type in return_types:
+            if return_type == util.NULL:
+                continue
             ancestor_types = self._get_ancestor_types(return_type)
             if sym.return_type not in ancestor_types:
                 raise InconsistentTypeError(
@@ -249,6 +256,9 @@ class Analyzer(object):
             t.type = t.value.type
         else:
             t.type = ((), 'void')
+
+    def _Null(self, t):
+        t.type = util.NULL
 
     def _If(self, t):
         self._dispatch(t.test)

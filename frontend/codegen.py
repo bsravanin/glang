@@ -362,6 +362,9 @@ class CodeGenerator(object):
             self.dispatch(t.value)
         self.end_stmt()
 
+    def _Null(self, t):
+        self.write(util.NULL)
+
     def _If(self, t, is_else=False):
         if is_else:
             self.write(' if (')

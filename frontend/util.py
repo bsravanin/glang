@@ -15,3 +15,4 @@ COLLECTION_BASE_TYPES = {
     ((), 'dict'): 2,
     ((), 'set'): 1,
     }
+NULL = 'null'

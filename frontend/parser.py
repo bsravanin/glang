@@ -243,10 +243,14 @@ class Parser(object):
         p[0].lineno = p.slice[1].lineno
 
     def p_parameterized_type(self, p):
-        '''parameterized_type : NAME LESS type_param_list GREATER'''
+        '''parameterized_type : NAME type_parameters'''
         p[0] = nodes.TypeNode(value=p[1], namespace=self._cur_namespace,
-                              params=p[3])
+                              params=p[2])
         p[0].lineno = p.slice[1].lineno
+
+    def p_type_parameters(self, p):
+        'type_parameters : LESS type_param_list GREATER'
+        p[0] = p[2]
 
     def p_type_param_list(self, p):
         '''type_param_list : bare_type
@@ -502,7 +506,10 @@ class Parser(object):
         p[0].lineno = p.slice[1].lineno
 
     def p_return_stmt(self, p):
-        'return_stmt : RETURN opt_expr'
+        '''return_stmt : RETURN opt_expr
+                       | RETURN NULL'''
+        if p.slice[2].type == 'NULL':
+            p[2] = nodes.NullNode()
         p[0] = nodes.ReturnNode(value=p[2])
         p[0].lineno = p.slice[1].lineno
 
