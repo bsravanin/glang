@@ -525,7 +525,8 @@ class CodeGenerator(object):
         if func_full_name == '__builtins.isinstance':
             self.write('(')
             self.dispatch(t.args[0])
-            self.write(' instanceof {0}'.format(t.args[1].value))
+            new_type = convert_type(eval(t.args[1].value))
+            self.write(' instanceof {0}'.format(new_type))
             self.write(')')
             return
 
