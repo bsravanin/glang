@@ -461,10 +461,10 @@ class Analyzer(object):
     def _Subscript(self, t):
         self._dispatch(t.value)
         # Check that we can actually index into t.value
-        if ((), 'list') not in self._get_ancestor_types(t.type):
+        if ((), 'list') not in self._get_ancestor_types(t.value):
             raise InvalidTypeError(
                 '{1}: Type {0} is not subscriptable -- only type list'.format(
-                    symbols.stringify_full_name(t.type), t.lineno))
+                    symbols.stringify_full_name(t.value), t.lineno))
         self._dispatch(t.index)
         # Check that the index is actually an integer
         if ((), 'int') not in self._get_ancestor_types(t.index.type):
