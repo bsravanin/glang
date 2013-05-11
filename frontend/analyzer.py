@@ -124,20 +124,6 @@ class Analyzer(object):
     def _FunctionDef(self, t):
         self._dispatch(t.name)
 
-        # TODO: remove this, since __init__'s now return the proper type
-        # If this is a constructor, set its return type to its class name
-        #if (getattr(t, 'is_method', False) and
-        #    t.name.value == util.CONSTRUCTOR_NAME):
-        #    class_name = t.name.namespace[-1]
-        #    class_namespace = t.name.namespace[:-1]
-        #    # A bit of a hack: if this is a parameterized type, we assume
-        #    # the first function param will tell us the type parameter
-        #    first_type_params = t.params[0].var_type.params
-        #    t.return_type = nodes.TypeNode(
-        #        class_name, namespace=class_namespace,
-        #        params=first_type_params)
-        #    t.return_type.lineno = t.lineno
-        # Update the symbol table entry to match
         sym = self._symbol_table.get_by_qualified_name(
             (t.name.namespace, t.name.value))
         self._dispatch(t.return_type)
@@ -461,10 +447,10 @@ class Analyzer(object):
     def _Subscript(self, t):
         self._dispatch(t.value)
         # Check that we can actually index into t.value
-        if ((), 'list') not in self._get_ancestor_types(t.type):
+        if ((), 'list') not in self._get_ancestor_types(t.value.type):
             raise InvalidTypeError(
                 '{1}: Type {0} is not subscriptable -- only type list'.format(
-                    symbols.stringify_full_name(t.type), t.lineno))
+                    symbols.stringify_full_name(t.value.type), t.lineno))
         self._dispatch(t.index)
         # Check that the index is actually an integer
         if ((), 'int') not in self._get_ancestor_types(t.index.type):
@@ -513,7 +499,7 @@ class Analyzer(object):
             # Replace NameNode with TypeNode for the type being constructed
             if func_node_class == 'NameNode':
                 new_node = nodes.TypeNode(
-                    type_sym.name, namespace=type_sym.namespace)
+                    type_sym.name, type_sym.namespace)
                 new_node.type = type_sym.full_name
                 new_node.lineno = t.lineno
                 if is_attribute:
