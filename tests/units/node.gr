@@ -1,0 +1,5 @@
+# test Node
+
+def void main():
+    Graph g = Graph()
+    g.node({"name":"abc", "age":"18"})
