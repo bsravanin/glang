@@ -4,7 +4,7 @@ class MyClass():
     int i
     float f
 
-    def void __init__(int i, float f):
+    def MyClass __init__(int i, float f):
         self.i = i
         self.f = f
 
@@ -15,7 +15,8 @@ class MyClass():
         return f
 
 class ChildClass(MyClass):
-    def void __init__(int i, float f):
+    def ChildClass __init__(int i, float f):
+        MyClass(i,f)
         self.i = i
         self.f = f
 
