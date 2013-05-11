@@ -123,7 +123,6 @@ class Analyzer(object):
 
     def _FunctionDef(self, t):
         self._dispatch(t.name)
-        self._dispatch(t.params)
 
         # TODO: remove this, since __init__'s now return the proper type
         # If this is a constructor, set its return type to its class name
@@ -144,6 +143,7 @@ class Analyzer(object):
         self._dispatch(t.return_type)
         sym.return_type = (t.return_type.namespace, t.return_type.value)
 
+        self._dispatch(t.params)
         self._dispatch(t.body)
 
         # Check that the return types matches the function declaration.
@@ -239,9 +239,11 @@ class Analyzer(object):
     def _Assignment(self, t):
         self._dispatch(t.target)
         self._dispatch(t.value)
-        if t.target.type != t.value.type:
+        ancestor_types = self._get_ancestor_types(t.value.type)
+        if t.target.type not in ancestor_types:
             raise InconsistentTypeError(
-                '{2}: Target type {0} does not match value type {1}'.format(
+                '{2}: Target type {0} not compatible with '
+                'value type {1}'.format(
                     symbols.stringify_full_name(t.target.type),
                     symbols.stringify_full_name(t.value.type), t.target.lineno))
 
