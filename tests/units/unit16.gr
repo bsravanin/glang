@@ -2,7 +2,7 @@
 
 def void main():
 	str s = "Rosebud"
-	str t = s.copy()
+	str t = s
 	print s, t
 
 	if s.endswith("bud"):

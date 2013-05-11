@@ -37,8 +37,6 @@ def set<bool> bool_set_ops(set<bool> sb):
 
 
 def set<float> float_set_ops(set<float> sf):
-	print sf.index(3.14)
-
 	if sf.contains(3.14):
 		print "sf contains 3.14."
 	else:
@@ -46,7 +44,6 @@ def set<float> float_set_ops(set<float> sf):
 
 	sf.add(6.28)
 	print sf
-	print sf.index(6.28)
 	sf.add(1.57)
 	print sf
 	sf.add(3.14)
@@ -76,8 +73,6 @@ def set<float> float_set_ops(set<float> sf):
 
 
 def set<int> int_set_ops(set<int> si):
-	print si.index(42)
-
 	if si.contains(42):
 		print "si contains 42."
 	else:
@@ -85,7 +80,6 @@ def set<int> int_set_ops(set<int> si):
 
 	si.add(21)
 	print si
-	print si.index(21)
 	si.add(84)
 	print si
 	si.add(42)
@@ -96,14 +90,14 @@ def set<int> int_set_ops(set<int> si):
 
 	si2.intersection_update(si)
 	print si2
-	sb2.difference_update(si)
+	si2.difference_update(si)
 	print si2
 	print si2.isempty()
 	print si.isempty()
 
 	si2.update(si)
 	print si2
-	sb2.remove(42)
+	si2.remove(42)
 	print si2
 	print si2.issuperset(si)
 	print si2.issuperset(si2)
@@ -115,8 +109,6 @@ def set<int> int_set_ops(set<int> si):
 
 
 def set<str> str_set_ops(set<str> ss):
-	print ss.index("Rosebud")
-
 	if ss.contains("Rosebud"):
 		print "ss contains Rosebud."
 	else:
@@ -124,7 +116,6 @@ def set<str> str_set_ops(set<str> ss):
 
 	ss.add("Citizen Kane")
 	print ss
-	print ss.index("Citizen Kane")
 	ss.add("Orson Welles")
 	print ss
 	ss.add("Rosebud")
@@ -155,13 +146,13 @@ def set<str> str_set_ops(set<str> ss):
 
 def void main():
 	set<bool> sb = {True}
-	print bool_set_ops()
+	print bool_set_ops(sb)
 
 	set<float> sf = {3.14}
-	print float_set_ops()
+	print float_set_ops(sf)
 
 	set<int> si = {42}
-	print int_set_ops()
+	print int_set_ops(si)
 
 	set<str> ss = {"Rosebud"}
-	print str_set_ops()
+	print str_set_ops(ss)

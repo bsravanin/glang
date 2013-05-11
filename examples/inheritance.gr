@@ -1,0 +1,27 @@
+class ColorNode(Node):
+	str color
+	def void myNode(dict dd, str expcolor):
+		color = expcolor
+		Node(dd)
+
+
+
+
+
+
+def void main():
+    Graph g = Graph()
+    ColorNode node1 = ColorNode({'name': 'Michael', 'age': 30, 'birthday_month' : 9, 'popularity' : 10, 'popular' : 'Yes'}, 'red')
+    ColorNode node2 = ColorNode({'name': 'David', 'age': 25,'birthday_month' : 5, 'popularity' : 8, 'popular' : 'SoSo'}, 'blue')
+    ColorNode node3 = ColorNode({'name': 'Jack', 'age': 18, 'birthday_month' : 5, 'popularity' : 9, 'popular' : 'No'}, 'green')
+    ColorNode node4 = ColorNode({'name': 'Tom', 'age': 26, 'birthday_month' : 5, 'popularity' : 4, 'popular' : 'Yes'}, 'yellow')
+	ColorNode node5 = ColorNode({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3, 'popular' : 'Yes'}, 'orange')
+
+	g.add_node(node1)
+	g.add_node(node2)
+	g.add_node(node3)
+	g.add_node(node4)
+	g.add_node(node5)
+#	g.edge(node1, node2,  {'type': 'fbfriend'})	
+    ColorNode n = (ColorNode) g.get_node('name, 'Michael')
+	print n.color

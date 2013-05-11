@@ -428,7 +428,12 @@ class CodeGenerator(object):
         op = t.operator
         if op == 'not':
             op = '!'
-        self.write(op)
+        if op.__class__.__name__ == 'TypeNode':
+            self.write('(')
+            self.dispatch(op)
+            self.write(') ')
+        else:
+            self.write(op)
         # In case of unary minus, we need to parenthesize the operand.
         self.write('(')
         self.dispatch(t.operand)
@@ -511,10 +516,17 @@ class CodeGenerator(object):
             self.write(')')
             return
         if func_full_name == 'float':
-            self.write('Float.valueOf(')
+            self.write('Double.valueOf(')
             self.write('(')
             self.dispatch(t.args[0])
             self.write(').toString()')
+            self.write(')')
+            return
+        if func_full_name == '__builtins.isinstance':
+            self.write('(')
+            self.dispatch(t.args[0])
+            self.write(' instanceof ')
+            self.dispatch(t.args[1])
             self.write(')')
             return
 
