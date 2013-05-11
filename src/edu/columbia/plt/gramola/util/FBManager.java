@@ -32,12 +32,14 @@ public class FBManager {
 	
 	public void connect() {
 		if (this.token == null || this.token.isEmpty()) {
-			System.err.println("No active token. Please set up token first");
-			System.err.println("http://https://developers.facebook.com/tools/explorer");
+			GInformer.printMessage("No active token. Please set up token first");
+			GInformer.printMessage("http://https://developers.facebook.com/tools/explorer");
+			return ;
 		}
 		
 		this.fbManager = new DefaultFacebookClient(this.token);
 		this.me = fbManager.fetchObject("me", User.class);
+		GInformer.printMessage("Connecting to Facebook succeeds");
 	}
 	
 	public void retrieveMyRelations() {
@@ -151,7 +153,7 @@ public class FBManager {
 		System.out.println("Test home: " + home);
 		
 		
-		if (u.getLocale() == null)
+		if (u.getLocation() == null || u.getLocation().getName() == null || u.getLocation().getName().isEmpty())
 			location = "";
 		else
 			location = u.getLocation().getName().replaceAll("\\s", "");

@@ -142,6 +142,7 @@ public class GraphVisualizer {
         
         frame.pack();
         frame.setVisible(true);
+        GInformer.printMessage("Graph drawing succeeds");
 	}
 	
 	/**

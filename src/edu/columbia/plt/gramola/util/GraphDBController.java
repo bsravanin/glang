@@ -47,10 +47,11 @@ public class GraphDBController {
 		File graphDBFile = new File(this.neo4jPath);
 		
 		if (graphDBFile.exists()) {
+			GInformer.printMessage("Find existing graph db");
 			this.deleteDBDir(graphDBFile);
-		} else {
-			graphDBFile.mkdir();
+			GInformer.printMessage("Delete existing graph db");
 		}
+		graphDBFile.mkdir();
 	}
 	
 	/**
@@ -136,6 +137,7 @@ public class GraphDBController {
 				
 			}
 			trans.success();
+			GInformer.printMessage("Graph dumping succeeds " + this.neo4jPath);
 		} finally {
 			trans.finish();
 		}
@@ -219,8 +221,8 @@ public class GraphDBController {
 				
 				edge = this.reproEdge(tmpRelation, startNode, endNode);
 				g.addEdge(edge);
-				
 			}
+			GInformer.printMessage("Loading Graph succeeds " + this.neo4jPath);
 		} finally {
 			trans.finish();
 		}
