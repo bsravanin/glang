@@ -72,6 +72,7 @@ JAVA_NAME_MAP = {
     'dict.items': 'entrySet',
     'dict.keys': 'keySet',
     'dict.pop': 'remove',
+    'dict.set': 'put',
     'dict.update': 'putAll',
     'dict.values': 'values',
     'list.append': 'add',
@@ -223,31 +224,56 @@ class CodeGenerator(object):
         for stmt in other_stmts:
             if stmt.__class__.__name__ == 'FunctionDefNode':
                 # static attributes in the main class
-                self._FunctionDef(stmt, top=True)
+                self._FunctionDef(stmt)
             else:
                 self.dispatch(stmt)
         self.fill()
         self.leave()
         self.fill()
 
-    def _FunctionDef(self, t, top=False):
+    def _FunctionDef(self, t, class_def=None):
         self.write('\n')
         self.fill('public ')
-        if top:
+        if not class_def:
             self.write('static ')
         if t.name.value == 'main':
             self.write('void main(String[] args)')
         else:
             self.dispatch(t.return_type)
-            if not (t.name.value == util.CONSTRUCTOR_NAME and
-                getattr(t, 'is_method', False)):
+            if not (t.name.value == util.CONSTRUCTOR_NAME and class_def):
                 self.write(' ')
                 self.dispatch(t.name)
             self.write('(')
             interleave(lambda: self.write(', '), self.dispatch, t.params)
             self.write(')')
         self.enter()
-        self.dispatch(t.body)
+
+        if not (t.name.value == util.CONSTRUCTOR_NAME and class_def):
+            self.dispatch(t.body)
+        else:
+            for i, stmt in enumerate(t.body):
+                # If the first statement is the parent class's constructor,
+                # generate a super() call
+                print stmt
+                if (i == 0 and
+                    stmt.__class__.__name__ == 'ExpressionStmtNode' and
+                    stmt.expr.__class__.__name__ == 'CallNode' and
+                    stmt.expr.func.__class__.__name__ == 'TypeNode' and
+                    stmt.expr.func.type == class_def.base.type):
+                    init_type_params = [x.value
+                                        for x in stmt.expr.func.params]
+                    parent_type_params = [x.value
+                                          for x in class_def.base.params]
+                    print init_type_params
+                    print parent_type_params
+                    if (init_type_params == parent_type_params):
+                        self.fill('super(')
+                        interleave(lambda: self.write(', '), self.dispatch,
+                                   stmt.expr.args)
+                        self.write(')')
+                        continue
+                self.dispatch(stmt)
+
         self.leave()
 
     def _Type(self, t):
@@ -283,7 +309,9 @@ class CodeGenerator(object):
         self.enter()
         self.write('\n')
         for stmt in t.body:
-            if stmt.__class__.__name__ == 'DeclarationStmtNode':
+            if stmt.__class__.__name__ == 'FunctionDefNode':
+                self._FunctionDef(stmt, class_def=t)
+            elif stmt.__class__.__name__ == 'DeclarationStmtNode':
                 self._DeclarationStmt(stmt, class_level=True)
             else:
                 self.dispatch(stmt)
