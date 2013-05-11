@@ -1,0 +1,19 @@
+# TEST: Comparison operators
+
+def void compare(int i, int j):
+	if i < j:
+		print "i < j"
+	if i > j:
+		print "i > j"
+	if i <= j:
+		print "i <= j"
+	if i >= j:
+		print "i >= j"
+	if i == j:
+		print "i == j"
+
+
+def void main():
+	compare(1, 2)
+	compare(2, 1)
+	compare(1, 1)

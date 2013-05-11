@@ -61,7 +61,8 @@ def list<float> float_list_ops(list<float> lf):
 	lf.extend(lf2)
 	print lf
 
-	lf2.insert(1, 42)
+	# lf2.insert(1, 42)
+	lf2.insert(1, 42.0)
 	print lf2
 	lf2.pop(2)
 	print lf2

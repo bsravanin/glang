@@ -3,7 +3,7 @@
 def void compare(int i, float f):
 	if i == f:
 		print "equal"
-	elif i < f:
+	elif i <= f:
 		print "less"
 	elif i > f:
 		print "greater"

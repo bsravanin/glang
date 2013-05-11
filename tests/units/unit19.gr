@@ -70,6 +70,11 @@ def dict<str,float> float_dict_ops(dict<str,float> df):
 	print df.keys()
 	print df.values()
 
+	dict<str,float> df2 = {"key1": 6.28, "key2": 3.14, "key3": 2.18}
+	print df2.items()
+	print df2.keys()
+	print df2.values()
+
 	df.update(df2)
 	print df.items()
 	print df.keys()
@@ -110,6 +115,11 @@ def dict<str,int> int_dict_ops(dict<str,int> di):
 	print di.items()
 	print di.keys()
 	print di.values()
+
+	dict<str,int> di2 = {"key1": 42, "key2": 21, "key3": 84}
+	print di2.items()
+	print di2.keys()
+	print di2.values()
 
 	di.update(di2)
 	print di.items()
@@ -152,6 +162,11 @@ def dict<str,str> str_dict_ops(dict<str,str> ds):
 	print ds.keys()
 	print ds.values()
 
+	dict<str,str> ds2 = {"key1": "Rosebud", "key2": "Citizen Kane", "key3": "Orson Welles"}
+	print ds2.items()
+	print ds2.keys()
+	print ds2.values()
+
 	ds.update(ds2)
 	print ds.items()
 	print ds.keys()
@@ -171,13 +186,13 @@ def dict<str,str> str_dict_ops(dict<str,str> ds):
 
 def void main():
 	dict<str,bool> db = {"key1": True}
-	print bool_dict_ops()
+	print bool_dict_ops(db)
 
 	dict<str,float> df = {"key1": 3.14}
-	print float_dict_ops()
+	print float_dict_ops(df)
 
 	dict<str,int> di = {"key1": 42}
-	print int_dict_ops()
+	print int_dict_ops(di)
 
 	dict<str,str> ds = {"key1": "Rosebud"}
-	print str_dict_ops()
+	print str_dict_ops(ds)
