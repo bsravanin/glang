@@ -254,7 +254,6 @@ class CodeGenerator(object):
             for i, stmt in enumerate(t.body):
                 # If the first statement is the parent class's constructor,
                 # generate a super() call
-                print stmt
                 if (i == 0 and
                     stmt.__class__.__name__ == 'ExpressionStmtNode' and
                     stmt.expr.__class__.__name__ == 'CallNode' and
@@ -264,13 +263,11 @@ class CodeGenerator(object):
                                         for x in stmt.expr.func.params]
                     parent_type_params = [x.value
                                           for x in class_def.base.params]
-                    print init_type_params
-                    print parent_type_params
                     if (init_type_params == parent_type_params):
                         self.fill('super(')
                         interleave(lambda: self.write(', '), self.dispatch,
                                    stmt.expr.args)
-                        self.write(')')
+                        self.write(');')
                         continue
                 self.dispatch(stmt)
 
