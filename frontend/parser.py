@@ -250,7 +250,7 @@ class Parser(object):
 
     def p_type_param_list(self, p):
         '''type_param_list : bare_type
-                           | type_param_list ',' bare_type'''
+                           | type_param_list COMMA bare_type'''
         if len(p) == 2:
             p[0] = [p[1]]
         else:
@@ -305,9 +305,13 @@ class Parser(object):
         sym = self._symbol_table.get(name)
         if sym is None:
             full_name = self._get_qualified_name(name)
-            # We'll correct this symbol's var_type in a later pass
+            # We'll correct this symbol's var_type and var_type_params in a
+            # later pass
             var_type = (type_node.namespace, type_node.value)
-            symbol = symbols.VariableSymbol(full_name, var_type=var_type)
+            var_type_params = [(param.namespace, param.value)
+                               for param in type_node.params]
+            symbol = symbols.VariableSymbol(
+                full_name, var_type=var_type, var_type_params=var_type_params)
             self._symbol_table.set(symbol)
         elif sym.namespace == self._cur_namespace:
             raise symbols.ConflictingSymbolError(
@@ -342,22 +346,24 @@ class Parser(object):
         p[0].lineno = p.slice[1].lineno
 
         # Set a dummy value for this TypeSymbol's base, to be correct later
+        new_type = p[2]
         base_node = p[5]
         if base_node:
-            sym = self._symbol_table.get(p[2].value)
+            sym = self._symbol_table.get(new_type.value)
             sym.base = (base_node.namespace, base_node.value)
 
         # For each method in this new class, add "self" within its namespace
         class_parent_scope = self._cur_namespace[:-1]
         full_class_name = (class_parent_scope, self._cur_scope_name)
+        new_type_params = [(x.namespace, x.value) for x in new_type.params]
         for stmt in p[8]:
             if type(stmt) == nodes.FunctionDefNode:
                 func_name = stmt.name.value
                 func_namespace, func_name = self._get_qualified_name(func_name)
                 sym = symbols.VariableSymbol(
                     (func_namespace + (func_name,), 'self'),
-                    token=None,
-                    var_type=full_class_name)
+                    var_type=full_class_name,
+                    var_type_params=new_type_params)
                 self._symbol_table.set(sym)
                 # Also, tag it as a method
                 stmt.is_method = True
@@ -366,7 +372,6 @@ class Parser(object):
     def p_new_type(self, p):
         'new_type : type'
         p[0] = p[1]
-        p[0].lineno = p[1].lineno
         name = p[1].value
         self._cur_scope_name = name
 

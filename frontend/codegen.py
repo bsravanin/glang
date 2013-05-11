@@ -114,9 +114,9 @@ TYPE_MAP = {
     'bool': 'Boolean',
     'float': 'Double',
     'str': 'String',
-    'list': 'ArrayList<Object>',
+    'list': 'ArrayList',
     'set': 'HashSet',
-    'dict': 'HashMap<Object, Object>',
+    'dict': 'HashMap',
     'Graph': 'Graph',
     'Node': 'Node',
     'Edge': 'Edge',
@@ -238,11 +238,9 @@ class CodeGenerator(object):
         if t.name.value == 'main':
             self.write('void main(String[] args)')
         else:
-            if (t.name.value == util.CONSTRUCTOR_NAME and
+            self.dispatch(t.return_type)
+            if not (t.name.value == util.CONSTRUCTOR_NAME and
                 getattr(t, 'is_method', False)):
-                self.write(t.return_type.value)
-            else:
-                self.dispatch(t.return_type)
                 self.write(' ')
                 self.dispatch(t.name)
             self.write('(')
@@ -254,6 +252,9 @@ class CodeGenerator(object):
 
     def _Type(self, t):
         self.write(convert_type(t.value))
+        if t.params:
+            param_str = ','.join(convert_type(x.value) for x in t.params)
+            self.write('<{0}>'.format(param_str))
 
     def _Name(self, t):
         value = t.value
@@ -415,7 +416,8 @@ class CodeGenerator(object):
 
     def _Number(self, t):
         number_type = t.type[1]
-        self.write('(({0}) {1})'.format(convert_type(number_type), repr(t.value)))
+        self.write('(({0}) {1})'.format(convert_type(number_type),
+                                        repr(t.value)))
 
     def _Paren(self, t):
         self.write('(')
