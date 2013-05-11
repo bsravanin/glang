@@ -1,8 +1,0 @@
-#!/bin/sh
-
-SOURCE=$1
-TARGET=$2
-CLASSPATH=../lib/*:.
-
-python codegen.py $SOURCE $TARGET
-javac -cp $CLASSPATH *.java
