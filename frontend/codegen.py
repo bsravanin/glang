@@ -460,14 +460,17 @@ class CodeGenerator(object):
         self.write(')))')
 
     def _Dict(self, t):
-        def write_pair(item):
-            self.dispatch(item[0])
-            self.write(', ')
-            self.dispatch(item[1])
-
+        keys = []
+        value = []
+        for item in t.items:
+            keys.append(item[0])
+            values.append(item[1])
         self.write('GraphUtil.createVarMap(')
-        interleave(lambda: self.write(', '), write_pair, t.items)
-        self.write(')')
+        self.write('Arrays.asList(')
+        interleave(lambda: self.write(', '), self.dispatch, keys)
+        self.write('), Arrays.asList(')
+        interleave(lambda: self.write(', '), self.dispatch, values)
+        self.write('))')
 
     def _Set(self, t):
         self.write('(new {0}(Arrays.asList('.format(convert_type('set')))
