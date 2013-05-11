@@ -18,6 +18,7 @@ UNITS=$TESTS/units
 EXPECTED=$TESTS/expected
 OUTPUT=$TESTS/output
 ERROR=$TESTS/error
+declare -A metrics
 
 
 function bootstrap {
@@ -34,16 +35,40 @@ function bootstrap {
 		if [ ! -d $ERROR/$dir ]; then
 			mkdir -p $ERROR/$dir
 		fi
+
+		metrics[${dir}_passed]=0
+		metrics[${dir}_failed]=0
 	done
+
+	metrics[total_passed]=0
+	metrics[total_failed]=0
 }
 
 
 function test_result {
-	if [ $1 == 0 ]; then
-		echo "$2 passed $3."
+	exit_status=$1
+	phase=$2
+	test_case=$3
+
+	if [ $exit_status == 0 ]; then
+		echo "$test_case passed $phase."
+		((metrics[${phase}_passed]++))
+		((metrics[total_passed]++))
 	else
-		echo "$2 FAILED $3."
+		echo "$test_case FAILED $phase."
+		((metrics[${phase}_failed]++))
+		((metrics[total_failed]++))
 	fi
+}
+
+
+function print_metrics {
+	echo
+	echo -e "PHASE\tPASSED\tFAILED"
+	for phase in lexer parser analyzer codegen gcompile gexe total
+	do
+		echo -e "$phase\t${metrics[${phase}_passed]}\t${metrics[${phase}_failed]}"
+	done
 }
 
 
@@ -101,6 +126,8 @@ function fast_all {
 	else
 		echo "Unknown test case $1"
 	fi
+
+	print_metrics
 }
 
 
@@ -143,6 +170,8 @@ function full_all {
 	else
 		echo "Unknown test case $1"
 	fi
+
+	print_metrics
 }
 
 
