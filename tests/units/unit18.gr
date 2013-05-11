@@ -1,0 +1,158 @@
+# TEST: Set operations.
+
+def set<bool> bool_set_ops(set<bool> sb):
+	if sb.contains(True):
+		print "sb contains True."
+	else:
+		print "sb doesn't contain True."
+
+	sb.add(False)
+	print sb
+	sb.add(True)
+	print sb
+	sb.add(False)
+	print sb
+
+	set<bool> sb2 = {False, True}
+	print sb2
+
+	sb2.intersection_update(sb)
+	print sb2
+	sb2.difference_update(sb)
+	print sb2
+	print sb2.isempty()
+	print sb.isempty()
+
+	sb2.update(sb)
+	print sb2
+	sb2.remove(False)
+	print sb2
+	print sb2.issuperset(sb)
+	print sb2.issuperset(sb2)
+
+	for bool b in sb:
+		print b
+
+	return sb
+
+
+def set<float> float_set_ops(set<float> sf):
+	if sf.contains(3.14):
+		print "sf contains 3.14."
+	else:
+		print "sf doesn't contain 3.14."
+
+	sf.add(6.28)
+	print sf
+	sf.add(1.57)
+	print sf
+	sf.add(3.14)
+	print sf
+
+	set<float> sf2 = {3.14, 6.28, 1.57}
+	print sf2
+
+	sf2.intersection_update(sf)
+	print sf2
+	sf2.difference_update(sf)
+	print sf2
+	print sf2.isempty()
+	print sf.isempty()
+
+	sf2.update(sf)
+	print sf2
+	sf2.remove(3.14)
+	print sf2
+	print sf2.issuperset(sf)
+	print sf2.issuperset(sf2)
+
+	for float f in sf:
+		print f
+
+	return sf
+
+
+def set<int> int_set_ops(set<int> si):
+	if si.contains(42):
+		print "si contains 42."
+	else:
+		print "si doesn't contain 42."
+
+	si.add(21)
+	print si
+	si.add(84)
+	print si
+	si.add(42)
+	print si
+
+	set<int> si2 = {42, 21, 84}
+	print si2
+
+	si2.intersection_update(si)
+	print si2
+	si2.difference_update(si)
+	print si2
+	print si2.isempty()
+	print si.isempty()
+
+	si2.update(si)
+	print si2
+	si2.remove(42)
+	print si2
+	print si2.issuperset(si)
+	print si2.issuperset(si2)
+
+	for int i in si:
+		print i
+
+	return si
+
+
+def set<str> str_set_ops(set<str> ss):
+	if ss.contains("Rosebud"):
+		print "ss contains Rosebud."
+	else:
+		print "ss doesn't contain Rosebud."
+
+	ss.add("Citizen Kane")
+	print ss
+	ss.add("Orson Welles")
+	print ss
+	ss.add("Rosebud")
+	print ss
+
+	set<str> ss2 = {"Rosebud", "Citizen Kane", "Orson Welles"}
+	print ss2
+
+	ss2.intersection_update(ss)
+	print ss2
+	ss2.difference_update(ss)
+	print ss2
+	print ss2.isempty()
+	print ss.isempty()
+
+	ss2.update(ss)
+	print ss2
+	ss2.remove("Rosebud")
+	print ss2
+	print ss2.issuperset(ss)
+	print ss2.issuperset(ss2)
+
+	for str s in ss:
+		print s
+
+	return ss
+
+
+def void main():
+	set<bool> sb = {True}
+	print bool_set_ops(sb)
+
+	set<float> sf = {3.14}
+	print float_set_ops(sf)
+
+	set<int> si = {42}
+	print int_set_ops(si)
+
+	set<str> ss = {"Rosebud"}
+	print str_set_ops(ss)

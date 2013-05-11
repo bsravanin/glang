@@ -72,6 +72,7 @@ JAVA_NAME_MAP = {
     'dict.items': 'entrySet',
     'dict.keys': 'keySet',
     'dict.pop': 'remove',
+    'dict.set': 'put',
     'dict.update': 'putAll',
     'dict.values': 'values',
     'list.append': 'add',
@@ -114,9 +115,9 @@ TYPE_MAP = {
     'bool': 'Boolean',
     'float': 'Double',
     'str': 'String',
-    'list': 'ArrayList<Object>',
+    'list': 'ArrayList',
     'set': 'HashSet',
-    'dict': 'HashMap<Object, Object>',
+    'dict': 'HashMap',
     'Graph': 'Graph',
     'Node': 'Node',
     'Edge': 'Edge',
@@ -223,37 +224,60 @@ class CodeGenerator(object):
         for stmt in other_stmts:
             if stmt.__class__.__name__ == 'FunctionDefNode':
                 # static attributes in the main class
-                self._FunctionDef(stmt, top=True)
+                self._FunctionDef(stmt)
             else:
                 self.dispatch(stmt)
         self.fill()
         self.leave()
         self.fill()
 
-    def _FunctionDef(self, t, top=False):
+    def _FunctionDef(self, t, class_def=None):
         self.write('\n')
         self.fill('public ')
-        if top:
+        if not class_def:
             self.write('static ')
         if t.name.value == 'main':
             self.write('void main(String[] args)')
         else:
-            if (t.name.value == util.CONSTRUCTOR_NAME and
-                getattr(t, 'is_method', False)):
-                self.write(t.return_type.value)
-            else:
-                self.dispatch(t.return_type)
+            self.dispatch(t.return_type)
+            if not (t.name.value == util.CONSTRUCTOR_NAME and class_def):
                 self.write(' ')
                 self.dispatch(t.name)
             self.write('(')
             interleave(lambda: self.write(', '), self.dispatch, t.params)
             self.write(')')
         self.enter()
-        self.dispatch(t.body)
+
+        if not (t.name.value == util.CONSTRUCTOR_NAME and class_def):
+            self.dispatch(t.body)
+        else:
+            for i, stmt in enumerate(t.body):
+                # If the first statement is the parent class's constructor,
+                # generate a super() call
+                if (i == 0 and
+                    stmt.__class__.__name__ == 'ExpressionStmtNode' and
+                    stmt.expr.__class__.__name__ == 'CallNode' and
+                    stmt.expr.func.__class__.__name__ == 'TypeNode' and
+                    stmt.expr.func.type == class_def.base.type):
+                    init_type_params = [x.value
+                                        for x in stmt.expr.func.params]
+                    parent_type_params = [x.value
+                                          for x in class_def.base.params]
+                    if (init_type_params == parent_type_params):
+                        self.fill('super(')
+                        interleave(lambda: self.write(', '), self.dispatch,
+                                   stmt.expr.args)
+                        self.write(');')
+                        continue
+                self.dispatch(stmt)
+
         self.leave()
 
     def _Type(self, t):
         self.write(convert_type(t.value))
+        if t.params:
+            param_str = ','.join(convert_type(x.value) for x in t.params)
+            self.write('<{0}>'.format(param_str))
 
     def _Name(self, t):
         value = t.value
@@ -263,8 +287,11 @@ class CodeGenerator(object):
             value = 'this'
         self.write(value)
 
-    def _Declaration(self, t):
+    def _Declaration(self, t, class_level=False):
         # Note: this is simply a type-name pair, not the full statement
+        if class_level:
+            # Class-level variables must be public
+            self.write('public ')
         self.dispatch(t.var_type)
         self.write(' ')
         self.dispatch(t.name)
@@ -277,8 +304,14 @@ class CodeGenerator(object):
             self.write(' extends ')
             self.dispatch(t.base)
         self.enter()
-        # TODO: make class variable declarations static
-        self.dispatch(t.body)
+        self.write('\n')
+        for stmt in t.body:
+            if stmt.__class__.__name__ == 'FunctionDefNode':
+                self._FunctionDef(stmt, class_def=t)
+            elif stmt.__class__.__name__ == 'DeclarationStmtNode':
+                self._DeclarationStmt(stmt, class_level=True)
+            else:
+                self.dispatch(stmt)
         self.leave()
 
     def _ExpressionStmt(self, t):
@@ -286,9 +319,9 @@ class CodeGenerator(object):
         self.dispatch(t.expr)
         self.end_stmt()
 
-    def _DeclarationStmt(self, t):
+    def _DeclarationStmt(self, t, class_level=False):
         self.fill()
-        self.dispatch(t.value)
+        self._Declaration(t.value, class_level=class_level)
         self.end_stmt()
 
     def _Assignment(self, t):
@@ -310,7 +343,7 @@ class CodeGenerator(object):
                 else:
                     self.write('(')
                     self.dispatch(e)
-                    self.write(').toString()')
+                    self.write(')')
                 self.write(')')
                 self.end_stmt()
 
@@ -395,7 +428,12 @@ class CodeGenerator(object):
         op = t.operator
         if op == 'not':
             op = '!'
-        self.write(op)
+        if op.__class__.__name__ == 'TypeNode':
+            self.write('(')
+            self.dispatch(op)
+            self.write(') ')
+        else:
+            self.write(op)
         # In case of unary minus, we need to parenthesize the operand.
         self.write('(')
         self.dispatch(t.operand)
@@ -408,8 +446,8 @@ class CodeGenerator(object):
 
     def _Number(self, t):
         number_type = t.type[1]
-        # TODO: make sure this works
-        self.write('{0}({1})'.format(convert_type(number_type), repr(t.value)))
+        self.write('(({0}) {1})'.format(convert_type(number_type),
+                                        repr(t.value)))
 
     def _Paren(self, t):
         self.write('(')

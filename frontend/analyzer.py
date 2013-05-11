@@ -124,14 +124,6 @@ class Analyzer(object):
     def _FunctionDef(self, t):
         self._dispatch(t.name)
 
-        # If this is a constructor, set its return type to its class name
-        if (getattr(t, 'is_method', False) and
-            t.name.value == util.CONSTRUCTOR_NAME):
-            class_name = t.name.namespace[-1]
-            class_namespace = t.name.namespace[:-1]
-            t.return_type = nodes.TypeNode(
-                class_name, namespace=class_namespace)
-        # Update the symbol table entry to match
         sym = self._symbol_table.get_by_qualified_name(
             (t.name.namespace, t.name.value))
         self._dispatch(t.return_type)
@@ -143,8 +135,14 @@ class Analyzer(object):
         # Check that the return types matches the function declaration.
         # Look for return statement(s) in 'body'.
         return_types = self._get_return_types(t.body)
+        if not (return_types or sym.return_type == ((), 'void') or
+                t.name.value == util.CONSTRUCTOR_NAME):
+            raise InconsistentTypeError(
+                '{0}: found no return type(s) for function {1}'.format(
+                    t.lineno, symbols.stringify_full_name(sym.full_name)))
         for return_type in return_types:
-            if return_type != sym.return_type:
+            ancestor_types = self._get_ancestor_types(return_type)
+            if sym.return_type not in ancestor_types:
                 raise InconsistentTypeError(
                     '{0}: expected return type {1} in definition of '
                     'function {2}, found return type {3}'.format(
@@ -156,10 +154,24 @@ class Analyzer(object):
     def _Type(self, t):
         sym = self._symbol_table.get(t.value, namespace=t.namespace,
                                      symbol_type=symbols.TypeSymbol)
-        # Now that we've resolved this type symbol, we can update this node's
-        # namespace and type
+        # Now that we've resolved this type symbol, we can update the namespace
+        # and type for it and any type parameters
         t.namespace = sym.namespace
         t.type = sym.full_name
+        self._dispatch(t.params)
+        expected_param_count = util.COLLECTION_BASE_TYPES.get(t.type)
+        if expected_param_count and expected_param_count != len(t.params):
+            raise InvalidTypeError(
+                '{0}: expected {1} parameter(s) for type {2}, '
+                'found {3}'.format(
+                    t.lineno, expected_param_count,
+                    symbols.stringify_full_name(t.type), len(t.params)))
+        for param in t.params:
+            param_sym = self._symbol_table.get(
+                param.value, namespace=param.namespace,
+                symbol_type=symbols.TypeSymbol)
+            param.namespace = param_sym.namespace
+            param.type = param_sym.full_name
 
     def _Name(self, t):
         if getattr(t, 'is_attribute', False):
@@ -193,6 +205,16 @@ class Analyzer(object):
         if t.base:
             self._dispatch(t.base)
         self._dispatch(t.body)
+        for stmt in t.body:
+            if (stmt.__class__.__name__ == 'FunctionDefNode' and
+                stmt.name.value == util.CONSTRUCTOR_NAME and
+                stmt.return_type.type != t.name.type):
+                raise InconsistentTypeError(
+                    '{0}: constructor return type {1} does not match '
+                    'class name {2}'.format(
+                        t.lineno,
+                        symbols.stringify_full_name(stmt.return_type.type),
+                        symbols.stringify_full_name(t.name.type)))
 
     def _ExpressionStmt(self, t):
         self._dispatch(t.expr)
@@ -203,9 +225,11 @@ class Analyzer(object):
     def _Assignment(self, t):
         self._dispatch(t.target)
         self._dispatch(t.value)
-        if t.target.type != t.value.type:
+        ancestor_types = self._get_ancestor_types(t.value.type)
+        if t.target.type not in ancestor_types:
             raise InconsistentTypeError(
-                '{2}: Target type {0} does not match value type {1}'.format(
+                '{2}: Target type {0} not compatible with '
+                'value type {1}'.format(
                     symbols.stringify_full_name(t.target.type),
                     symbols.stringify_full_name(t.value.type), t.target.lineno))
 
@@ -244,15 +268,16 @@ class Analyzer(object):
         if not (set(self._get_ancestor_types(t.iterable.type)) &
                 set([((), 'list'), ((), 'set')])):
             raise InvalidTypeError(
-                '{1}: Expected an iterable (list, set), found {0}'.format(
+                '{1}: expected an iterable (list, set), found {0}'.format(
                     symbols.stringify_full_name(t.iterable.type), t.lineno))
+        # TODO: check that iterable's type param is compatible with target type
         # At compile time, we don't know what element types are in t.iterable,
         # unless it's a manually constructed list
         for item in getattr(t.iterable, 'elts', []):
             ancestor_types = self._get_ancestor_types(item.type)
             if t.target.type not in ancestor_types:
                 raise InconsistentTypeError(
-                    '{0}: Expected type {1}, found type {2}'.format(
+                    '{0}: expected type {1}, found type {2}'.format(
                         item.lineno, symbols.stringify_full_name(t.target.type),
                         symbols.stringify_full_name(item.type)))
         self._dispatch(t.body)
@@ -364,6 +389,19 @@ class Analyzer(object):
                         t.lineno,
                         symbols.stringify_full_name(t.operand.type)))
             t.type = t.operand.type
+        elif op.__class__.__name__ == 'TypeNode':
+            # Type cast
+            self._dispatch(op)
+            op_ancestor_types = self._get_ancestor_types(op.type)
+            operand_ancestor_types = self._get_ancestor_types(t.operand.type)
+            if (op.type not in operand_ancestor_types and
+                t.operand.type not in op_ancestor_types):
+                raise InconsistentTypeError(
+                    '{0}: operator type {1} not incompatible with '
+                    'operand type {2}'.format(
+                        t.lineno, symbols.stringify_full_name(op.type),
+                        symbols.stringify_full_name(t.operand.type)))
+            t.type = t.operand.type = op.type
         else:
             raise Error('{1}: Unknown unary operation: {0}'.format(
                     op, t.lineno))
@@ -409,24 +447,24 @@ class Analyzer(object):
                     t.attribute.value,
                     symbols.stringify_full_name(t.value.type), t.lineno))
 
-        # We skipped setting the attribute's namespace in _Name() so that we
-        # could set it here
+        # We skipped setting the attribute's namespace and type in _Name() so
+        # that we could set it here
         t.attribute.namespace = attr_sym.namespace
         if attr_sym.__class__.__name__ == 'FunctionSymbol':
             # If the attribute isn't a VariableSymbol or TypeSymbol,
             # type means nothing
-            new_type = None
+            t.attribute.type = None
         else:
-            new_type = t.attribute.type
-        t.type = new_type
+            t.attribute.type = attr_sym.var_type
+        t.type = t.attribute.type
 
     def _Subscript(self, t):
         self._dispatch(t.value)
         # Check that we can actually index into t.value
-        if ((), 'list') not in self._get_ancestor_types(t.type):
+        if ((), 'list') not in self._get_ancestor_types(t.value.type):
             raise InvalidTypeError(
                 '{1}: Type {0} is not subscriptable -- only type list'.format(
-                    symbols.stringify_full_name(t.type), t.lineno))
+                    symbols.stringify_full_name(t.value.type), t.lineno))
         self._dispatch(t.index)
         # Check that the index is actually an integer
         if ((), 'int') not in self._get_ancestor_types(t.index.type):
@@ -445,7 +483,7 @@ class Analyzer(object):
         if func_node_class == 'AttributeRefNode':
             is_attribute = True
             name_node = t.func.attribute
-        elif func_node_class in 'NameNode':
+        elif func_node_class in ('NameNode', 'TypeNode'):
             name_node = t.func
         else:
             raise InvalidNameError('{1}: Cannot call a {0}'.format(
@@ -473,13 +511,15 @@ class Analyzer(object):
                 util.CONSTRUCTOR_NAME)
             t.type = type_sym.full_name
             # Replace NameNode with TypeNode for the type being constructed
-            new_node = nodes.TypeNode(
-                type_sym.name, namespace=type_sym.namespace)
-            new_node.type = type_sym.full_name
-            if is_attribute:
-                t.func.attribute = new_node
-            else:
-                t.func = new_node
+            if func_node_class == 'NameNode':
+                new_node = nodes.TypeNode(
+                    type_sym.name, type_sym.namespace)
+                new_node.type = type_sym.full_name
+                new_node.lineno = t.lineno
+                if is_attribute:
+                    t.func.attribute = new_node
+                else:
+                    t.func = new_node
             if func_sym is None:
                 # There's no init method to check, so we're done here
                 return
@@ -490,14 +530,16 @@ class Analyzer(object):
         # Check that arg types match param_types in function symbol
         if len(func_sym.param_types) != len(t.args):
             raise ParameterCountError(
-                '{0} expected {1} argument(s), found {2}'.format(
+                '{0}: expected {1} argument(s) for function {2}, '
+                'found {3}'.format(
+                    t.lineno, len(func_sym.param_types),
                     symbols.stringify_full_name(func_sym.full_name),
-                    len(func_sym.param_types), len(t.args)))
+                    len(t.args)))
         for i, (param_type, arg) in enumerate(
             zip(func_sym.param_types, t.args)):
             if param_type not in self._get_ancestor_types(arg.type):
                 raise InconsistentTypeError(
-                    '{3}: Expected type {0} for function argument {1}, '
+                    '{3}: expected type {0} for function argument {1}, '
                     'found {2}'.format(
                         symbols.stringify_full_name(param_type), i + 1,
                         symbols.stringify_full_name(arg.type),

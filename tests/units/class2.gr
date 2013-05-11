@@ -1,0 +1,25 @@
+# Class constructor
+
+class MyClass():
+    int i
+    float f
+
+    def MyClass __init__(int i, float f):
+        self.i = i
+        self.f = f
+
+    def int get_i():
+        return i
+
+    def float get_f():
+        return f
+
+
+def void main():
+    int i = 1
+    float f = 3.14
+    
+    MyClass c = MyClass(i, f)
+
+    print c.get_i()
+    print c.get_f()

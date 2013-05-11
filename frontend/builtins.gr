@@ -7,7 +7,7 @@
 
 class object():
 
-	def void __init__(object obj):
+	def object __init__(object obj):
 		pass
 
 
@@ -17,101 +17,101 @@ class void():
 
 class int(object):
 
-	def void __init__(object obj):
+	def int __init__(object obj):
 		# Integer.valueOf(x.toString())
 		pass
 
 
 class bool(int):
 
-	def void __init__(object obj):
+	def bool __init__(object obj):
 		# Boolean.valueOf(x != 0 ? "true" : "false")
 		pass
 
 
 class float(object):
 
-	def void __init__(object obj):
+	def float __init__(object obj):
 		# Float.valueOf(x.toString())
 		pass
 
 
 class str(object):
 
-	def void __init__(object obj):
+	def str __init__(object obj):
 		# String.valueOf(x)
 		pass
 
 	def str copy():
 		# String.clone
-		pass
+		return ''
 
 	def bool endswith(str s):
 		# String.endsWith
-		pass
+		return bool('')
 
-	def list find(str s):
+	def int find(str s):
 		# String.indexOf
-		pass
+		return 0
 
 	def str lower():
 		# String.toLowerCase
-		pass
+		return ''
 
 	def str replace(str s, str t):
 		# String.replace
-		pass
+		return ''
 
 	def int rfind(str s):
 		# String.lastIndexOf
-		pass
+		return 0
 
-	def list split(str s):
+	def list<str> split(str s):
 		# String.split
-		pass
+		return []
 
 	def bool startswith(str s):
 		# String.startsWith
-		pass
+		return False
 
 	def str strip():
 		# String.trim
-		pass
+		return ''
 
 	def str substring(int start, int end):
 		# String.substring
-		pass
+		return ''
 
 	def str upper():
 		# String.toUpperCase
-		pass
+		return ''
 
 
-class list(object):
+class list<object>(object):
 
-	def void __init__(list obj):
+	def list<object> __init__(list<object> obj):
 		# ArrayList<Object>
 		pass
 
 	def bool append(object obj):
 		# ArrayList<Object>.add
-		pass
+		return False
 
 	def bool contains(object obj):
 		# ArrayList<Object>.contains
-		pass
+		return False
 
-	def list copy():
+	def list<object> copy():
 		# ArrayList<Object>.clone
-		pass
+		return []
 
-	def bool extend(list l):
+	def bool extend(list<object> l):
 		# ArrayList<Object>.addAll
-		pass
+		return False
 
 	def int index(object obj):
 		# ArrayList<Object>.indexOf
-		pass
+		return 0
 
 	def void insert(int pos, object obj):
 		# ArrayList<Object>.add
@@ -119,11 +119,11 @@ class list(object):
 
 	def object pop(int pos):
 		# ArrayList<Object>.remove
-		pass
+		return ''
 
 	def bool remove(object obj):
 		# ArrayList<Object>.remove
-		pass
+		return False
 
 	# Ideally, we'd support these....
 	#def void reverse():
@@ -135,151 +135,155 @@ class list(object):
 	#	pass
 
 
-class set(object):
+class set<object>(object):
 
-	def void __init__(list obj):
+	def set<object> __init__(list<object> obj):
 		# HashSet<Object>
 		pass
 
 	def bool add(object obj):
 		# HashSet<Object>.add
-		pass
+		return False
 
 	def bool contains(object obj):
 		# HashSet<Object>.contains
-		pass
+		return False
 
-	def set copy():
+	def set<object> copy():
 		# HashSet<Object>.clone
-		pass
+		return set<object>([])
 
-	def bool difference_update(set s):
+	def bool difference_update(set<object> s):
 		# HashSet<Object>.removeAll
-		pass
+		return False
 
-	def bool intersection_update(set s):
+	def bool intersection_update(set<object> s):
 		# HashSet<Object>.retainAll
-		pass
+		return False
 
 	def bool isempty():
-		pass
+		return False
 
-	def bool issuperset(set s):
+	def bool issuperset(set<object> s):
 		# HashSet<Object>.containsAll
-		pass
+		return False
 
 	def bool remove(object obj):
 		# HashSet<Object>.remove
-		pass
+		return False
 
-	def bool update(set s):
+	def bool update(set<object> s):
 		# HashSet<Object>.addAll
-		pass
+		return False
 
 
-class dict(object):
+class dict<object,object>(object):
 
-	def void __init__(list obj):
+	def dict<object,object> __init__(dict<object,object> obj):
 		# HashMap<Object,Object>
 		pass
 
-	def dict copy():
+	def dict<object,object> copy():
 		# HashMap<Object,Object>.clone
-		pass
+		return {}
 
 	def object get(object key):
 		# HashMap<Object,Object>.get
-		pass
+		return ''
 
 	def bool has_key(object key):
 		# HashMap<Object,Object>.containsKey
-		pass
+		return False
 
-	def set items():
+	def set<object> items():
 		# HashMap<Object,Object>.entrySet
-		pass
+		return set<object>([])
 
-	def set keys():
+	def set<object> keys():
 		# HashMap<Object,Object>.keySet
-		pass
+		return set<object>([])
 
 	def object pop(object key):
 		# HashMap<Object,Object>.remove
-		pass
+		return ''
 
-	def void update(dict d):
+	def object set(object key, object value):
+		# HashMap<Object,Object>.put
+		return value
+
+	def void update(dict<object,object> d):
 		# HashMap<Object,Object>.putAll
 		pass
 
-	def set values():
+	def set<object> values():
 		# HashMap<Object,Object>.values
-		pass
+		return set<object>([])
 
 
 class Graph(object):
 
-	def void __init__():
+	def Graph __init__():
 		pass
 
 	def int get_id():
-		pass
+		return 0
 
-	def Node node(dict attr_dict):
-		pass
+	def Node node(dict<object,object> attr_dict):
+		return Node({})
 
-	def Edge edge(Node start, Node end, dict attr_dict):
-		pass
+	def Edge edge(Node start, Node end, dict<object,object> attr_dict):
+		return Edge(start, end, attr_dict, 0)
 
 	def void add_node(Node n):
 		pass
 
 	def Node get_node(str variable, object value):
-		pass
+		return Node({})
 
 	def NodeSet get_nodes(str variable, object value):
-		pass
+		return NodeSet([])
 
 	def Node get_node_by_id(int node_id):
-		pass
+		return Node({})
 
-	def list get_all_nodes():
-		pass
+	def list<object> get_all_nodes():
+		return []
 
 	def void add_edge(Edge e):
 		pass
 
-	def list get_all_edges():
-		pass
+	def list<object> get_all_edges():
+		return []
 
-	def list get_shortest_path(Node start, Node end, dict attr_map):
-		pass
+	def list<object> get_shortest_path(Node start, Node end, dict<object,object> attr_map):
+		return []
 
-	def list get_paths(Node start, Node end, dict attr_map):
-		pass
+	def list<object> get_paths(Node start, Node end, dict<object,object> attr_map):
+		return []
 
 
 class Node(object):
 
-	def void __init__(dict attr_map):
+	def Node __init__(dict<object,object> attr_map):
 		pass
 
 	def void set_id(int node_id):
 		pass
 
 	def int get_id():
-		pass
+		return 0
 
 	def object get_attribute(str variable):
-		pass
+		return ''
 
 	def void set_attribute(str variable, object value):
 		pass
 
-	def set get_attributes():
-		pass
+	def set<object> get_attributes():
+		return set<object>([])
 
-	def dict get_attribute_dict():
-		pass
+	def dict<object,object> get_attribute_dict():
+		return {}
 
 	def void set_in_edge(Edge e):
 		pass
@@ -288,16 +292,16 @@ class Node(object):
 		pass
 
 	def EdgeSet out_edges():
-		pass
+		return EdgeSet([])
 
 	def EdgeSet in_edges():
-		pass
+		return EdgeSet([])
 
 	def NodeSet in_neighbors():
-		pass
+		return NodeSet([])
 
 	def NodeSet out_neighbors():
-		pass
+		return NodeSet([])
 
 	def void update(str variable, object new_value):
 		pass
@@ -305,29 +309,29 @@ class Node(object):
 
 class Edge(object):
 
-	def void __init__(Node start, Node end, dict var_map, int edge_id):
+	def Edge __init__(Node start, Node end, dict<object,object> var_map, int edge_id):
 		pass
 
 	def void set_id(int edge_id):
 		pass
 
 	def int get_id():
-		pass
+		return 0
 
 	def Node in_node():
-		pass
+		return Node({})
 
 	def Node out_node():
-		pass
+		return Node({})
 
-	def set get_attributes():
-		pass
+	def set<object> get_attributes():
+		return set<object>([])
 
-	def dict get_attribute_dict():
-		pass
+	def dict<object,object> get_attribute_dict():
+		return {}
 
 	def object get_attribute(str variable):
-		pass
+		return ''
 
 	def void set_attribute(str variable, object value):
 		pass
@@ -335,38 +339,40 @@ class Edge(object):
 	def void add_parents(Edge path_parent):
 		pass
 
-	def dict get_parents():
-		pass
+	def dict<object,object> get_parents():
+		return {}
 
 
-class NodeSet(set):
+class NodeSet(set<Node>):
 
-	def set select(str attr):
-		pass
+	def set<object> select(str attr):
+		return set<object>([])
 
 	def NodeSet filter(str variable, object value):
-		pass
+		return NodeSet([])
 
 	def EdgeSet out_edges():
-		pass
+		return EdgeSet([])
 
 
-class EdgeSet(set):
+class EdgeSet(set<Edge>):
 
-	def set select(str attr):
-		pass
+	# TODO: remove this, since we don't support it
+	#def set<object> select(str attr):
+	#	pass
 
 	def EdgeSet filter(str variable, object value):
-		pass
+		return EdgeSet([])
 
 	def NodeSet out_nodes():
-		pass
+		return NodeSet([])
 
 
-class Path(list):
-
-	def void __init__(object obj):
-		pass
+# TODO: remove this, since we don't support it
+#class Path(list):
+#
+#	def Path __init__(object obj):
+#		pass
 
 
 class __builtins(object):
@@ -375,22 +381,22 @@ class __builtins(object):
 	bool True = bool(1)
 
 	def int len(object obj):
-		pass
+		return 0
 
 	def Graph load(str path):
-		pass
+		return Graph()
 
 	def Graph get_fb(str token):
-		pass
+		return Graph()
 
 	def Graph get_fb_friend(str token):
-		pass
+		return Graph()
 
 	def Graph get_fb_feed(str token):
-		pass
+		return Graph()
 
 	def Graph get_fb_page(str token):
-		pass
+		return Graph()
 
 	def void dump(Graph g, str path):
 		pass
@@ -398,5 +404,5 @@ class __builtins(object):
 	def void draw(Graph g, str node_attr, str edge_attr):
 		pass
 
-	def set union(set lhs, set rhs):
-		pass
+	def set<object> union(set<object> lhs, set<object> rhs):
+		return set<object>([])

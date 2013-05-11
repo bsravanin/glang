@@ -1,0 +1,30 @@
+# TEST: String operations.
+
+def void main():
+	str s = "Rosebud"
+	str t = s
+	print s, t
+
+	if s.endswith("bud"):
+		print s, "ends with bud."
+
+	if not s.endswith("Bud"):
+		print s, "doesn't end with Bud."
+
+	t = "I'm as mad as hell, and I'm not going to take this anymore!"
+	print t.find("l")
+	print t.lower()
+	print t.replace("hell", "heaven")
+	print t.rfind("!")
+	print t.split(" ")
+
+	if t.startswith("I'm"):
+		print t, "starts with I'm."
+
+	if t.startswith("I am"):
+		print t, "doesn't start with I am."
+
+	str sloppy_str = "Let us see you try stripping this   "
+	print sloppy_str.strip()
+	print t.substring(0, 3)
+	print t.upper()

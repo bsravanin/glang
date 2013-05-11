@@ -1,0 +1,198 @@
+# TEST: Dict operations.
+
+def dict<str,bool> bool_dict_ops(dict<str,bool> db):
+	print db.get("key1")
+
+	if db.has_key("key1"):
+		print "db contains key1."
+	else:
+		print "db doesn't contain key1."
+
+	dict<str,bool> db_temp = {"key2": False}
+	db.update(db_temp)
+	print db.items()
+	print db.keys()
+	print db.values()
+	db_temp = {"key2": True}
+	db.update(db_temp)
+	print db.items()
+	print db.keys()
+	print db.values()
+	db_temp = {"key3": False}
+	db.update(db_temp)
+	print db.items()
+	print db.keys()
+	print db.values()
+
+	dict<str,bool> db2 = {"key1": True, "key2": False, "key3": True}
+	print db2.items()
+	print db2.keys()
+	print db2.values()
+
+	db.update(db2)
+	print db.items()
+	print db.keys()
+	print db.values()
+
+	db2.pop("key3")
+	print db2.items()
+	print db2.keys()
+	print db2.values()
+	db2.pop("key1")
+	print db2.items()
+	print db2.keys()
+	print db2.values()
+	
+	return db
+
+
+def dict<str,float> float_dict_ops(dict<str,float> df):
+	print df.get("key1")
+
+	if df.has_key("key1"):
+		print "df contains key1."
+	else:
+		print "df doesn't contain key1."
+
+	dict<str,float> df_temp = {"key2": 6.28}
+	df.update(df_temp)
+	print df.items()
+	print df.keys()
+	print df.values()
+	df_temp = {"key2": 1.57}
+	df.update(df_temp)
+	print df.items()
+	print df.keys()
+	print df.values()
+	df_temp = {"key3": 12.56}
+	df.update(df_temp)
+	print df.items()
+	print df.keys()
+	print df.values()
+
+	dict<str,float> df2 = {"key1": 6.28, "key2": 3.14, "key3": 2.18}
+	print df2.items()
+	print df2.keys()
+	print df2.values()
+
+	df.update(df2)
+	print df.items()
+	print df.keys()
+	print df.values()
+
+	df2.pop("key3")
+	print df2.items()
+	print df2.keys()
+	print df2.values()
+	df2.pop("key1")
+	print df2.items()
+	print df2.keys()
+	print df2.values()
+	
+	return df
+
+
+def dict<str,int> int_dict_ops(dict<str,int> di):
+	print di.get("key1")
+
+	if di.has_key("key1"):
+		print "di contains key1."
+	else:
+		print "di doesn't contain key1."
+
+	dict<str,int> di_temp = {"key2": 84}
+	di.update(di_temp)
+	print di.items()
+	print di.keys()
+	print di.values()
+	di_temp = {"key2": 21}
+	di.update(di_temp)
+	print di.items()
+	print di.keys()
+	print di.values()
+	di_temp = {"key3": 84}
+	di.update(di_temp)
+	print di.items()
+	print di.keys()
+	print di.values()
+
+	dict<str,int> di2 = {"key1": 42, "key2": 21, "key3": 84}
+	print di2.items()
+	print di2.keys()
+	print di2.values()
+
+	di.update(di2)
+	print di.items()
+	print di.keys()
+	print di.values()
+
+	di2.pop("key3")
+	print di2.items()
+	print di2.keys()
+	print di2.values()
+	di2.pop("key1")
+	print di2.items()
+	print di2.keys()
+	print di2.values()
+	
+	return di
+
+
+def dict<str,str> str_dict_ops(dict<str,str> ds):
+	print ds.get("key1")
+
+	if ds.has_key("key1"):
+		print "ds contains key1."
+	else:
+		print "ds doesn't contain key1."
+
+	dict<str,str> ds_temp = {"key2": "Citizen Kane"}
+	ds.update(ds_temp)
+	print ds.items()
+	print ds.keys()
+	print ds.values()
+	ds_temp = {"key2": "Orson Welles"}
+	ds.update(ds_temp)
+	print ds.items()
+	print ds.keys()
+	print ds.values()
+	ds_temp = {"key3": "Citizen Kane"}
+	ds.update(ds_temp)
+	print ds.items()
+	print ds.keys()
+	print ds.values()
+
+	dict<str,str> ds2 = {"key1": "Rosebud", "key2": "Citizen Kane", "key3": "Orson Welles"}
+	print ds2.items()
+	print ds2.keys()
+	print ds2.values()
+
+	ds.update(ds2)
+	print ds.items()
+	print ds.keys()
+	print ds.values()
+
+	ds2.pop("key3")
+	print ds2.items()
+	print ds2.keys()
+	print ds2.values()
+	ds2.pop("key1")
+	print ds2.items()
+	print ds2.keys()
+	print ds2.values()
+	
+	return ds
+
+
+def void main():
+	dict<str,bool> db = {"key1": True}
+	print bool_dict_ops(db)
+
+	dict<str,float> df = {"key1": 3.14}
+	print float_dict_ops(df)
+
+	dict<str,int> di = {"key1": 42}
+	print int_dict_ops(di)
+
+	dict<str,str> ds = {"key1": "Rosebud"}
+	print str_dict_ops(ds)

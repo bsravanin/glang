@@ -1,0 +1,163 @@
+# TEST: List operations.
+
+def list<bool> bool_list_ops(list<bool> lb):
+	print lb[0]
+	print lb.index(True)
+
+	if lb.contains(True):
+		print "lb contains True."
+	else:
+		print "lb doesn't contain True."
+
+	lb.append(False)
+	print lb
+	print lb.index(False)
+	lb.append(True)
+	print lb
+	lb.append(False)
+	print lb
+
+	list<bool> lb2 = [True, False, False, True]
+	print lb2
+	print lb2[2]
+
+	lb.extend(lb2)
+	print lb
+
+	lb2.insert(1, True)
+	print lb2
+	lb2.pop(2)
+	print lb2
+	lb2.remove(True)
+	print lb2
+	
+	for bool b in lb:
+		print b
+
+	return lb
+
+
+def list<float> float_list_ops(list<float> lf):
+	print lf[0]
+	print lf.index(3.14)
+
+	if lf.contains(3.14):
+		print "lf contains 3.14."
+	else:
+		print "lf doesn't contain 3.14."
+
+	lf.append(6.28)
+	print lf
+	print lf.index(6.28)
+	lf.append(1.57)
+	print lf
+	lf.append(3.14)
+	print lf
+
+	list<float> lf2 = [3.14, 6.28, 1.57, 1.57]
+	print lf2
+	print lf2[2]
+
+	lf.extend(lf2)
+	print lf
+
+	# lf2.insert(1, 42)
+	lf2.insert(1, 42.0)
+	print lf2
+	lf2.pop(2)
+	print lf2
+	lf2.remove(3.14)
+	print lf2
+	
+	for float f in lf:
+		print f
+
+	return lf
+
+
+def list<int> int_list_ops(list<int> li):
+	print li[0]
+	print li.index(42)
+
+	if li.contains(42):
+		print "li contains 42."
+	else:
+		print "li doesn't contain 42."
+
+	li.append(21)
+	print li
+	print li.index(21)
+	li.append(84)
+	print li
+	li.append(42)
+	print li
+
+	list<int> li2 = [21, 42, 84, 42]
+	print li2
+	print li2[2]
+
+	li.extend(li2)
+	print li
+
+	li2.insert(1, 42)
+	print li2
+	li2.pop(2)
+	print li2
+	li2.remove(42)
+	print li2
+	
+	for int i in li:
+		print i
+
+	return li
+
+
+def list<str> str_list_ops(list<str> ls):
+	print ls[0]
+	print ls.index("Rosebud")
+
+	if ls.contains("Rosebud"):
+		print "ls contains Rosebud."
+	else:
+		print "ls doesn't contain Rosebud."
+
+	ls.append("Citizen Kane")
+	print ls
+	print ls.index("Citizen Kane")
+	ls.append("Orson Welles")
+	print ls
+	ls.append("Rosebud")
+	print ls
+
+	list<str> ls2 = ["Rosebud", "Orson Welles", "Rosebud", "Citizen Kane"]
+	print ls2
+	print ls2[2]
+
+	ls.extend(ls2)
+	print ls
+
+	ls2.insert(1, "42")
+	print ls2
+	ls2.pop(2)
+	print ls2
+	ls2.remove("Rosebud")
+	print ls2
+	
+	for str s in ls:
+		print s
+
+	return ls
+
+
+def void main():
+	list<bool> lb = [True]
+	print bool_list_ops(lb)
+
+	list<float> lf = [3.14]
+	print float_list_ops(lf)
+
+	list<int> li = [42]
+	print int_list_ops(li)
+
+	list<str> ls = ["Rosebud"]
+	print str_list_ops(ls)

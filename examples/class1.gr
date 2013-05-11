@@ -1,0 +1,26 @@
+# Class method test
+
+class MyClass():
+    int i
+    float f
+
+    def void fun():
+        print i
+
+    def int get_i():
+        return i
+
+    def float get_f():
+        return f
+
+def void main():
+    MyClass c = MyClass()
+
+    # set fields
+    c.i = 0
+    c.f = 3.14
+
+    c.fun()
+
+    print c.get_i()
+    print c.get_f()
