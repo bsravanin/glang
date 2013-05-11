@@ -207,7 +207,7 @@ class Parser(object):
             p[0].extend(p[2])
 
     def p_top_level_stmt(self, p):
-        '''top_level_stmt : class_stmt
+        '''top_level_stmt : function_def
                           | class_def'''
         p[0] = p[1]
 
