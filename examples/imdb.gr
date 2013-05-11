@@ -3,71 +3,64 @@
 # Are the variable types supposed to be keywords? Not listed in LRM. :(
 
 class Movie(Node):
+	str nodetype = 'movie' #not sure it works or not!, it is a public instance variable
 	str title
-	str rating
-	set cast	# cast [Actor]?
+	def void Movie(dict dd, str movietitle):
+	    title = movietitle
+		Node(dd)
 
 class Actor(Node):
+	str nodetype = 'actor'
 	str name
-	set filmography		# filmography [Movie]?
-
-# These 2 Edge subclasses may be wrong, so not using. Something like this is good to have.
-class Stars(Edge):
-	Movie start
-	Actor end
-	str name
-
-class ActedIn(Edge):
-	Actor start
-	Movie end
-	str name
+	def void Actor(dict dd, str actorname):
+	    name = actorname
+		Node(dd)
 
 class IMDB(Graph):
 	# field declarations?
 
-	def find_movie(self, title):
-		# Find movie by title. Assuming unique titles.
-		return self.get_node(type==Movie, title==title)
-
-	def find_actor(self, name):
-		# Find actor by name. Assuming unique names.
-		return self.get_node(type==Actor, name==name)
-
-	def update(self, title, rating, cast):
-		# To trigger updates for both movies and actors simultaneously.
-		movie = self.find_movie(self, title)
-
-		if movie == None:
-			movie = self.Movie(title, rating, cast)
-		else:
-			movie.rating = rating
-			movie.cast.union(cast)
-
-		for name in cast:
-			actor = self.find_actor(name)
-
-			if actor == None:
-				actor = self.Actor(name, set([movie]))
-			else:
-				actor.filmography.add(movie)
-
-			self.Edge(movie, actor, name=="has actor")
-
-	def worked_with(self, name1, name2):
-		# A unique (hidden) feature of IMDB to search for movies where two
-		# people worked together. http://www.imdb.com/name/nm0000020/workedwith
-		actor1 = self.find_actor(name1)
-		actor2 = self.find_actor(name2)
-
-		if actor1 == None or actor2 == None:
-			print "One of the actors not in IMDB."
-			return set()
-
-		return actor1.filmography.intersection(actor2.filmography)
+	def Movie find_movie(str title):
+		Nodeset setn = self.get_all_nodes()
+		for n in setn:
+			if n.nodetype == 'movie' && n.title == title:
+				return (Movie)n
+				
+		
+	def Actor find_actor(str name):
+		Nodeset setn = self.get_all_nodes()
+		for n in setn:
+			if n.nodetype == 'actor' && n.name == name:
+				return (Actor)n
 
 
-imdb = IMDB()
-western = imdb.Movie("Once Upon a Time in the West", 8.7, set(["Henry Fonda", "Charles Bronson", "Jason Robards", "Claudia Cardinale]"))	# Will this work? Can IMDB sub-graph recognize Node of type Movie/Actor?
-imdb.update("Once Upon a Time in the West", 8.7, set(["Henry Fonda", "Charles Bronson", "Jason Robards", "Claudia Cardinale]"))
-imdb.update("12 Angry Men", 8.9, set(["Henry Fonda"]))
-imdb.worked_with("Henry Fonda", "Charles Bronson")
+	def void worked_with(Actor Actor_1, Actor Actor_2):
+		self.edge(Actor_1, Actor_2,  {'type': 'work_with'})
+		self.edge(Actor_2, Actor_1,  {'type': 'work_with'})
+
+	def void act_in(Actor Actor_1, Movie Movie_1):
+		self.edge(Actor_1, Movie_1, {'type': 'act_in'})
+
+	def void update_movie(str title, str attr, str newvalue):
+		Movie = find_movie(title)
+		Movie.set_attribute(attr, newvalue)
+
+
+
+def void main():
+    IMDB imdb = IMDB()
+
+	Movie western = Movie({'year':'1968', 'rating':'8.6', 'length':'175 mins'}, 'Once Upon a Time in the West')  
+
+    imdb.add_node(western)
+    Actor Henry = Actor({'Gender':'male', 'Period' : '1905-1982'}, 'Henry Fonda')
+	Actor Charles = Actor({'Gender':'male', 'Period' : '1921-2003'}, 'Charles Bronson')
+
+	imdb.add_node(Henry)
+	imdb.add_node(Chales)
+
+	imdb.worked_with(Henry, Charles)
+	imdb.act_in(Henry, western)
+	imdb.act_in(Charles, western)
+
+	imdb.update_movie('Once Upon a Time in the West', 'rating', '7.3')
+
