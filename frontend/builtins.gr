@@ -237,10 +237,10 @@ class Graph(object):
 	def void add_node(Node n):
 		pass
 
-	def Node get_node(str variable, object value):
+	def Node get_node(str variable, str value):
 		return Node({})
 
-	def NodeSet get_nodes(str variable, object value):
+	def NodeSet get_nodes(str variable, str value):
 		return NodeSet([])
 
 	def Node get_node_by_id(int node_id):
@@ -273,10 +273,10 @@ class Node(object):
 	def int get_id():
 		return 0
 
-	def object get_attribute(str variable):
+	def str get_attribute(str variable):
 		return ''
 
-	def void set_attribute(str variable, object value):
+	def void set_attribute(str variable, str value):
 		pass
 
 	def set<str> get_attributes():
@@ -303,7 +303,7 @@ class Node(object):
 	def NodeSet out_neighbors():
 		return NodeSet([])
 
-	def void update(str variable, object new_value):
+	def void update(str variable, str new_value):
 		pass
 
 
@@ -330,10 +330,10 @@ class Edge(object):
 	def dict<str,object> get_attribute_dict():
 		return {}
 
-	def object get_attribute(str variable):
+	def str get_attribute(str variable):
 		return ''
 
-	def void set_attribute(str variable, object value):
+	def void set_attribute(str variable, str value):
 		pass
 
 	def void add_parents(Edge path_parent):
@@ -345,10 +345,10 @@ class Edge(object):
 
 class NodeSet(set<Node>):
 
-	def set<object> select(str attr):
-		return set<object>([])
+	def set<Node> select(str attr):
+		return set<Node>([])
 
-	def NodeSet filter(str variable, object value):
+	def NodeSet filter(str variable, str value):
 		return NodeSet([])
 
 	def EdgeSet out_edges():

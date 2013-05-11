@@ -3,64 +3,69 @@
 # Are the variable types supposed to be keywords? Not listed in LRM. :(
 
 class Movie(Node):
-	str nodetype = 'movie' #not sure it works or not!, it is a public instance variable
 	str title
-	def void Movie(dict dd, str movietitle):
-	    title = movietitle
+	def Movie __init__(dict<str,object> dd, str movietitle):
 		Node(dd)
+	    self.title = movietitle
+
 
 class Actor(Node):
-	str nodetype = 'actor'
 	str name
-	def void Actor(dict dd, str actorname):
-	    name = actorname
+	def Actor __init__(dict<str,object> dd, str actorname):
 		Node(dd)
+	    self.name = actorname
+
 
 class IMDB(Graph):
 	# field declarations?
+    str dumb
 
 	def Movie find_movie(str title):
-		Nodeset setn = self.get_all_nodes()
-		for n in setn:
-			if n.nodetype == 'movie' && n.title == title:
-				return (Movie)n
-				
+		list<Node> setn = self.get_all_nodes()
+        for Node n in setn:
+            if isinstance(n, "Movie"):
+                Movie movie = (Movie)n
+                if movie.title == title:
+			        return movie
+                
 		
 	def Actor find_actor(str name):
-		Nodeset setn = self.get_all_nodes()
-		for n in setn:
-			if n.nodetype == 'actor' && n.name == name:
-				return (Actor)n
+		list<Node> setn = self.get_all_nodes()
+		for Node n in setn:
+            if isinstance(n, "Actor"):
+                Actor actor = (Actor)n
+			    if actor.name == name:
+			        return actor
 
 
 	def void worked_with(Actor Actor_1, Actor Actor_2):
 		self.edge(Actor_1, Actor_2,  {'type': 'work_with'})
 		self.edge(Actor_2, Actor_1,  {'type': 'work_with'})
 
-	def void act_in(Actor Actor_1, Movie Movie_1):
-		self.edge(Actor_1, Movie_1, {'type': 'act_in'})
+	# def void act_in(Actor Actor_1, Movie Movie_1):
+	# 	self.edge(Actor_1, Movie_1, {'type': 'act_in'})
 
-	def void update_movie(str title, str attr, str newvalue):
-		Movie = find_movie(title)
-		Movie.set_attribute(attr, newvalue)
+	# def void update_movie(str title, str attr, str newvalue):
+	# 	Movie = find_movie(title)
+	# 	Movie.set_attribute(attr, newvalue)
 
 
 
-def void main():
-    IMDB imdb = IMDB()
+# def void main():
+#     IMDB imdb = IMDB()
 
-	Movie western = Movie({'year':'1968', 'rating':'8.6', 'length':'175 mins'}, 'Once Upon a Time in the West')  
+# 	Movie western = Movie({'year':'1968', 'rating':'8.6', 'length':'175 mins'}, 'Once Upon a Time in the West')  
 
-    imdb.add_node(western)
-    Actor Henry = Actor({'Gender':'male', 'Period' : '1905-1982'}, 'Henry Fonda')
-	Actor Charles = Actor({'Gender':'male', 'Period' : '1921-2003'}, 'Charles Bronson')
+#     imdb.add_node(western)
+#     Actor Henry = Actor({'Gender':'male', 'Period' : '1905-1982'}, 'Henry Fonda')
+# 	Actor Charles = Actor({'Gender':'male', 'Period' : '1921-2003'}, 'Charles Bronson')
 
-	imdb.add_node(Henry)
-	imdb.add_node(Chales)
+# 	imdb.add_node(Henry)
+# 	imdb.add_node(Chales)
 
-	imdb.worked_with(Henry, Charles)
-	imdb.act_in(Henry, western)
-	imdb.act_in(Charles, western)
+# 	imdb.worked_with(Henry, Charles)
+# 	imdb.act_in(Henry, western)
+# 	imdb.act_in(Charles, western)
 
-	imdb.update_movie('Once Upon a Time in the West', 'rating', '7.3')
+# 	imdb.update_movie('Once Upon a Time in the West', 'rating', '7.3')
 
