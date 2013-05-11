@@ -179,16 +179,16 @@ class VariableSymbol(Symbol):
           token: see Symbol.
           var_type: A (namespace, name) tuple representing the fully qualified
               type for this variable.
-          var_type_params: A list of (namespace, name) tuples representing
+          var_type_params: An iterable of (namespace, name) tuples representing
               parameters for this variable's type, or None.
         '''
         Symbol.__init__(self, full_name, token=token)
         _validate_full_name(var_type)
         self.var_type = var_type
-        params = var_type_params or []
+        params = var_type_params or ()
         for param in params:
             _validate_full_name(param)
-        self.var_type_params = params
+        self.var_type_params = tuple(params)
 
 
 class FunctionSymbol(Symbol):
@@ -203,7 +203,7 @@ class FunctionSymbol(Symbol):
           token: see Symbol.
           return_type: A (namespace, name) tuple representing the return type
               of this function, or None.
-          param_types: A list of (namespace, name) tuples representing the
+          param_types: An iterable of (namespace, name) tuples representing the
               parameter types of this function, or None.
         '''
         Symbol.__init__(self, full_name, token=token)
@@ -214,7 +214,7 @@ class FunctionSymbol(Symbol):
             param_types = []
         for param_type in param_types:
             _validate_full_name(param_type)
-        self.param_types = param_types
+        self.param_types = tuple(param_types)
 
 
 class SymbolTable(object):
