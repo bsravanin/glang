@@ -460,14 +460,17 @@ class CodeGenerator(object):
         self.write(')))')
 
     def _Dict(self, t):
-        def write_pair(item):
-            self.dispatch(item[0])
-            self.write(', ')
-            self.dispatch(item[1])
-
+        keys = []
+        values = []
+        for item in t.items:
+            keys.append(item[0])
+            values.append(item[1])
         self.write('GraphUtil.createVarMap(')
-        interleave(lambda: self.write(', '), write_pair, t.items)
-        self.write(')')
+        self.write('Arrays.asList(')
+        interleave(lambda: self.write(', '), self.dispatch, keys)
+        self.write('), Arrays.asList(')
+        interleave(lambda: self.write(', '), self.dispatch, values)
+        self.write('))')
 
     def _Set(self, t):
         self.write('(new {0}(Arrays.asList('.format(convert_type('set')))
@@ -516,10 +519,17 @@ class CodeGenerator(object):
             self.write(')')
             return
         if func_full_name == 'float':
-            self.write('Float.valueOf(')
+            self.write('Double.valueOf(')
             self.write('(')
             self.dispatch(t.args[0])
             self.write(').toString()')
+            self.write(')')
+            return
+        if func_full_name == '__builtins.isinstance':
+            self.write('(')
+            self.dispatch(t.args[0])
+            new_type = convert_type(eval(t.args[1].value))
+            self.write(' instanceof {0}'.format(new_type))
             self.write(')')
             return
 

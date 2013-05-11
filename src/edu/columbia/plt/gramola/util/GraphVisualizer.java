@@ -142,6 +142,7 @@ public class GraphVisualizer {
         
         frame.pack();
         frame.setVisible(true);
+        GInformer.printMessage("Graph drawing succeeds");
 	}
 	
 	/**
@@ -176,7 +177,9 @@ public class GraphVisualizer {
 				ExportController exporter = 
 						Lookup.getDefault().lookup(ExportController.class);
 				try {
-					exporter.exportFile(new File(exportRoot + g.getGraphId() + ".pdf"));
+					String exportName = exportRoot + g.getGraphId() + ".pdf";
+					exporter.exportFile(new File(exportName));
+					GInformer.printMessage("Exporting graph to pdf succeeds " + exportName);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
