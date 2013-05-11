@@ -228,10 +228,10 @@ class Graph(object):
 	def int get_id():
 		return 0
 
-	def Node node(dict<object,object> attr_dict):
+	def Node node(dict<str,object> attr_dict):
 		return Node({})
 
-	def Edge edge(Node start, Node end, dict<object,object> attr_dict):
+	def Edge edge(Node start, Node end, dict<str,object> attr_dict):
 		return Edge(start, end, attr_dict, 0)
 
 	def void add_node(Node n):
@@ -246,25 +246,25 @@ class Graph(object):
 	def Node get_node_by_id(int node_id):
 		return Node({})
 
-	def list<object> get_all_nodes():
+	def list<Node> get_all_nodes():
 		return []
 
 	def void add_edge(Edge e):
 		pass
 
-	def list<object> get_all_edges():
+	def list<Edge> get_all_edges():
 		return []
 
-	def list<object> get_shortest_path(Node start, Node end, dict<object,object> attr_map):
+	def list<Edge> get_shortest_path(Node start, Node end, dict<str,object> attr_map):
 		return []
 
-	def list<object> get_paths(Node start, Node end, dict<object,object> attr_map):
+	def list<object> get_paths(Node start, Node end, dict<str,object> attr_map):
 		return []
 
 
 class Node(object):
 
-	def Node __init__(dict<object,object> attr_map):
+	def Node __init__(dict<str,object> attr_map):
 		pass
 
 	def void set_id(int node_id):
@@ -279,10 +279,10 @@ class Node(object):
 	def void set_attribute(str variable, object value):
 		pass
 
-	def set<object> get_attributes():
-		return set<object>([])
+	def set<str> get_attributes():
+		return set<str>([])
 
-	def dict<object,object> get_attribute_dict():
+	def dict<str,object> get_attribute_dict():
 		return {}
 
 	def void set_in_edge(Edge e):
@@ -309,7 +309,7 @@ class Node(object):
 
 class Edge(object):
 
-	def Edge __init__(Node start, Node end, dict<object,object> var_map, int edge_id):
+	def Edge __init__(Node start, Node end, dict<str,object> var_map, int edge_id):
 		pass
 
 	def void set_id(int edge_id):
@@ -324,10 +324,10 @@ class Edge(object):
 	def Node out_node():
 		return Node({})
 
-	def set<object> get_attributes():
-		return set<object>([])
+	def set<str> get_attributes():
+		return set<str>([])
 
-	def dict<object,object> get_attribute_dict():
+	def dict<str,object> get_attribute_dict():
 		return {}
 
 	def object get_attribute(str variable):
@@ -339,8 +339,8 @@ class Edge(object):
 	def void add_parents(Edge path_parent):
 		pass
 
-	def dict<object,object> get_parents():
-		return {}
+	def set<Edge> get_parents():
+		return set([])
 
 
 class NodeSet(set<Node>):
@@ -357,22 +357,11 @@ class NodeSet(set<Node>):
 
 class EdgeSet(set<Edge>):
 
-	# TODO: remove this, since we don't support it
-	#def set<object> select(str attr):
-	#	pass
-
 	def EdgeSet filter(str variable, object value):
 		return EdgeSet([])
 
 	def NodeSet out_nodes():
 		return NodeSet([])
-
-
-# TODO: remove this, since we don't support it
-#class Path(list):
-#
-#	def Path __init__(object obj):
-#		pass
 
 
 class __builtins(object):
