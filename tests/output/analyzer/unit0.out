@@ -1,1 +1,0 @@
-<StartNode: stmt_list=[<FunctionDefNode: body=[<PrintNode: values=[<StringNode: type=((), 'str'), lineno=4, value='"Hello, World!"'>], lineno=4>], return_type=<TypeNode: type=((), 'void'), namespace=(), lineno=3, value='void'>, params=[], name=<NameNode: namespace=(), lineno=3, value='main'>, lineno=3>]>
