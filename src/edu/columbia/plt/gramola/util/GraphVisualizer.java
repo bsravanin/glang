@@ -36,7 +36,7 @@ import processing.core.PApplet;
 import edu.columbia.plt.gramola.datastruct.Edge;
 import edu.columbia.plt.gramola.datastruct.Graph;
 
-public class GraphVisualizer<K, V> {
+public class GraphVisualizer {
 
 	private static String dotFileRoot = "../dotdata/";
 	
