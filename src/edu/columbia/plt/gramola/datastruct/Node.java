@@ -161,7 +161,10 @@ public class Node extends GraphElement {
 	
 	@Override
 	public String toString() {
-		return String.valueOf(this.id);
+      StringBuilder sb = new StringBuilder();
+      sb.append("Node " + this.id + ": ");
+      sb.append(variableMap.toString());
+      return sb.toString();
 	}
 	
 	/**
