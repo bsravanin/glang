@@ -452,14 +452,10 @@ class Parser(object):
         p[0].lineno = p.slice[2].lineno
 
     def p_target(self, p):
-        '''target : var_opt_type
+        '''target : declaration
+                  | var_name
                   | attribute_ref
                   | subscription'''
-        p[0] = p[1]
-
-    def p_var_opt_type(self, p):
-        '''var_opt_type : declaration
-                        | var_name'''
         p[0] = p[1]
 
     def p_var_name(self, p):
@@ -571,7 +567,7 @@ class Parser(object):
         p[0].lineno = p.slice[1].lineno
 
     def p_for_stmt(self, p):
-        'for_stmt : for new_scope var_opt_type IN for_iterable COLON suite'
+        'for_stmt : for new_scope declaration IN for_iterable COLON suite'
         p[0] = nodes.ForNode(target=p[3], iterable=p[5], body=p[7])
         p[0].lineno = p[3].lineno
         self._pop_scope()
