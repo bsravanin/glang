@@ -288,11 +288,11 @@ class Node(object):
 	def dict<str,str> get_attribute_dict():
 		return {}
 
-	def void set_in_edge(Edge e):
-		pass
+	# def void set_in_edge(Edge e):
+	#	pass
 
-	def void set_out_edge(Edge e):
-		pass
+	# def void set_out_edge(Edge e):
+	#	pass
 
 	def EdgeSet out_edges():
 		return EdgeSet([])
