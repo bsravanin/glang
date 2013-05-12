@@ -1,26 +1,15 @@
-def list customermaillist(Graph fbgraph, Graph googlegraph):
+def set<str> customermaillist(Node fbnode_shop, Node googlenode_shop):
  
-	Node fbnode_shop = fbgraph.get_node("name", "shop")
-	Node googlenode_shop = googlegraph.get_node("name", "shop")
-
-
 	#task1 : for birthday gift card
     NodeSet fbns = fbnode_shop.out_edges().filter('type','member').out_nodes().filter('birthday_month', '5')
-
-
     NodeSet googlens = googlenode_shop.out_edges().filter('type','member').out_nodes().filter('birthday_month', '5')
-    set fbns_name = fbns.select('name')
-    set googlens_name = googlens.select('name')
-	set give_gift_card = union(fbns_name, googlens_name)  # actually I want to union them by name
-	 
- 	# friends who has more than 300 connections on fb
- 	NodeSet high_connection_set = fbnode_shop.out_edges().filter('type','fbfriend').out_nodes().filter('popular', 'yes')  
- 	
-	#potential customer (The friends of my friends may also like our products )
-	NodeSet potential_customer_set = fbnode_shop.out_edges().filter('type', 'fbfriend').out_nodes().out_edges().filter('type','fbfriend').out_nodes()
+    
+	set<str> fbns_name = fbns.select('name')
+    set<str> googlens_name = googlens.select('name')
+	set<str> give_gift_card = union(fbns_name, googlens_name)  # actually I want to union them by name
 	
-	return [give_gift_card, high_connection_set, potential_customer_set]           #list or sets
-
+	return give_gift_card
+ 	
 def int num_old_member(Graph fbgraph):
     list<Node> nodelist = fbgraph.get_all_nodes()
     int num = 0
@@ -32,8 +21,28 @@ def int num_old_member(Graph fbgraph):
 def void main():
     Graph fbgraph = load('fbdata1')
     Graph googlegraph = load('googledata1')
-    list mailinglist = customermaillist(fbgraph, googlegraph)
-    print mailinglist
+	Node fbnode_shop = fbgraph.get_node("name", "shop")
+	Node googlenode_shop = googlegraph.get_node("name", "shop")
+
+    set<str> birthday_discount = for_discount(fbnode_shop, googlenode_shop)
+	print 'birthday_discount:'
+	for str s in birthday_discount: 
+	    print s
+
+	# friends who has more than 300 connections on fb
+ 	NodeSet high_connection_set = fbnode_shop.out_edges().filter('type','fbfriend').out_nodes().filter('popular', 'yes')  
+ 
+	print 'more than 300 facebook connections'
+	for Node n in high_connection:
+	    print n.get_attribute('name')
+	
+	#potential customer (The friends of my friends may also like our products )
+	NodeSet potential_customer_set = fbnode_shop.out_edges().filter('type', 'fbfriend').out_nodes().out_edges().filter('type','fbfriend').out_nodes()
     
+	print 'potential customer'
+	for Node n in potential_customer_set:
+	    print n.get_attribute('name')
+
+    print 'number of old members'
     int k = num_old_member(fbgraph)
     print k
