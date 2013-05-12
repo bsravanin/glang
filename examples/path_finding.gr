@@ -1,0 +1,20 @@
+def void main():
+	Graph g = Graph()
+	Node a = g.node({'name': 'a'})
+	Node b = g.node({'name': 'b'})   #diff
+	Node c = g.node({'name': 'c'})
+	Node d = g.node({'name': 'd'})   #diff
+	Node e = g.node({'name': 'e'})
+	
+	g.edge(a, b, {'type': 'test'})
+	g.edge(b, d, {'type': 'test'})
+	g.edge(d, e, {'type': 'test'})
+	g.edge(a, c, {'type': 'test'})
+	g.edge(c, b, {'type': 'test'})
+	g.edge(c, d, {'type': 'test'})
+	list<str> var = ['type']
+	list<str> val = ['test']
+
+	list<Edge> ret = g.get_shortest_path(a, e, var, val)
+	for Edge ex in ret:
+		print ex.in_node().get_attribute('name'), '->', ex.out_node().get_attribute('name')
