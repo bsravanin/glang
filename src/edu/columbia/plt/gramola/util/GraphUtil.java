@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import edu.columbia.plt.gramola.datastruct.Graph;
 import edu.columbia.plt.gramola.datastruct.Node;
@@ -96,7 +97,7 @@ public class GraphUtil {
 		return createVariableMap(vvlist);
 	}
 	
-	public static <K, V> HashMap<K, V> createVarMap(ArrayList<K> var, ArrayList<V> value) {
+	public static <K, V> HashMap<K, V> createVarMap(List<K> var, List<V> value) {
 		
 		if (var.size() != value.size()) {
 			GInformer.printMessage("Inconsistent var-value.");
