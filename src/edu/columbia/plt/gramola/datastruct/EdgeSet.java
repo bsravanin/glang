@@ -20,7 +20,7 @@ public class EdgeSet implements Set{
 	 * @param value
 	 * @return
 	 */
-	public EdgeSet filter(String variable, Object value) {
+	public EdgeSet filter(String variable, String value) {
 		EdgeSet filterEdges = new EdgeSet();
 		Iterator<Edge> edgeIT = edgeSet.iterator();
 		Edge tmp;
