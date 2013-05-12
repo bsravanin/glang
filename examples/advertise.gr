@@ -14,7 +14,7 @@ def int num_old_member(Graph fbgraph):
     list<Node> nodelist = fbgraph.get_all_nodes()
     int num = 0
     for Node n in nodelist:
-        if n.get_attribute('age') != '20':
+        if n.has_attribute('age') and n.get_attribute('age') != '20':
             num = num + 1
     return num
 

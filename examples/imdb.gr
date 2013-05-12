@@ -4,14 +4,14 @@
 
 class Movie(Node):
 	str title
-	def Movie __init__(dict<str,object> dd, str movietitle):
+	def Movie __init__(dict<str,str> dd, str movietitle):
 		Node(dd)
 	    self.title = movietitle
 
 
 class Actor(Node):
 	str name
-	def Actor __init__(dict<str,object> dd, str actorname):
+	def Actor __init__(dict<str,str> dd, str actorname):
 		Node(dd)
 	    self.name = actorname
 
@@ -67,14 +67,14 @@ def void main():
 	imdb.act_in(Henry, western)
 	imdb.act_in(Charles, western)
 	
-	Actor target_actor = find_actor('Henry Fonda')
+	Actor target_actor = imdb.find_actor('Henry Fonda')
 	EdgeSet target_edges = target_actor.out_edges()
     for Edge e in target_edges:
         print e.get_attribute('type')
 
     imdb.update_movie('Once Upon a Time in the West', 'rating', '7.3')
     
-	Movie target_movie = find_movie('Once Upon a Time in the West')
-    print targe_movie.get_attribute('rating')   # check this
+	Movie target_movie = imdb.find_movie('Once Upon a Time in the West')
+    print target_movie.get_attribute('rating')   # check this
 
 
