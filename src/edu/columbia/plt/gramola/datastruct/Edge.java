@@ -30,6 +30,13 @@ public class Edge extends GraphElement{
 		this.id = id;
 	}
 
+
+	public Edge(Node start, Node end, HashMap<String, String> variableMap) {
+		this.start = start;
+		this.end = end;
+		this.variableMap = variableMap;
+	}
+
 	/**
 	 * Set Edge id
 	 */

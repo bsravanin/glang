@@ -312,7 +312,7 @@ class Node(object):
 
 class Edge(object):
 
-	def Edge __init__(Node start, Node end, dict<str,str> var_map, int edge_id):
+	def Edge __init__(Node start, Node end, dict<str,str> var_map):
 		pass
 
 	# def void set_id(int edge_id):
