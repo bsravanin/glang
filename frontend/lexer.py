@@ -43,9 +43,7 @@ class Lexer(object):
         'elif': 'ELIF',
         'else': 'ELSE',
         'for': 'FOR',
-        #'from': 'FROM',
         'if': 'IF',
-        #'import': 'IMPORT',
         'in': 'IN',
         'is': 'IS',
         'not': 'NOT',
@@ -54,7 +52,6 @@ class Lexer(object):
         'print': 'PRINT',
         'return': 'RETURN',
         'while': 'WHILE',
-        #'None': 'NONE',
         'pass': 'PASS',
         }
 
