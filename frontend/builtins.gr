@@ -279,6 +279,9 @@ class Node(object):
 	def str get_attribute(str attr):
 		return ''
 
+	def bool has_attribute(str attr):
+		return True
+
 	def void set_attribute(str variable, str value):
 		pass
 
@@ -335,6 +338,9 @@ class Edge(object):
 
 	def str get_attribute(str variable):
 		return ''
+
+	def bool has_attribute(str attr):
+		return True
 
 	def void set_attribute(str variable, str value):
 		pass

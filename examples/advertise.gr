@@ -1,4 +1,4 @@
-def set<str> customermaillist(Node fbnode_shop, Node googlenode_shop):
+def set<str> get_gift_customers(Node fbnode_shop, Node googlenode_shop):
  
 	#task1 : for birthday gift card
     NodeSet fbns = fbnode_shop.out_edges().filter('type','member').out_nodes().filter('birthday_month', '5')
@@ -24,7 +24,7 @@ def void main():
 	Node fbnode_shop = fbgraph.get_node("name", "shop")
 	Node googlenode_shop = googlegraph.get_node("name", "shop")
 
-    set<str> birthday_discount = for_discount(fbnode_shop, googlenode_shop)
+    set<str> birthday_discount = get_gift_customers(fbnode_shop, googlenode_shop)
 	print 'birthday_discount:'
 	for str s in birthday_discount: 
 	    print s
@@ -33,7 +33,7 @@ def void main():
  	NodeSet high_connection_set = fbnode_shop.out_edges().filter('type','fbfriend').out_nodes().filter('popular', 'yes')  
  
 	print 'more than 300 facebook connections'
-	for Node n in high_connection:
+	for Node n in high_connection_set:
 	    print n.get_attribute('name')
 	
 	#potential customer (The friends of my friends may also like our products )

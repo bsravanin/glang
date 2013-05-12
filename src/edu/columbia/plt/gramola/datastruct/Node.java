@@ -146,6 +146,19 @@ public class Node extends GraphElement {
 		this.variableMap.put(variable, newValue);
 	}
 	
+	/**
+	 * Check if Node has a specific attribute
+	 * @param variable
+	 * @return
+	 */
+	public boolean hasAttribute(String variable) {
+		if (this.variableMap.containsKey(variable)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return String.valueOf(this.id);
