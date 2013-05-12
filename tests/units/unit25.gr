@@ -1,0 +1,35 @@
+# TEST: NodeSet and EdgeSet.
+
+def void main():
+	Graph g = Graph()
+	Node a = g.node({"name": "a", "age": "42", "status": "dead"})
+	Node b = g.node({"name": "b", "age": "4.75 billion years", "status": "gave up"})
+	Node c = g.node({"name": "c", "place": "earth", "status": "bored"})
+	Node d = g.node({"name": "d", "age": "2.5", "status": "won"})
+	Node e = g.node({"name": "e", "age": "71", "status": "bored"})
+
+	Edge e1 = g.edge(a, b, {"type": "test", "key1": "val1"})
+	Edge e2 = g.edge(b, d, {"type": "best", "key2": "val2"})
+	Edge e3 = g.edge(d, e, {"type": "pest", "key3": "val3"})
+	Edge e4 = g.edge(a, c, {"type": "rest", "key2": "val2"})
+	Edge e5 = g.edge(c, b, {"type": "vest", "key3": "val5"})
+	Edge e6 = g.edge(c, d, {"type": "test"})
+
+	NodeSet ns = NodeSet([a, b, c, d, e])
+
+	for str s in ns.select("name"):
+		print s
+
+	for Node n in ns.filter("status", "bored"):
+		print n.get_attribute_dict()
+
+	for Edge ed in ns.out_edges():
+		print ed.get_attribute_dict()
+
+	EdgeSet es = EdgeSet([e1, e2, e3, e4, e5, e6])
+
+	for Edge ed in es.filter("type", "test"):
+		print ed.get_attribute_dict()
+
+	for Node n in es.out_nodes():
+		print n.get_attribute_dict()

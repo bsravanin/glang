@@ -13,7 +13,14 @@ import java.util.Set;
 public class NodeSet implements Set<Node>{
 	
 	private HashSet<Node> nodeSet = new HashSet<Node>();
-	
+
+	public NodeSet(Collection<Node> nodes) {
+		nodeSet.addAll(nodes);
+	}
+
+	public NodeSet() {
+	}
+
 	/**
 	 * Find out Nodes that fit var-value constraints in NodeSet
 	 * @param variable

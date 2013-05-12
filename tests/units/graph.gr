@@ -1,7 +1,0 @@
-# test graph
-
-def void main():
-    Graph g = Graph()
-    NodeSet ns = g.get_all_nodes()
-    
-    

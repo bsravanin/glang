@@ -14,6 +14,13 @@ public class EdgeSet implements Set<Edge>{
 	
 	private Set<Edge> edgeSet = new HashSet<Edge>();
 	
+	public EdgeSet(Collection<Edge> edges) {
+		edgeSet.addAll(edges);
+	}
+
+	public EdgeSet() {
+	}
+
 	/**
 	 * Find out Edges that fit variable-value constraint in the EdgeSet
 	 * @param variable
