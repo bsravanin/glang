@@ -23,7 +23,7 @@ def void main():
 	dict<str,str> ds = {"key": "Rosebud"}
 	Graph g = Graph()
 	Node n = g.node({"name": "Hello", "age": "42"})
-	Edge e = g.edge(hello, g.node({"name": "World", "age": "20"}), {"type": "friend"})
+	Edge e = g.edge(n, g.node({"name": "World", "age": "20"}), {"type": "friend"})
     MyClass c = MyClass()
 
 	list<object> vars = [b, f, i, s, lb, lf, li, ls, sb, sf, si, ss, db, df, di, ds, g, n, e, c]
