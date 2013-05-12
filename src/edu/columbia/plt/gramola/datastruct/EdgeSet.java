@@ -5,6 +5,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * EdgeSet is a Set containing Edges with filtering functionalities
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class EdgeSet implements Set{
 	
 	private Set<Edge> edgeSet = new HashSet<Edge>();

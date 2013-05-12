@@ -17,6 +17,11 @@ import org.neo4j.tooling.GlobalGraphOperations;
 
 import edu.columbia.plt.gramola.datastruct.Graph;
 
+/**
+ * GraphDBController is responsible for talking to Neo4j database
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class GraphDBController {
 	
 	private static DynamicRelationshipType connect = 
