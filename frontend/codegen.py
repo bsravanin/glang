@@ -423,9 +423,12 @@ class CodeGenerator(object):
             op = '&&'
         elif op == 'or':
             op = '||'
+        expr_type = symbols.stringify_full_name(t.type)
+        self.write('(({0}) ('.format(convert_type(expr_type)))
         self.dispatch(t.left)
         self.write(' {0} '.format(op))
         self.dispatch(t.right)
+        self.write('))')
 
     def _UnaryOp(self, t):
         op = t.operator

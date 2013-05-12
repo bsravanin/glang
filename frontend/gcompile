@@ -24,10 +24,10 @@ if [ ! -e ../lib/gramola.jar ]; then
 	echo "ERROR: Could not find gramola.jar."
 	exit 1
 fi
-	
+
 python codegen.py $SOURCE $JTARGET
-rm $TARGET_DIR/*.java
+[ -f $TARGET_DIR/*.java ] && rm $TARGET_DIR/*.java
 mv *.java $TARGET_DIR
 javac -cp $CLASSPATH ${TARGET_DIR}/*.java
-rm $BIN_DIR/*.class
+[ -f $BIN_DIR/*.class ] && rm $BIN_DIR/*.class
 mv ${TARGET_DIR}/*.class $BIN_DIR
