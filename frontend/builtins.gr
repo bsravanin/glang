@@ -276,7 +276,7 @@ class Node(object):
 	def int get_id():
 		return 0
 
-	def str get_attribute(str str):
+	def str get_attribute(str attr):
 		return ''
 
 	def void set_attribute(str variable, str value):
