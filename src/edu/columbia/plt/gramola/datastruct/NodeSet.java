@@ -20,7 +20,7 @@ public class NodeSet implements Set{
 	 * @param value
 	 * @return
 	 */
-	public NodeSet filter(String variable, Object value) {
+	public NodeSet filter(String variable, String value) {
 		NodeSet filterNodes = new NodeSet();
 		Iterator<Node> nodeIT = nodeSet.iterator();
 		Node tmp;
@@ -148,8 +148,8 @@ public class NodeSet implements Set{
 		return ret;
 	}
 	
-	public HashSet<Object> select(String attr) {
-		HashSet<Object> ret = new HashSet<Object>();
+	public HashSet<String> select(String attr) {
+		HashSet<String> ret = new HashSet<String>();
 		Iterator<Node> nIT = this.nodeSet.iterator();
 		while(nIT.hasNext()) {
 			ret.add(nIT.next().getVariableValue(attr).toString());
