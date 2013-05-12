@@ -1,8 +1,5 @@
 package edu.columbia.plt.gramola.abstractdata;
 
-import java.util.HashMap;
-import java.util.Set;
-
 public abstract class GraphElement {
 	
 	/**

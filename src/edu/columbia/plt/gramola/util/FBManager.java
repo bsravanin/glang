@@ -143,38 +143,29 @@ public class FBManager {
 		else
 			name = u.getName().replaceAll("-|\\s", "");
 		
-		System.out.println("Test name: " + name);
-		
 		List<Education> eduList = u.getEducation();
 		
 		if (eduList.size() <= 0)
 			edu = "";
 		else
 			edu = u.getEducation().get(0).getSchool().getName().replaceAll("\\s", "");
-		
-		System.out.println("Test edu: " + edu);
+
 		
 		if (u.getHometownName() == null || u.getHometownName().isEmpty())
 			home = "";
 		else
 			home = u.getHometownName().replaceAll("\\s", "");
 		
-		System.out.println("Test home: " + home);
-		
-		
 		if (u.getLocation() == null || u.getLocation().getName() == null || u.getLocation().getName().isEmpty())
 			location = "";
 		else
 			location = u.getLocation().getName().replaceAll("\\s", "");
-		
-		System.out.println("Test location: " + location);
 		
 		HashMap<String, String> usrMap = new HashMap<String, String>();
 		usrMap.put("name", name);
 		usrMap.put("edu", edu);
 		usrMap.put("home", home);
 		usrMap.put("location", location);
-		//Node userNode = g.Node("name", name, "edu", edu, "home", home, "location", location);
 		Node userNode = g.Node(usrMap);
 		return userNode;
 	}
@@ -198,7 +189,6 @@ public class FBManager {
 		feedMap.put("name", name);
 		feedMap.put("likes", String.valueOf(likeCount));
 		feedMap.put("link", link);
-		//Node feedNode = g.Node("name", name, "likes", String.valueOf(likeCount), "link", link);
 		Node feedNode = g.Node(feedMap);
 		return feedNode;
 	}
@@ -210,7 +200,6 @@ public class FBManager {
 		HashMap<String, String> pageMap = new HashMap<String, String>();
 		pageMap.put("name", name);
 		pageMap.put("id", id);
-		//Node pageNode = g.Node("name", name, "id", id);
 		Node pageNode = g.Node(pageMap);
 		return pageNode;
 	}

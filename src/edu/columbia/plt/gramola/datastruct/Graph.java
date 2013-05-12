@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Stack;
 
-import edu.columbia.plt.gramola.abstractdata.GraphElement;
 import edu.columbia.plt.gramola.util.GraphUtil;
 
 public class Graph<V, K>{
@@ -221,8 +219,7 @@ public class Graph<V, K>{
 		
 		if (!this.nodeList.contains(start) || !this.nodeList.contains(end))
 			return null;
-		
-		//HashMap<K, V> variableMap = GraphUtil.createVariableMap(vvlist);
+
 		HashMap<K,V> variableMap = GraphUtil.createVarMap(var, val);
 		
 		int length;
@@ -335,8 +332,6 @@ public class Graph<V, K>{
 	 */
 	private ArrayList<ArrayList<Edge<K,V>>> constructPath(Node<K,V> start, Edge<K,V> e) {
 		ArrayList<ArrayList<Edge<K,V>>> paths = new ArrayList<ArrayList<Edge<K,V>>>();
-		/*System.out.println("Test edge " + e.inV().getVariableValue("name") + " " 
-				+ e.getVariableValue("type") + " " + e.outV().getVariableValue("name"));*/
 		
 		if (e.inV() == start) {
 			ArrayList<Edge<K,V>> pathList = new ArrayList<Edge<K,V>>();
@@ -345,12 +340,9 @@ public class Graph<V, K>{
 		}
 		
 		HashSet<Edge<K,V>> parents = e.getParents();
-		/*System.out.println("Test parent size: " + parents.size());*/
 		ArrayList<ArrayList<Edge<K,V>>> subPaths;
 		
 		for (Edge<K,V> tmp: parents) {
-			/*System.out.println("Test parent: " + tmp.inV().getVariableValue("name") + " "
-					+ tmp.outV().getVariableValue("name"));*/
 			subPaths = constructPath(start, tmp);
 			Iterator<ArrayList<Edge<K,V>>> subPathIT = subPaths.iterator();
 			ArrayList<Edge<K,V>> tmpList;

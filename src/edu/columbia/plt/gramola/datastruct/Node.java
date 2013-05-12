@@ -1,7 +1,6 @@
 package edu.columbia.plt.gramola.datastruct;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 

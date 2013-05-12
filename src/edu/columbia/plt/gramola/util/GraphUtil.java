@@ -104,7 +104,7 @@ public class GraphUtil {
 			return null;
 		}
 		
-		HashMap variableMap = new HashMap();
+		HashMap<String, String> variableMap = new HashMap<String, String>();
 		for (int i = 0; i < var.size(); i++) {
 			variableMap.put(String.valueOf(var.get(i)), String.valueOf(value.get(i)));
 		}
