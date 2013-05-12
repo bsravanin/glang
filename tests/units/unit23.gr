@@ -9,6 +9,7 @@ def void main():
 	print earth.get_id(), earth.get_attribute("name"), earth.get_attribute("age")
 
 	earth.set_attribute("temperature", "depends")
+	print earth.has_attribute("name"), earth.has_attribute("naam")
 	print earth.get_attributes()
 	print earth.get_attribute_dict()
 
