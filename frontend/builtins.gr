@@ -400,7 +400,7 @@ class __builtins(object):
 		pass
 
 	def set<str> union(set<str> lhs, set<str> rhs):
-		return set<object>([])
+		return set<str>([])
 
 	def bool isinstance(object obj, str type_name):
 		return False
