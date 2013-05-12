@@ -1,0 +1,75 @@
+# TEST: For and while loops.
+
+def list<int> range(int i, int j):
+	list<int> r = []
+	int t = i
+
+	while t <= j:
+		r.append(t)
+		t = t + 1
+
+	return r
+
+
+def void jumpy_iterate(list<int> l):
+	list<int> l2 = []
+	int j
+	int k
+
+	for int i in l:
+		k = i % 25
+		if k == 0:
+		# if i % 25 == 0:
+			break
+
+		j = i % 5
+		if j == 0:
+		# if i % 5 == 0:
+			continue
+
+		l2.append(i)
+
+	print l2
+
+
+def void nested_loops():
+	int i = 0
+	int j = 0
+
+	for int x in range(1, 10):
+		for int y in range(90, 100):
+			i = i + 1
+
+	print i, j
+
+	while i > 0:
+		j = 10
+		while j > 10:
+			j = j - 1
+		i = i - 1
+
+	print i, j
+
+	list<str> l = []
+
+	while i <= 10:
+		for int x in range(1, 10):
+			l.append("Moist")
+		i = i + 1
+
+	print l
+
+	list<int> l2 = []
+
+	for str s in l:
+		i = 0
+		while i <= 1:
+			j = j + 1
+			i = i + 1
+
+	print j
+
+
+def void main():
+	jumpy_iterate(range(1, 100))
+	nested_loops()

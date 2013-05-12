@@ -1,0 +1,31 @@
+# TEST: isinstance.
+
+def void main():
+	bool b = True
+	float f = 3.14
+	int i = 42
+	str s = "Rosebud"
+	list<str> l = []
+	set<str> s1 = {"Rosebud"}
+	# dict<str,str> d = {}
+    Graph g = Graph()
+	Node n = g.node({"name": "Hello", "age": "42"})
+	# Edge e
+
+	# list<object> vars = [b, f, i, s, l, s1, d, g]
+	list<object> vars = [b, f, i, s, l, s1, g, n]
+	list<str> types = ["bool", "float", "int", "str", "list", "set", "dict", "Graph", "Node", "Edge"]
+
+	for object o in vars:
+		# for str w in types:
+			# print isinstance(b, w)
+		print isinstance(o, "bool")
+		print isinstance(o, "float")
+		print isinstance(o, "int")
+		print isinstance(o, "str")
+		print isinstance(o, "list")
+		print isinstance(o, "set")
+		print isinstance(o, "dict")
+		print isinstance(o, "Graph")
+		print isinstance(o, "Node")
+		print isinstance(o, "Edge")

@@ -26,7 +26,7 @@ def list<bool> bool_list_ops(list<bool> lb):
 
 	lb2.insert(1, True)
 	print lb2
-	lb2.pop(2)
+	print lb2.pop(2)
 	print lb2
 	lb2.remove(True)
 	print lb2
@@ -64,7 +64,7 @@ def list<float> float_list_ops(list<float> lf):
 	# lf2.insert(1, 42)
 	lf2.insert(1, 42.0)
 	print lf2
-	lf2.pop(2)
+	print lf2.pop(2)
 	print lf2
 	lf2.remove(3.14)
 	print lf2
@@ -101,7 +101,7 @@ def list<int> int_list_ops(list<int> li):
 
 	li2.insert(1, 42)
 	print li2
-	li2.pop(2)
+	print li2.pop(2)
 	print li2
 	li2.remove(42)
 	print li2
@@ -138,7 +138,7 @@ def list<str> str_list_ops(list<str> ls):
 
 	ls2.insert(1, "42")
 	print ls2
-	ls2.pop(2)
+	print ls2.pop(2)
 	print ls2
 	ls2.remove("Rosebud")
 	print ls2
@@ -147,6 +147,10 @@ def list<str> str_list_ops(list<str> ls):
 		print s
 
 	return ls
+
+
+def void object_list_ops(list<object> lo):
+	print
 
 
 def void main():
@@ -158,6 +162,9 @@ def void main():
 
 	list<int> li = [42]
 	print int_list_ops(li)
+
+	list<object> lo = [True]
+	object_list_ops(lo)
 
 	list<str> ls = ["Rosebud"]
 	print str_list_ops(ls)

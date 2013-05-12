@@ -7,7 +7,20 @@ Removed from unit16.gr, unit17.gr, unit18.gr
 Java clone(). No alternative.
 
 insert
+Inserting an int into a float list.
 unit17.gr:64
 
 Dicts
 unit19.gr
+
+Expressions Vs Statements
+For loop variables
+Defining arrays in loops.
+
+isinstance
+unit20.gr:17-18
+Sweet: Uninitialized variables have no instances, so isintance is undefined on them.
+
+Comparison
+LHS of expressions is not boxed to an Integer, Float, etc.
+unit21.gr:22,27
