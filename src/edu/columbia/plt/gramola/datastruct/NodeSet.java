@@ -137,8 +137,13 @@ public class NodeSet implements Set<Node>{
 		EdgeSet ret = new EdgeSet();
 		Iterator<Node> nIT = this.nodeSet.iterator();
 		
+		Iterator<Edge> tmpEIT;
 		while(nIT.hasNext()) {
-			ret.add(nIT.next().outE());
+			tmpEIT = nIT.next().outE().iterator();
+			
+			while(tmpEIT.hasNext()) {
+				ret.add(tmpEIT.next());
+			}
 		}
 		
 		return ret;

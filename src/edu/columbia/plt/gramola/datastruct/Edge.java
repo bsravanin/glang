@@ -113,6 +113,19 @@ public class Edge extends GraphElement{
 	}
 	
 	/**
+	 * Check if Node has a specific attribute
+	 * @param variable
+	 * @return
+	 */
+	public boolean hasAttribute(String variable) {
+		if (this.variableMap.containsKey(variable)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * Return string containing start node id, edge id and end node id
 	 */
 	@Override
