@@ -69,6 +69,7 @@ def void main():
 	
 	Actor target_actor = find_actor('Henry Fonda')
 	EdgeSet target_edges = target_actor.out_edges()
+	print 'Fetch out edges of Actor node(Henry Fonda), and print the edge type:'
     for Edge e in target_edges:
         print e.get_attribute('type')
 
