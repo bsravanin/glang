@@ -25,9 +25,23 @@ if [ ! -e ../lib/gramola.jar ]; then
 	exit 1
 fi
 
+rm -f $TARGET_DIR/*.java
 python codegen.py $SOURCE $JTARGET
-rm $TARGET_DIR/*.java
+
+if [ $? != 0 ]; then
+    echo "ERROR: code generation fails."
+    exit 1
+fi
+
 mv *.java $TARGET_DIR
+
+rm -f $BIN_DIR/*.class
+
 javac -nowarn -cp $CLASSPATH ${TARGET_DIR}/*.java
-rm $BIN_DIR/*.class
+
+if [ $? != 0 ]; then
+    echo "ERROR: Java compilation fails."
+    exit 1
+fi
+
 mv ${TARGET_DIR}/*.class $BIN_DIR

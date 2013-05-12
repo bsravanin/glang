@@ -1,4 +1,4 @@
-# Basic class test
+# TEST: Basic class test
 
 class MyClass():
     int i

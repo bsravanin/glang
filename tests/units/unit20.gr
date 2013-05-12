@@ -1,20 +1,33 @@
 # TEST: isinstance.
 
+class MyClass():
+    int i
+    float f
+
 def void main():
 	bool b = True
 	float f = 3.14
 	int i = 42
 	str s = "Rosebud"
-	list<str> l = []
-	set<str> s1 = {"Rosebud"}
-	# dict<str,str> d = {}
-    Graph g = Graph()
+	list<bool> lb = []
+	list<float> lf = []
+	list<int> li = []
+	list<str> ls = []
+	set<bool> sb = {True}
+	set<float> sf = {3.14}
+	set<int> si = {42}
+	set<str> ss = {"Rosebud"}
+	dict<str,bool> db = {"key": True}
+	dict<str,float> df = {"key": 3.14}
+	dict<str,int> di = {"key": 42}
+	dict<str,str> ds = {"key": "Rosebud"}
+	Graph g = Graph()
 	Node n = g.node({"name": "Hello", "age": "42"})
-	# Edge e
+	Edge e = g.edge(hello, g.node({"name": "World", "age": "20"}), {"type": "friend"})
+    MyClass c = MyClass()
 
-	# list<object> vars = [b, f, i, s, l, s1, d, g]
-	list<object> vars = [b, f, i, s, l, s1, g, n]
-	list<str> types = ["bool", "float", "int", "str", "list", "set", "dict", "Graph", "Node", "Edge"]
+	list<object> vars = [b, f, i, s, lb, lf, li, ls, sb, sf, si, ss, db, df, di, ds, g, n, e, c]
+	list<str> types = ["bool", "float", "int", "str", "list", "set", "dict", "Graph", "Node", "Edge", "MyClass"]
 
 	for object o in vars:
 		# for str w in types:

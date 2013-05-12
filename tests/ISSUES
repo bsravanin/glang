@@ -18,9 +18,13 @@ For loop variables
 Defining arrays in loops.
 
 isinstance
-unit20.gr:17-18
 Sweet: Uninitialized variables have no instances, so isintance is undefined on them.
+
+unit20.gr:28-20
 
 Comparison
 LHS of expressions is not boxed to an Integer, Float, etc.
 unit21.gr:22,27
+
+Sending int to float InconsistentTypeError
+unit14.gr:23-29

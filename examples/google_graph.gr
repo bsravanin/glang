@@ -1,10 +1,10 @@
 def void main():
 	Graph g = Graph()
-	Node n1 = g.node({'name': 'Michael', 'age': 30, 'birthday_month' : 9, 'popularity' : 10, 'numfriends' : 311})
-	Node n2 = g.node({'name': 'Edward', 'age': 25,'birthday_month' : 5, 'popularity' : 8, 'numfriends' : 268})   #diff
-	Node n3 = g.node({'name': 'Jack', 'age': 18, 'birthday_month' : 5, 'popularity' : 9, 'numfriends' : 158})
-	Node n4 = g.node({'name': 'Cindy', 'age': 26, 'birthday_month' : 5, 'popularity' : 4, 'numfriends' : 372})   #diff
-	Node n5 = g.node({'name': 'John', 'age': 29, 'birthday_month' : 11, 'popularity' : 3, 'numfriends' : 401})
+	Node n1 = g.node({'name': 'Michael', 'age': '30', 'birthday_month' : '9', 'popularity' : '10', 'numfriends' : '311'})
+	Node n2 = g.node({'name': 'Edward', 'age': '25','birthday_month' : '5', 'popularity' : '8', 'numfriends' : '268'})   #diff
+	Node n3 = g.node({'name': 'Jack', 'age': '18', 'birthday_month' : '5', 'popularity' : '9', 'numfriends' : '158'})
+	Node n4 = g.node({'name': 'Cindy', 'age': '26', 'birthday_month' : '5', 'popularity' : '4', 'numfriends' : '372'})   #diff
+	Node n5 = g.node({'name': 'John', 'age': '29', 'birthday_month' : '11', 'popularity' : '3', 'numfriends' : '401'})
 
 	Node n6 = g.node({'name' : 'shop'})
 	

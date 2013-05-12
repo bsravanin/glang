@@ -1,4 +1,4 @@
-# Class constructor
+# TEST: Class constructor
 
 class MyClass():
     int i
