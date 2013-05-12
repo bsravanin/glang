@@ -1,4 +1,4 @@
-# Class inheritance
+# TEST: Class inheritance
 
 class MyClass():
     int i
