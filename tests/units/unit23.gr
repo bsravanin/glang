@@ -1,0 +1,35 @@
+# TEST: Node operations.
+
+def void main():
+    Graph g = Graph()
+    Node earth = g.node({"name": "Earth", "age": "4.75 billion years"})
+
+	print earth.get_id()
+	earth.set_id(42)
+	print earth.get_id(), earth.get_attribute("name"), earth.get_attribute("age")
+
+	earth.set_attribute("temperature", "depends")
+	print earth.has_attribute("name"), earth.has_attribute("naam")
+	print earth.get_attributes()
+	print earth.get_attribute_dict()
+
+    Node heaven = g.node({"name": "Heaven", "temperature": "pleasant"})
+    Node hell = g.node({"name": "Hell", "temperature": "crazy"})
+
+	Edge e1 = g.edge(earth, heaven, {"relation": "want to go to"})
+	Edge e2 = g.edge(earth, hell, {"relation": "end up in"})
+
+	Node eden = g.node({"name": "Eden", "temperature": "humid"})
+	Edge e3 = g.edge(eden, earth, {"relation": "end up in"})
+
+	for Edge e in earth.out_edges():
+		print e.get_attribute_dict()
+
+	for Edge e in earth.in_edges():
+		print e.get_attribute_dict()
+
+	for Node n in earth.in_neighbors():
+		print n.get_attribute_dict()
+
+	for Node n in earth.out_neighbors():
+		print n.get_attribute_dict()

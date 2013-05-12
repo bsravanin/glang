@@ -14,7 +14,7 @@ def void main():
 
     Node n3 = g.node({"name": "Rosebud", "age": "42_2"})
 	print g.get_node("name", "Rosebud").get_attribute_dict()
-	
+
 	for Node n in g.get_nodes("name", "Rosebud"):
 		print n.get_attribute_dict()
 

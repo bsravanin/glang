@@ -20,6 +20,7 @@ TARGET_PROGRAM_NAME = 'Test'
 JAVA_NAME_MAP = {
     'Edge.add_parents': 'addParents',
     'Edge.get_attribute': 'getVariableValue',
+    'Edge.has_attribute': 'hasAttribute',
     'Edge.get_attribute_dict': 'getVariableMap',
     'Edge.get_attributes': 'getVariables',
     'Edge.get_id': 'getId',
@@ -43,6 +44,7 @@ JAVA_NAME_MAP = {
     'Graph.get_shortest_path': 'getShortestPath',
     'Graph.node': 'Node',
     'Node.get_attribute': 'getVariableValue',
+    'Node.has_attribute': 'hasAttribute',
     'Node.get_attribute_dict': 'getVariableMap',
     'Node.get_attributes': 'getVariables',
     'Node.get_id': 'getId',

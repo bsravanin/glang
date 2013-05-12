@@ -1,0 +1,19 @@
+# TEST: Edge operations.
+
+def void main():
+    Graph g = Graph()
+    Node earth = g.node({"name": "Earth", "temperature": "depends"})
+    Node hell = g.node({"name": "Hell", "temperature": "crazy"})
+	Edge e1 = g.edge(earth, hell, {"relation": "is scared of", "likes": "nope"})
+	Edge e2 = g.edge(hell, earth, {"relation": "scares", "likes": "yep"})
+
+	print e1.get_id(), e2.get_id()
+	print e1.in_node().get_attribute_dict(), e2.in_node().get_attribute_dict()
+	print e1.out_node().get_attribute_dict(), e2.out_node().get_attribute_dict()
+	print e1.get_attributes(), e2.get_attributes()
+	print e1.get_attribute_dict(), e2.get_attribute_dict()
+	print e1.get_attribute("relation"), e2.get_attribute("likes")
+	print e1.has_attribute("likes"), e2.has_attribute("relation")
+	e1.set_attribute("visa", "sins")
+	e2.set_attribute("visa", "sans")
+	print e1.get_attribute_dict(), e2.get_attribute_dict()

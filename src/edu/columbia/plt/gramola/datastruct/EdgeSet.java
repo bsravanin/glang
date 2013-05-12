@@ -10,7 +10,7 @@ import java.util.Set;
  * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
  *
  */
-public class EdgeSet implements Set{
+public class EdgeSet implements Set<Edge>{
 	
 	private Set<Edge> edgeSet = new HashSet<Edge>();
 	
@@ -33,21 +33,17 @@ public class EdgeSet implements Set{
 	}
 
 	@Override
-	public boolean add(Object e) {
+	public boolean add(Edge e) {
 		// TODO Auto-generated method stub
-		if (e instanceof Edge) {
-			this.edgeSet.add((Edge)e);
-			return true;
-		}
-		return false;
+		return this.edgeSet.add(e);
 	}
 
 	@Override
-	public boolean addAll(Collection c) {
+	public boolean addAll(Collection<? extends Edge> c) {
 		// TODO Auto-generated method stub
 		Iterator cIT = c.iterator();
 		while(cIT.hasNext()) {
-			if (!this.add(cIT.next())) {
+			if (!this.add((Edge)cIT.next())) {
 				edgeSet.clear();
 				return false;
 			}

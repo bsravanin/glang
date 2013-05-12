@@ -257,8 +257,8 @@ class Graph(object):
 	def list<Edge> get_all_edges():
 		return []
 
-	# def list<Edge> get_shortest_path(Node start, Node end, dict<str,object> attr_map):
-	# 	return []
+	def list<Edge> get_shortest_path(Node start, Node end, list<str> vars, list<str> vals):
+		return []
 
 	# def list<object> get_paths(Node start, Node end, dict<str,object> attr_map):
 	# 	# This returns a list of lists
@@ -279,6 +279,9 @@ class Node(object):
 	def str get_attribute(str attr):
 		return ''
 
+	def bool has_attribute(str attr):
+		return True
+
 	def void set_attribute(str variable, str value):
 		pass
 
@@ -288,11 +291,11 @@ class Node(object):
 	def dict<str,str> get_attribute_dict():
 		return {}
 
-	def void set_in_edge(Edge e):
-		pass
+	# def void set_in_edge(Edge e):
+	#	pass
 
-	def void set_out_edge(Edge e):
-		pass
+	# def void set_out_edge(Edge e):
+	#	pass
 
 	def EdgeSet out_edges():
 		return EdgeSet([])
@@ -335,6 +338,9 @@ class Edge(object):
 
 	def str get_attribute(str variable):
 		return ''
+
+	def bool has_attribute(str attr):
+		return True
 
 	def void set_attribute(str variable, str value):
 		pass
