@@ -234,7 +234,7 @@ class Graph(object):
 		return Node({})
 
 	def Edge edge(Node start, Node end, dict<str,str> attr_dict):
-		return Edge(start, end, attr_dict, 0)
+		return Edge(start, end, attr_dict)
 
 	def void add_node(Node n):
 		pass
@@ -282,11 +282,11 @@ class Node(object):
 	def void set_attribute(str variable, str value):
 		pass
 
-	# def set<str> get_attributes():
-	# 	return set<str>([])
+	def set<str> get_attributes():
+		return set<str>([])
 
-	# def dict<str,object> get_attribute_dict():
-	# 	return {}
+	def dict<str,str> get_attribute_dict():
+		return {}
 
 	def void set_in_edge(Edge e):
 		pass
@@ -327,11 +327,11 @@ class Edge(object):
 	def Node out_node():
 		return Node({})
 
-	# def set<str> get_attributes():
-	# 	return set<str>([])
+	def set<str> get_attributes():
+		return set<str>([])
 
-	# def dict<str,str> get_attribute_dict():
-	# 	return {}
+	def dict<str,str> get_attribute_dict():
+		return {}
 
 	def str get_attribute(str variable):
 		return ''
