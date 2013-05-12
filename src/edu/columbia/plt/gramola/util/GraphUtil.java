@@ -97,7 +97,7 @@ public class GraphUtil {
 		return createVariableMap(vvlist);
 	}*/
 	
-	public static HashMap<String, Object> createVarMap(List<String> var, List<Object> value) {
+	public static HashMap<String, Object> createVarMap(List<String> var, List<? extends Object> value) {
 		
 		if (var.size() != value.size()) {
 			GInformer.printMessage("Inconsistent var-value.");
