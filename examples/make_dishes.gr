@@ -1,0 +1,46 @@
+#Linear programming is too difficult, let¿s try simple things...
+
+# This is an fb application 
+#@ input : Social Network with Foods in everyones refrigerator as attrs
+#@ constraint :recipe
+#@ output : search possible dishes and participants
+#@ using scenario : 
+#    Collect the food in a group of people¿s refrigerators and make them dishes.
+
+#Maximize : # of dishes
+
+#Constraints:
+#a. Recipes : recipes in the database
+#1. lettuce, hamburger, bread, tomato, cheese => arbitrary hamburger
+#2. rice, eggs, arbitrary vegtables => fried rice
+#3. rice, curry, arbitrary vegetables => curry rice
+#b. 
+def Set collect_all_foods(Set pfriends) :
+	Set allfood
+	for f in pfriends :
+		allfood = union(allfood, f.food)
+	return allfood
+
+def void make_dishes() :	
+# select participants (1-hop friends and 2-hop friends in this case), 1 hop friends 
+# have priority
+# want to have a 10-people party
+numPeople = 10
+# this function originally put 1-hop first
+list pfriends = v.outE([type=="friend"], start=2, end=2).outV()
+# select friends who want to participate in this activities
+#(firends already entered the foods in their refrigerators)
+pfriends = pfriends(cooktogether == 1)
+pfriends = pfriends[1:10]
+#select 10 participants (numParticipants = 10) at least need to have 1 dish
+# we can change this example to linear programming, however we may need new Gramola #build-in, the following is the brute-force code
+Set Allfoods = collect_all_foods(pfriends) # a set of all foods
+list recipes_list
+for m in menu :
+	if ( intersect (m, Allfoods) == m ): 
+		list.append(m)
+
+print recipes_list
+
+def void main(args) :
+	make_dishes()
