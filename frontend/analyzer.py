@@ -399,15 +399,15 @@ class Analyzer(object):
         elif op.__class__.__name__ == 'TypeNode':
             # Type cast
             self._dispatch(op)
-            op_ancestor_types = self._get_ancestor_types(op.type)
-            operand_ancestor_types = self._get_ancestor_types(t.operand.type)
-            if (op.type not in operand_ancestor_types and
-                t.operand.type not in op_ancestor_types):
-                raise InconsistentTypeError(
-                    '{0}: operator type {1} not incompatible with '
-                    'operand type {2}'.format(
-                        t.lineno, symbols.stringify_full_name(op.type),
-                        symbols.stringify_full_name(t.operand.type)))
+            #op_ancestor_types = self._get_ancestor_types(op.type)
+            #operand_ancestor_types = self._get_ancestor_types(t.operand.type)
+            #if (op.type not in operand_ancestor_types and
+            #    t.operand.type not in op_ancestor_types):
+            #    raise InconsistentTypeError(
+            #        '{0}: operator type {1} not incompatible with '
+            #        'operand type {2}'.format(
+            #            t.lineno, symbols.stringify_full_name(op.type),
+            #            symbols.stringify_full_name(t.operand.type)))
             t.type = t.operand.type = op.type
         else:
             raise Error('{1}: Unknown unary operation: {0}'.format(
