@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class EdgeSet implements Set{
+public class EdgeSet<K, V> implements Set{
 	
-	private Set<Edge> edgeSet = new HashSet<Edge>();
+	private Set<Edge<K,V>> edgeSet = new HashSet<Edge<K,V>>();
 	
 	/**
 	 * Find out Edges that fit variable-value constraint in the EdgeSet
@@ -15,10 +15,10 @@ public class EdgeSet implements Set{
 	 * @param value
 	 * @return
 	 */
-	public EdgeSet filter(String variable, Object value) {
-		EdgeSet filterEdges = new EdgeSet();
-		Iterator<Edge> edgeIT = edgeSet.iterator();
-		Edge tmp;
+	public EdgeSet<K,V> filter(K variable, V value) {
+		EdgeSet<K,V> filterEdges = new EdgeSet<K,V>();
+		Iterator<Edge<K,V>> edgeIT = edgeSet.iterator();
+		Edge<K,V> tmp;
 		while(edgeIT.hasNext()) {
 			tmp = edgeIT.next();
 			if (tmp.getVariableValue(variable).toString().equals(value.toString()))
@@ -31,7 +31,7 @@ public class EdgeSet implements Set{
 	public boolean add(Object e) {
 		// TODO Auto-generated method stub
 		if (e instanceof Edge) {
-			this.edgeSet.add((Edge)e);
+			this.edgeSet.add((Edge<K,V>)e);
 			return true;
 		}
 		return false;
@@ -76,7 +76,7 @@ public class EdgeSet implements Set{
 	}
 
 	@Override
-	public Iterator<Edge> iterator() {
+	public Iterator<Edge<K,V>> iterator() {
 		// TODO Auto-generated method stub
 		return this.edgeSet.iterator();
 	}
@@ -123,7 +123,7 @@ public class EdgeSet implements Set{
 	 */
 	public NodeSet outV() {
 		NodeSet ret = new NodeSet();
-		Iterator<Edge> eIT = this.edgeSet.iterator();
+		Iterator<Edge<K,V>> eIT = this.edgeSet.iterator();
 		
 		while(eIT.hasNext()) {
 			ret.add(eIT.next().outV());

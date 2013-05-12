@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -35,7 +36,7 @@ import processing.core.PApplet;
 import edu.columbia.plt.gramola.datastruct.Edge;
 import edu.columbia.plt.gramola.datastruct.Graph;
 
-public class GraphVisualizer {
+public class GraphVisualizer<K, V> {
 
 	private static String dotFileRoot = "../dotdata/";
 	
@@ -43,13 +44,13 @@ public class GraphVisualizer {
 	
 	private String finalPath;
 	
-	private Graph g;
+	private Graph<String,String> g;
 	
 	private String nodeVar;
 	
 	private String edgeVar;
 	
-	public GraphVisualizer(Graph g, String nodeVar, String edgeVar) {
+	public GraphVisualizer(Graph<String,String> g, String nodeVar, String edgeVar) {
 		this.g = g;
 		this.nodeVar = nodeVar;
 		this.edgeVar = edgeVar;
@@ -67,8 +68,9 @@ public class GraphVisualizer {
 			FileWriter fw = new FileWriter(finalPath);
 			BufferedWriter bw = new BufferedWriter(fw);
 			
+			ArrayList<Edge<String, String>> edgeList = this.g.getAllEdges();
 			sb.append("digraph{\n");
-			for (Edge e: this.g.getAllEdges()) {
+			for (Edge<String,String> e: edgeList) {
 				sb.append(e.inV().getVariableValue(this.nodeVar) + " -> "
 						+ e.outV().getVariableValue(this.nodeVar) + " ");
 				sb.append("[ label = \"" + e.getVariableValue(edgeVar) + "\" ]");

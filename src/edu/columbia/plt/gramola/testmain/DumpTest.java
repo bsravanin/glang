@@ -1,9 +1,12 @@
 package edu.columbia.plt.gramola.testmain;
 
+import java.util.ArrayList;
+
 import edu.columbia.plt.gramola.datastruct.Edge;
 import edu.columbia.plt.gramola.datastruct.Graph;
 import edu.columbia.plt.gramola.datastruct.Node;
 import edu.columbia.plt.gramola.util.GraphDBController;
+import edu.columbia.plt.gramola.util.GraphUtil;
 
 public class DumpTest {
 
@@ -12,11 +15,36 @@ public class DumpTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Graph g = new Graph();
+		Graph<String, String> g = new Graph<String, String>();
 		
-		Node hello = g.Node("name", "hello", "age", 21);
-		Node world = g.Node("name", "world", "age", 27);
-		Edge e = g.Edge(hello, world, "type", "friend");
+		ArrayList<String> vars = new ArrayList<String>();
+		ArrayList<String> values = new ArrayList<String>();
+		
+		vars.add("name");
+		vars.add("age");
+		
+		values.add("hello");
+		values.add("21");
+		Node hello = g.Node(GraphUtil.createVarMap(vars, values));
+		
+		vars = new ArrayList<String>();
+		values = new ArrayList<String>();
+		
+		vars.add("name");
+		vars.add("age");
+		
+		values.add("world");
+		values.add("27");
+		
+		Node world = g.Node(GraphUtil.createVarMap(vars, values));
+		
+		vars = new ArrayList<String>();
+		values = new ArrayList<String>();
+		
+		vars.add("type");
+		values.add("friend");
+		
+		Edge e = g.Edge(hello, world, GraphUtil.createVarMap(vars, values));
 		System.out.println("Test start node: " + hello);
 		System.out.println("Test end node: " + world);
 		System.out.println("Test edge: " + e);
@@ -28,7 +56,6 @@ public class DumpTest {
 		System.out.println("Test db path " + dbController.getGraphDBDir());
 		
 		dbController.dump(g, "id", "id");
-		//System.out.println(Test0419.class.getResource("Test0419.class")); 
 	}
 
 }

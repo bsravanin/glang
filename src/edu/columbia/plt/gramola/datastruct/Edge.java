@@ -7,19 +7,19 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
-public class Edge extends GraphElement{
+public class Edge<K, V> extends GraphElement{
 	
 	private int id = -1;
 	
-	private Node start;
+	private Node<K,V> start;
 	
-	private Node end;
+	private Node<K,V> end;
 	
-	private HashSet<Edge> pathParent = new HashSet<Edge>();
+	private HashSet<Edge<K,V>> pathParent = new HashSet<Edge<K,V>>();
 	
-	private HashMap<String, Object> variableMap;
+	private HashMap<K, V> variableMap;
 	
-	public Edge(Node start, Node end, HashMap<String, Object> variableMap, int id) {
+	public Edge(Node<K,V> start, Node<K,V> end, HashMap<K, V> variableMap, int id) {
 		this.start = start;
 		this.end = end;
 		this.variableMap = variableMap;
@@ -44,7 +44,7 @@ public class Edge extends GraphElement{
 	 * Returns the start Node of the current Edge
 	 * @return the Node object in the start position
 	 */
-	public Node inV() {
+	public Node<K,V> inV() {
 		return this.start;
 	}
 	
@@ -52,14 +52,14 @@ public class Edge extends GraphElement{
 	 * Returns the end Node of the current Edge
 	 * @return the Node object in the end position
 	 */
-	public Node outV() {
+	public Node<K,V> outV() {
 		return this.end;
 	}
 	
 	/**
 	 * Get all variables for describing Edge
 	 */
-	public Set<String> getVariables() {
+	public Set<K> getVariables() {
 		return this.variableMap.keySet();
 	}
 	
@@ -67,21 +67,21 @@ public class Edge extends GraphElement{
 	 * Get the variable map containing <varName, varValue> values
 	 * of Edge
 	 */
-	public HashMap<String, Object> getVariableMap() {
+	public HashMap<K, V> getVariableMap() {
 		return this.variableMap;
 	}
 	
 	/**
 	 * Get the value for a specific variable
 	 */
-	public Object getVariableValue(String variable) {
+	public V getVariableValue(K variable) {
 		return this.variableMap.get(variable);
 	}
 	
 	/**
 	 * Set the value for a specific variable
 	 */
-	public synchronized void setVariableValue(String variable, Object value) {
+	public synchronized void setVariableValue(K variable, V value) {
 		this.variableMap.put(variable, value);
 	}
 	
@@ -89,7 +89,7 @@ public class Edge extends GraphElement{
 	 * Set the Edge parent of the current Edge. Mainly for path traversal.
 	 * @param pathParent the parent Edge object
 	 */
-	public synchronized void addParents(Edge pathParent) {
+	public synchronized void addParents(Edge<K,V> pathParent) {
 		this.pathParent.add(pathParent);
 	}
 	
@@ -97,7 +97,7 @@ public class Edge extends GraphElement{
 	 * Retrieve all Edge parents of the current Edge. Mainly for path traveral.
 	 * @return all parent Edge objects of the current Edge
 	 */
-	public HashSet<Edge> getParents() {
+	public HashSet<Edge<K,V>> getParents() {
 		return this.pathParent;
 	}
 	
@@ -123,7 +123,7 @@ public class Edge extends GraphElement{
 		if (!(obj instanceof Edge))
 			return false;
 		
-		Edge tmp = (Edge) obj;
+		Edge<K,V> tmp = (Edge<K,V>) obj;
 		
 		if (this.getId() == tmp.getId())
 			return true;

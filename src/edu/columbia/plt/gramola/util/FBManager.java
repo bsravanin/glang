@@ -1,5 +1,6 @@
 package edu.columbia.plt.gramola.util;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.restfb.Connection;
@@ -95,9 +96,12 @@ public class FBManager {
 	
 	private void createFriendGraph(Graph g, Node myNode) {
 		Node tmpUsrNode;
+		HashMap<String, String> varMap;
 		for (User f: myFriends.getData()) {
 			tmpUsrNode = this.createUserNode(g, f);
-			g.Edge(myNode, tmpUsrNode, "type", "friend");
+			varMap = new HashMap<String, String>();
+			varMap.put("type", "friend");
+			g.Edge(myNode, tmpUsrNode, varMap);
 		}
 	}
 	
@@ -108,18 +112,23 @@ public class FBManager {
 				continue;
 			
 			tmpFeedNode = this.createFeedNode(g, p);
-			g.Edge(myNode, tmpFeedNode, "type", "feed");
+			HashMap<String, String> varMap = new HashMap<String, String>();
+			varMap.put("type", "feed");
+			g.Edge(myNode, tmpFeedNode, varMap);
 		}
 	}
 	
 	private void createPageGraph(Graph g, Node myNode) {		
 		Node tmpPageNode;
+		HashMap<String, String> varMap;
 		for (LikePage page: this.myPages) {
 			if (page.getName() == null || page.getName().isEmpty())
 				continue;
 			
 			tmpPageNode = this.createPageNode(g, page);
-			g.Edge(myNode, tmpPageNode, "type", "page");
+			varMap = new HashMap<String, String>();
+			varMap.put("type", "page");
+			g.Edge(myNode, tmpPageNode, varMap);
 		}
 	}
 	
@@ -160,7 +169,13 @@ public class FBManager {
 		
 		System.out.println("Test location: " + location);
 		
-		Node userNode = g.Node("name", name, "edu", edu, "home", home, "location", location);
+		HashMap<String, String> usrMap = new HashMap<String, String>();
+		usrMap.put("name", name);
+		usrMap.put("edu", edu);
+		usrMap.put("home", home);
+		usrMap.put("location", location);
+		//Node userNode = g.Node("name", name, "edu", edu, "home", home, "location", location);
+		Node userNode = g.Node(usrMap);
 		return userNode;
 	}
 	
@@ -179,7 +194,12 @@ public class FBManager {
 		else
 			link = p.getLink();
 		
-		Node feedNode = g.Node("name", name, "likes", likeCount, "link", link);
+		HashMap<String, String> feedMap = new HashMap<String, String>();
+		feedMap.put("name", name);
+		feedMap.put("likes", String.valueOf(likeCount));
+		feedMap.put("link", link);
+		//Node feedNode = g.Node("name", name, "likes", String.valueOf(likeCount), "link", link);
+		Node feedNode = g.Node(feedMap);
 		return feedNode;
 	}
 	
@@ -187,7 +207,11 @@ public class FBManager {
 		String name = page.getName().replaceAll("\\s", "");
 		String id = page.getId();
 		
-		Node pageNode = g.Node("name", name, "id", id);
+		HashMap<String, String> pageMap = new HashMap<String, String>();
+		pageMap.put("name", name);
+		pageMap.put("id", id);
+		//Node pageNode = g.Node("name", name, "id", id);
+		Node pageNode = g.Node(pageMap);
 		return pageNode;
 	}
 	
