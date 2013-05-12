@@ -167,46 +167,46 @@ class set<object>(object):
 		return False
 
 
-class dict<object,object>(object):
+class dict<str,object>(object):
 
-	def dict<object,object> __init__(dict<object,object> obj):
-		# HashMap<Object,Object>
+	def dict<str,object> __init__(dict<str,object> obj):
+		# HashMap<String,Object>
 		pass
 
-	def dict<object,object> copy():
-		# HashMap<Object,Object>.clone
+	def dict<str,object> copy():
+		# HashMap<String,Object>.clone
 		return {}
 
-	def object get(object key):
-		# HashMap<Object,Object>.get
+	def object get(str key):
+		# HashMap<String,Object>.get
 		return ''
 
-	def bool has_key(object key):
-		# HashMap<Object,Object>.containsKey
+	def bool has_key(str key):
+		# HashMap<String,Object>.containsKey
 		return False
 
 	def set<object> items():
-		# HashMap<Object,Object>.entrySet
+		# HashMap<String,Object>.entrySet
 		return set<object>([])
 
-	def set<object> keys():
-		# HashMap<Object,Object>.keySet
+	def set<str> keys():
+		# HashMap<String,Object>.keySet
 		return set<object>([])
 
-	def object pop(object key):
-		# HashMap<Object,Object>.remove
+	def object pop(str key):
+		# HashMap<String,Object>.remove
 		return ''
 
-	def object set(object key, object value):
-		# HashMap<Object,Object>.put
+	def object set(str key, object value):
+		# HashMap<String,Object>.put
 		return value
 
-	def void update(dict<object,object> d):
-		# HashMap<Object,Object>.putAll
+	def void update(dict<str,object> d):
+		# HashMap<String,Object>.putAll
 		pass
 
 	def set<object> values():
-		# HashMap<Object,Object>.values
+		# HashMap<String,Object>.values
 		return set<object>([])
 
 
