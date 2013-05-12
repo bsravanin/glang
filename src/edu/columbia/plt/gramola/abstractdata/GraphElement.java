@@ -1,5 +1,8 @@
 package edu.columbia.plt.gramola.abstractdata;
 
+import java.util.HashMap;
+import java.util.Set;
+
 public abstract class GraphElement {
 	
 	/**
@@ -13,4 +16,12 @@ public abstract class GraphElement {
 	 * @return an unique identification number of GraphElement
 	 */
 	public abstract int getId();
+	
+	public abstract Object getVariableValue(String variable);
+	
+	public abstract void setVariableValue(String variable, Object value);
+	
+	public abstract Set<String> getVariables();
+	
+	public abstract HashMap<String, Object> getVariableMap();
 }

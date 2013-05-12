@@ -20,57 +20,57 @@ public class GraphApp {
 		// TODO Auto-generated method stub
 		Graph g = new Graph();
 		
-		HashMap<String, String> varMap = new HashMap<String, String>();
+		HashMap<String, Object> varMap = new HashMap<String, Object>();
 		varMap.put("name", "marko");
-		Node<String, String> marko = g.Node(varMap);
+		Node marko = g.Node(varMap);
 		marko.setVariableValue("age", "29");
 		
 		/*Two nodes that marko connects to*/
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "vadas");
 		varMap.put("age", "27");
-		Node<String, String> vadas = g.Node(varMap);
+		Node vadas = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("type", "knows");
-		Edge<String, String> e = g.Edge(marko, vadas, varMap);
+		Edge e = g.Edge(marko, vadas, varMap);
 		e.setVariableValue("weight", "0.5");
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "john");
 		varMap.put("age", "32");
-		Node<String, String> john = g.Node(varMap);
+		Node john = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("type", "admires");
-		Edge<String, String> jEdge = g.Edge(marko, john, varMap);
+		Edge jEdge = g.Edge(marko, john, varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "joseph");
 		varMap.put("age", "22");
 		Node joseph = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("type", "hates");
 		Edge joEdge = g.Edge(marko, joseph, varMap);
 		
 		
 		/*Two nodes connect to marko*/
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "mary");
 		varMap.put("age", "22");
 		Node mary = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("type", "loves");
 		Edge mEdge = g.Edge(mary, marko, varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "lisa");
 		varMap.put("age", "32");
 		Node lisa = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("type", "hates");
 		Edge lEdge = g.Edge(lisa, marko, varMap);
 		

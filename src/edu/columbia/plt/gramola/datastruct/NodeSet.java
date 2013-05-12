@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class NodeSet<V, K> implements Set{
+public class NodeSet implements Set{
 	
-	private HashSet<Node<K,V>> nodeSet = new HashSet<Node<K,V>>();
+	private HashSet<Node> nodeSet = new HashSet<Node>();
 	
 	/**
 	 * Find out Nodes that fit var-value constraints in NodeSet
@@ -15,10 +15,10 @@ public class NodeSet<V, K> implements Set{
 	 * @param value
 	 * @return
 	 */
-	public NodeSet<K,V> filter(K variable, V value) {
-		NodeSet<K,V> filterNodes = new NodeSet<K,V>();
-		Iterator<Node<K,V>> nodeIT = nodeSet.iterator();
-		Node<K,V> tmp;
+	public NodeSet filter(String variable, Object value) {
+		NodeSet filterNodes = new NodeSet();
+		Iterator<Node> nodeIT = nodeSet.iterator();
+		Node tmp;
 		while(nodeIT.hasNext()) {
 			tmp = nodeIT.next();
 			if (tmp.getVariableValue(variable).toString().equals(value.toString()))
@@ -31,7 +31,7 @@ public class NodeSet<V, K> implements Set{
 	public boolean add(Object e) {
 		// TODO Auto-generated method stub
 		if (e instanceof Node) {
-			this.nodeSet.add((Node<K,V>)e);
+			this.nodeSet.add((Node)e);
 			return true;
 		}
 		return false;
@@ -132,9 +132,9 @@ public class NodeSet<V, K> implements Set{
 	 * Return an EdgeSet containing all outgoing Edges from Nodes in the NodeSet
 	 * @return an EdgeSet
 	 */
-	public EdgeSet<K,V> outE() {
-		EdgeSet<K,V> ret = new EdgeSet<K,V>();
-		Iterator<Node<K,V>> nIT = this.nodeSet.iterator();
+	public EdgeSet outE() {
+		EdgeSet ret = new EdgeSet();
+		Iterator<Node> nIT = this.nodeSet.iterator();
 		
 		while(nIT.hasNext()) {
 			ret.add(nIT.next().outE());
@@ -143,9 +143,9 @@ public class NodeSet<V, K> implements Set{
 		return ret;
 	}
 	
-	public HashSet<Object> select(K attr) {
+	public HashSet<Object> select(String attr) {
 		HashSet<Object> ret = new HashSet<Object>();
-		Iterator<Node<K,V>> nIT = this.nodeSet.iterator();
+		Iterator<Node> nIT = this.nodeSet.iterator();
 		while(nIT.hasNext()) {
 			ret.add(nIT.next().getVariableValue(attr).toString());
 		}

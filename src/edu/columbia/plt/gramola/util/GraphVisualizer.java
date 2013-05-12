@@ -44,13 +44,13 @@ public class GraphVisualizer<K, V> {
 	
 	private String finalPath;
 	
-	private Graph<String,String> g;
+	private Graph g;
 	
 	private String nodeVar;
 	
 	private String edgeVar;
 	
-	public GraphVisualizer(Graph<String,String> g, String nodeVar, String edgeVar) {
+	public GraphVisualizer(Graph g, String nodeVar, String edgeVar) {
 		this.g = g;
 		this.nodeVar = nodeVar;
 		this.edgeVar = edgeVar;
@@ -68,9 +68,9 @@ public class GraphVisualizer<K, V> {
 			FileWriter fw = new FileWriter(finalPath);
 			BufferedWriter bw = new BufferedWriter(fw);
 			
-			ArrayList<Edge<String, String>> edgeList = this.g.getAllEdges();
+			ArrayList<Edge> edgeList = this.g.getAllEdges();
 			sb.append("digraph{\n");
-			for (Edge<String,String> e: edgeList) {
+			for (Edge e: edgeList) {
 				sb.append(e.inV().getVariableValue(this.nodeVar) + " -> "
 						+ e.outV().getVariableValue(this.nodeVar) + " ");
 				sb.append("[ label = \"" + e.getVariableValue(edgeVar) + "\" ]");

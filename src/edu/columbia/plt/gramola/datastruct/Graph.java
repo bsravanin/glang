@@ -9,11 +9,11 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.util.GraphUtil;
 
-public class Graph<V, K>{
+public class Graph{
 
-	private ArrayList<Node<K,V>> nodeList = new ArrayList<Node<K,V>>();
+	private ArrayList<Node> nodeList = new ArrayList<Node>();
 	
-	private ArrayList<Edge<K,V>> edgeList = new ArrayList<Edge<K,V>>();
+	private ArrayList<Edge> edgeList = new ArrayList<Edge>();
 	
 	private int nodeId = 0;
 	
@@ -49,8 +49,8 @@ public class Graph<V, K>{
 		return node;
 	}*/
 	
-	public synchronized Node<K,V> Node(HashMap<K, V> variableMap) {
-		Node<K,V> node = new Node<K,V>(variableMap, this.generateNodeId());
+	public synchronized Node Node(HashMap<String, Object> variableMap) {
+		Node node = new Node(variableMap, this.generateNodeId());
 		this.addNode(node);
 		
 		return node;
@@ -73,8 +73,8 @@ public class Graph<V, K>{
 		return edge;
 	}*/
 	
-	public synchronized Edge<K,V> Edge(Node<K,V> start, Node<K,V> end, HashMap<K, V> variableMap) {
-		Edge<K,V> edge = new Edge<K,V>(start, end, variableMap, this.generateEdgeId());
+	public synchronized Edge Edge(Node start, Node end, HashMap<String, Object> variableMap) {
+		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
 		start.setOutE(edge);
 		end.setInE(edge);
 		this.addEdge(edge);
@@ -86,7 +86,7 @@ public class Graph<V, K>{
 	 * Inserting Node into the Graph, if the Node is created by new Node()
 	 * @param n a Node object that has not registered to any Graph
 	 */
-	public synchronized void addNode(Node<K,V> n) {
+	public synchronized void addNode(Node n) {
 		if (n.getId() == -1) {
 			n.setId(this.generateNodeId());
 		}
@@ -102,10 +102,10 @@ public class Graph<V, K>{
 	 * @param value the value of the variable/attribute
 	 * @return a Node that fits the var-value requirement
 	 */
-	public Node<K,V> getNode(K variable, V value) {
-		Iterator<Node<K,V>> nIT = this.nodeList.iterator();
-		Node<K,V> tmp;
-		V tmpVal;
+	public Node getNode(String variable, Object value) {
+		Iterator<Node> nIT = this.nodeList.iterator();
+		Node tmp;
+		Object tmpVal;
 		
 		while (nIT.hasNext()) {
 			tmp = nIT.next();
@@ -125,11 +125,11 @@ public class Graph<V, K>{
 	 * @param value the value of the variable/attribute
 	 * @return a NodeSet containing all Nodes that fit the var-value requirement
 	 */
-	public NodeSet<K,V> getNodes(K variable, V value) {
-		Iterator<Node<K,V>> nIT = this.nodeList.iterator();
-		NodeSet<K,V> ret = new NodeSet<K,V>();
-		Node<K,V> tmp;
-		V tmpVal;
+	public NodeSet getNodes(String variable, Object value) {
+		Iterator<Node> nIT = this.nodeList.iterator();
+		NodeSet ret = new NodeSet();
+		Node tmp;
+		Object tmpVal;
 		
 		while (nIT.hasNext()) {
 			tmp = nIT.next();
@@ -152,7 +152,7 @@ public class Graph<V, K>{
 	 * @param id
 	 * @return the Node with the correct ID
 	 */
-	public Node<K,V> getNode(int id) {
+	public Node getNode(int id) {
 		return this.nodeList.get(id);
 	}
 	
@@ -160,7 +160,7 @@ public class Graph<V, K>{
 	 * Return the list containing all Nodes in the Graph
 	 * @return a list containing all Nodes in the Graph
 	 */
-	public ArrayList<Node<K,V>> getAllNodes() {
+	public ArrayList<Node> getAllNodes() {
 		return this.nodeList;
 	}
 	
@@ -168,7 +168,7 @@ public class Graph<V, K>{
 	 * Helper method for createEdge to register Edge in Graph
 	 * @param e the Edge to be registered in Graph
 	 */
-	public synchronized void addEdge(Edge<K,V> e) {
+	public synchronized void addEdge(Edge e) {
 		if (e.getId() == -1) {
 			e.setId(this.generateEdgeId());
 		}
@@ -179,7 +179,7 @@ public class Graph<V, K>{
 	 * Get all Edges of a Graph
 	 * @return a list containing all Edges in a Graph
 	 */
-	public ArrayList<Edge<K,V>> getAllEdges() {
+	public ArrayList<Edge> getAllEdges() {
 		return this.edgeList;
 	}
 	
@@ -191,13 +191,13 @@ public class Graph<V, K>{
 	 * @param vvlist the var-value array
 	 * @return a path (list containing all corresponding Edges in sequence) with shortest length
 	 */
-	public ArrayList<Edge<K,V>> getShortestPath(Node<K,V> start, Node<K,V> end, ArrayList<K> var, ArrayList<V> val) {
+	public ArrayList<Edge> getShortestPath(Node start, Node end, ArrayList<String> var, ArrayList<Object> val) {
 		int min = Integer.MAX_VALUE;
-		ArrayList<Edge<K,V>> shortest = null;
+		ArrayList<Edge> shortest = null;
 		//ArrayList<ArrayList<Edge<K,V>>> allPaths = this.getPaths(start, end, vvlist);
-		ArrayList<ArrayList<Edge<K,V>>> allPaths = this.getPaths(start, end, var, val);
+		ArrayList<ArrayList<Edge>> allPaths = this.getPaths(start, end, var, val);
 		
-		for (ArrayList<Edge<K,V>> tmp: allPaths) {
+		for (ArrayList<Edge> tmp: allPaths) {
 			if (tmp.size() < min) {
 				shortest = tmp;
 			}
@@ -213,18 +213,18 @@ public class Graph<V, K>{
 	 * @param vvlist the var-value array
 	 * @return a list containing all paths with qualified Edges
 	 */
-	public ArrayList<ArrayList<Edge<K,V>>> getPaths(Node<K,V> start, Node<K,V> end, ArrayList<K> var, ArrayList<V> val) {
+	public ArrayList<ArrayList<Edge>> getPaths(Node start, Node end, ArrayList<String> var, ArrayList<Object> val) {
 		if (start.getId() == -1 || end.getId() == -1)
 			return null;
 		
 		if (!this.nodeList.contains(start) || !this.nodeList.contains(end))
 			return null;
 
-		HashMap<K,V> variableMap = GraphUtil.createVarMap(var, val);
+		HashMap<String,Object> variableMap = GraphUtil.createVarMap(var, val);
 		
 		int length;
 		
-		Set<K> keys = variableMap.keySet();
+		Set<String> keys = variableMap.keySet();
 		
 		if (keys.contains("length")) {
 			length = Integer.valueOf(variableMap.get("length").toString()); 
@@ -237,10 +237,10 @@ public class Graph<V, K>{
 			return null;
 		}
 		
-		ArrayList<ArrayList<Edge<K,V>>> ret = new ArrayList<ArrayList<Edge<K,V>>>();
-		HashSet<Edge<K,V>> lastEdges = this.getPathImpl(start, end, variableMap, length);
-		Iterator<Edge<K,V>> lastIT = lastEdges.iterator();
-		Edge<K,V> tmpLast;
+		ArrayList<ArrayList<Edge>> ret = new ArrayList<ArrayList<Edge>>();
+		HashSet<Edge> lastEdges = this.getPathImpl(start, end, variableMap, length);
+		Iterator<Edge> lastIT = lastEdges.iterator();
+		Edge tmpLast;
 		
 		while(lastIT.hasNext()) {
 			tmpLast = lastIT.next();
@@ -258,21 +258,21 @@ public class Graph<V, K>{
 	 * @param length the length requirement for path
 	 * @return a Set of last Edges connecting to the end Node
 	 */
-	private HashSet<Edge<K,V>> getPathImpl(Node<K,V> start, Node<K,V> end,
-			HashMap<K, V> variableMap, int length) {
+	private HashSet<Edge> getPathImpl(Node start, Node end,
+			HashMap<String, Object> variableMap, int length) {
 		
 		if (length == 0)
 			return null;
 		
-		EdgeSet<K,V> startSet = start.outE();
+		EdgeSet startSet = start.outE();
 		
 		if (startSet == null) {
 			return null;
 		}
 
-		Iterator<Edge<K,V>> sIT = startSet.iterator();
-		Edge<K,V> tmpEdge;
-		HashSet<Edge<K,V>> lastEdgeSet = new HashSet<Edge<K,V>>();
+		Iterator<Edge> sIT = startSet.iterator();
+		Edge tmpEdge;
+		HashSet<Edge> lastEdgeSet = new HashSet<Edge>();
 		while(sIT.hasNext()) {
 			tmpEdge = sIT.next();
 
@@ -295,10 +295,10 @@ public class Graph<V, K>{
 	 * @param variableMap the var-value map defines requirements
 	 * @return if Edge is qualified or not
 	 */
-	private boolean checkEdgeValidity(Edge<K,V> e, HashMap<K, V> variableMap) {
-		Iterator<K> mapIT = variableMap.keySet().iterator();
+	private boolean checkEdgeValidity(Edge e, HashMap<String, Object> variableMap) {
+		Iterator<String> mapIT = variableMap.keySet().iterator();
 		
-		K variableName = null;
+		String variableName = null;
 		while (mapIT.hasNext()) {
 			variableName = mapIT.next();
 			if (e.getVariableValue(variableName) == null)
@@ -317,8 +317,8 @@ public class Graph<V, K>{
 	 * @param parent the parent Edge
 	 * @param childSet the child Edge
 	 */
-	private void setPathParent(Edge<K,V> parent, EdgeSet<K,V> childSet) {
-		Iterator<Edge<K,V>> cIT = childSet.iterator();
+	private void setPathParent(Edge parent, EdgeSet childSet) {
+		Iterator<Edge> cIT = childSet.iterator();
 		while(cIT.hasNext()) {
 			cIT.next().addParents(parent);
 		}
@@ -330,25 +330,25 @@ public class Graph<V, K>{
 	 * @param e the last Edge
 	 * @return a path (a list of qualified Edges in sequence)
 	 */
-	private ArrayList<ArrayList<Edge<K,V>>> constructPath(Node<K,V> start, Edge<K,V> e) {
-		ArrayList<ArrayList<Edge<K,V>>> paths = new ArrayList<ArrayList<Edge<K,V>>>();
+	private ArrayList<ArrayList<Edge>> constructPath(Node start, Edge e) {
+		ArrayList<ArrayList<Edge>> paths = new ArrayList<ArrayList<Edge>>();
 		
 		if (e.inV() == start) {
-			ArrayList<Edge<K,V>> pathList = new ArrayList<Edge<K,V>>();
+			ArrayList<Edge> pathList = new ArrayList<Edge>();
 			pathList.add(0, e);
 			paths.add(pathList);
 		}
 		
-		HashSet<Edge<K,V>> parents = e.getParents();
-		ArrayList<ArrayList<Edge<K,V>>> subPaths;
+		HashSet<Edge> parents = e.getParents();
+		ArrayList<ArrayList<Edge>> subPaths;
 		
-		for (Edge<K,V> tmp: parents) {
+		for (Edge tmp: parents) {
 			subPaths = constructPath(start, tmp);
-			Iterator<ArrayList<Edge<K,V>>> subPathIT = subPaths.iterator();
-			ArrayList<Edge<K,V>> tmpList;
+			Iterator<ArrayList<Edge>> subPathIT = subPaths.iterator();
+			ArrayList<Edge> tmpList;
 			
 			while(subPathIT.hasNext()) {
-				ArrayList<Edge<K,V>> pathList = new ArrayList<Edge<K,V>>();
+				ArrayList<Edge> pathList = new ArrayList<Edge>();
 				pathList.add(0, e);
 				
 				tmpList = subPathIT.next();

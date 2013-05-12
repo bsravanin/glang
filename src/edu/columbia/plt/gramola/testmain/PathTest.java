@@ -17,28 +17,28 @@ public class PathTest {
 		// TODO Auto-generated method stub
 		Graph g = new Graph();
 		
-		HashMap<String, String> varMap = new HashMap<String, String>();
+		HashMap<String, Object> varMap = new HashMap<String, Object>();
 		
 		varMap.put("name", "a");
 		Node a = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "b");
 		Node b = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "c");
 		Node c = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "d");
 		Node d = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("name", "e");
 		Node e = g.Node(varMap);
 		
-		varMap = new HashMap<String, String>();
+		varMap = new HashMap<String, Object>();
 		varMap.put("type", "test");
 		Edge ab = g.Edge(a, b, varMap);
 		Edge bd = g.Edge(b, d, varMap);
@@ -49,7 +49,7 @@ public class PathTest {
 		Edge cd = g.Edge(c, d, varMap);
 		
 		ArrayList<String> vars = new ArrayList<String>();
-		ArrayList<String> vals = new ArrayList<String>();
+		ArrayList<Object> vals = new ArrayList<Object>();
 		vars.add("type");
 		vals.add("test");
 		ArrayList<ArrayList<Edge>> paths = g.getPaths(a, e, vars, vals);
