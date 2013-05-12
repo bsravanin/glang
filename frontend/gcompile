@@ -37,7 +37,7 @@ mv *.java $TARGET_DIR
 
 rm -f $BIN_DIR/*.class
 
-javac -cp $CLASSPATH ${TARGET_DIR}/*.java
+javac -nowarn -cp $CLASSPATH ${TARGET_DIR}/*.java
 
 if [ $? != 0 ]; then
     echo "ERROR: Java compilation fails."
