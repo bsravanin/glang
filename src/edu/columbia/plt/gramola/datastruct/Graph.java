@@ -9,6 +9,11 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.util.GraphUtil;
 
+/**
+ * Graph contains Nodes and Edges for representing things and relations among them
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class Graph{
 
 	private ArrayList<Node> nodeList = new ArrayList<Node>();

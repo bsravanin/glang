@@ -6,6 +6,11 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
+/**
+ * Node represents a thing with specific attributes
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class Node  extends GraphElement {
 		
 	int id = -1;

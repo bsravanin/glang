@@ -13,6 +13,11 @@ import com.restfb.types.User.Education;
 import edu.columbia.plt.gramola.datastruct.Graph;
 import edu.columbia.plt.gramola.datastruct.Node;
 
+/**
+ * FBManager is responsible to connect to Facebook and grab real-time data
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class FBManager {
 	
 	private String token;

@@ -36,6 +36,11 @@ import processing.core.PApplet;
 import edu.columbia.plt.gramola.datastruct.Edge;
 import edu.columbia.plt.gramola.datastruct.Graph;
 
+/**
+ * GraphVisualizer supports converting Graph object to dot file and drawing in a Java applet
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class GraphVisualizer {
 
 	private static String dotFileRoot = "../dotdata/";

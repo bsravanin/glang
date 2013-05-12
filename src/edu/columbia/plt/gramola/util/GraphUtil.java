@@ -6,6 +6,11 @@ import java.util.List;
 
 import edu.columbia.plt.gramola.datastruct.Graph;
 
+/**
+ * GraphUtil is designed for facilitating built-in functions in Gramola
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class GraphUtil {
 	
   public static String graphDBRoot = "../db/";
@@ -107,7 +112,12 @@ public class GraphUtil {
 		return variableMap;
 	}
 
-	// We probably won't need this, but just in case.
+	/**
+	 * Helper method for creating variable map that consumes Object as key and Object as value
+	 * @param key
+	 * @param value
+	 * @return
+	 */
 	public static HashMap<Object,Object> createGenericMap(List<? extends Object> key, List<? extends Object> value) {
 		
 		if (key.size() != value.size()) {

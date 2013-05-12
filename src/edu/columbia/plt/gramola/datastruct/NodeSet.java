@@ -5,6 +5,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * NodeSet is a Set containing Node objects
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class NodeSet implements Set{
 	
 	private HashSet<Node> nodeSet = new HashSet<Node>();
