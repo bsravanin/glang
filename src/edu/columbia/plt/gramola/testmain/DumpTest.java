@@ -18,7 +18,7 @@ public class DumpTest {
 		Graph g = new Graph();
 		
 		ArrayList<String> vars = new ArrayList<String>();
-		ArrayList<Object> values = new ArrayList<Object>();
+		ArrayList<String> values = new ArrayList<String>();
 		
 		vars.add("name");
 		vars.add("age");
@@ -28,7 +28,7 @@ public class DumpTest {
 		Node hello = g.Node(GraphUtil.createVarMap(vars, values));
 		
 		vars = new ArrayList<String>();
-		values = new ArrayList<Object>();
+		values = new ArrayList<String>();
 		
 		vars.add("name");
 		vars.add("age");
@@ -39,7 +39,7 @@ public class DumpTest {
 		Node world = g.Node(GraphUtil.createVarMap(vars, values));
 		
 		vars = new ArrayList<String>();
-		values = new ArrayList<Object>();
+		values = new ArrayList<String>();
 		
 		vars.add("type");
 		values.add("friend");

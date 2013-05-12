@@ -101,10 +101,10 @@ public class FBManager {
 	
 	private void createFriendGraph(Graph g, Node myNode) {
 		Node tmpUsrNode;
-		HashMap<String, Object> varMap;
+		HashMap<String, String> varMap;
 		for (User f: myFriends.getData()) {
 			tmpUsrNode = this.createUserNode(g, f);
-			varMap = new HashMap<String, Object>();
+			varMap = new HashMap<String, String>();
 			varMap.put("type", "friend");
 			g.Edge(myNode, tmpUsrNode, varMap);
 		}
@@ -112,13 +112,13 @@ public class FBManager {
 	
 	private void createFeedGraph(Graph g, Node myNode) {		
 		Node tmpFeedNode;
-		HashMap<String, Object> varMap;
+		HashMap<String, String> varMap;
 		for (Post p: myFeeds.getData()) {
 			if (p.getMessage() == null || p.getMessage().isEmpty() || p.getMessage().length() == 0)
 				continue;
 			
 			tmpFeedNode = this.createFeedNode(g, p);
-			varMap = new HashMap<String, Object>();
+			varMap = new HashMap<String, String>();
 			varMap.put("type", "feed");
 			g.Edge(myNode, tmpFeedNode, varMap);
 		}
@@ -126,13 +126,13 @@ public class FBManager {
 	
 	private void createPageGraph(Graph g, Node myNode) {		
 		Node tmpPageNode;
-		HashMap<String, Object> varMap;
+		HashMap<String, String> varMap;
 		for (LikePage page: this.myPages) {
 			if (page.getName() == null || page.getName().isEmpty())
 				continue;
 			
 			tmpPageNode = this.createPageNode(g, page);
-			varMap = new HashMap<String, Object>();
+			varMap = new HashMap<String, String>();
 			varMap.put("type", "page");
 			g.Edge(myNode, tmpPageNode, varMap);
 		}
@@ -167,7 +167,7 @@ public class FBManager {
 		else
 			location = u.getLocation().getName().replaceAll("\\s", "");
 		
-		HashMap<String, Object> usrMap = new HashMap<String, Object>();
+		HashMap<String, String> usrMap = new HashMap<String, String>();
 		usrMap.put("name", name);
 		usrMap.put("edu", edu);
 		usrMap.put("home", home);
@@ -191,9 +191,9 @@ public class FBManager {
 		else
 			link = p.getLink();
 		
-		HashMap<String, Object> feedMap = new HashMap<String, Object>();
+		HashMap<String, String> feedMap = new HashMap<String, String>();
 		feedMap.put("name", name);
-		feedMap.put("likes", likeCount);
+		feedMap.put("likes", String.valueOf(likeCount));
 		feedMap.put("link", link);
 		Node feedNode = g.Node(feedMap);
 		return feedNode;
@@ -203,7 +203,7 @@ public class FBManager {
 		String name = page.getName().replaceAll("\\s", "");
 		String id = page.getId();
 		
-		HashMap<String, Object> pageMap = new HashMap<String, Object>();
+		HashMap<String, String> pageMap = new HashMap<String, String>();
 		pageMap.put("name", name);
 		pageMap.put("id", id);
 		Node pageNode = g.Node(pageMap);

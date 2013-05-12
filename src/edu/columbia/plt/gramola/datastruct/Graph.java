@@ -54,7 +54,7 @@ public class Graph{
 		return node;
 	}*/
 	
-	public synchronized Node Node(HashMap<String, Object> variableMap) {
+	public synchronized Node Node(HashMap<String, String> variableMap) {
 		Node node = new Node(variableMap, this.generateNodeId());
 		this.addNode(node);
 		
@@ -78,7 +78,7 @@ public class Graph{
 		return edge;
 	}*/
 	
-	public synchronized Edge Edge(Node start, Node end, HashMap<String, Object> variableMap) {
+	public synchronized Edge Edge(Node start, Node end, HashMap<String, String> variableMap) {
 		Edge edge = new Edge(start, end, variableMap, this.generateEdgeId());
 		start.setOutE(edge);
 		end.setInE(edge);
@@ -107,10 +107,10 @@ public class Graph{
 	 * @param value the value of the variable/attribute
 	 * @return a Node that fits the var-value requirement
 	 */
-	public Node getNode(String variable, Object value) {
+	public Node getNode(String variable, String value) {
 		Iterator<Node> nIT = this.nodeList.iterator();
 		Node tmp;
-		Object tmpVal;
+		String tmpVal;
 		
 		while (nIT.hasNext()) {
 			tmp = nIT.next();
@@ -130,11 +130,11 @@ public class Graph{
 	 * @param value the value of the variable/attribute
 	 * @return a NodeSet containing all Nodes that fit the var-value requirement
 	 */
-	public NodeSet getNodes(String variable, Object value) {
+	public NodeSet getNodes(String variable, String value) {
 		Iterator<Node> nIT = this.nodeList.iterator();
 		NodeSet ret = new NodeSet();
 		Node tmp;
-		Object tmpVal;
+		String tmpVal;
 		
 		while (nIT.hasNext()) {
 			tmp = nIT.next();
@@ -196,7 +196,7 @@ public class Graph{
 	 * @param vvlist the var-value array
 	 * @return a path (list containing all corresponding Edges in sequence) with shortest length
 	 */
-	public ArrayList<Edge> getShortestPath(Node start, Node end, ArrayList<String> var, ArrayList<Object> val) {
+	public ArrayList<Edge> getShortestPath(Node start, Node end, ArrayList<String> var, ArrayList<String> val) {
 		int min = Integer.MAX_VALUE;
 		ArrayList<Edge> shortest = null;
 		//ArrayList<ArrayList<Edge<K,V>>> allPaths = this.getPaths(start, end, vvlist);
@@ -218,14 +218,14 @@ public class Graph{
 	 * @param vvlist the var-value array
 	 * @return a list containing all paths with qualified Edges
 	 */
-	public ArrayList<ArrayList<Edge>> getPaths(Node start, Node end, ArrayList<String> var, ArrayList<Object> val) {
+	public ArrayList<ArrayList<Edge>> getPaths(Node start, Node end, ArrayList<String> var, ArrayList<String> val) {
 		if (start.getId() == -1 || end.getId() == -1)
 			return null;
 		
 		if (!this.nodeList.contains(start) || !this.nodeList.contains(end))
 			return null;
 
-		HashMap<String,Object> variableMap = GraphUtil.createVarMap(var, val);
+		HashMap<String, String> variableMap = GraphUtil.createVarMap(var, val);
 		
 		int length;
 		
@@ -264,7 +264,7 @@ public class Graph{
 	 * @return a Set of last Edges connecting to the end Node
 	 */
 	private HashSet<Edge> getPathImpl(Node start, Node end,
-			HashMap<String, Object> variableMap, int length) {
+			HashMap<String, String> variableMap, int length) {
 		
 		if (length == 0)
 			return null;
@@ -300,7 +300,7 @@ public class Graph{
 	 * @param variableMap the var-value map defines requirements
 	 * @return if Edge is qualified or not
 	 */
-	private boolean checkEdgeValidity(Edge e, HashMap<String, Object> variableMap) {
+	private boolean checkEdgeValidity(Edge e, HashMap<String, String> variableMap) {
 		Iterator<String> mapIT = variableMap.keySet().iterator();
 		
 		String variableName = null;
