@@ -6,6 +6,11 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
+/**
+ * Edge represents the connection between two Nodes
+ * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ *
+ */
 public class Edge extends GraphElement{
 	
 	private int id = -1;
