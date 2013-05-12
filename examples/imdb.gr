@@ -27,7 +27,8 @@ class IMDB(Graph):
                 Movie movie = (Movie)n
                 if movie.title == title:
 			        return movie
-                
+        return null                           
+                                  
 		
 	def Actor find_actor(str name):
 		list<Node> setn = self.get_all_nodes()
@@ -36,36 +37,44 @@ class IMDB(Graph):
                 Actor actor = (Actor)n
 			    if actor.name == name:
 			        return actor
+        return null
+
+	def void worked_with(Actor actor1, Actor actor2):
+		self.edge(actor1, actor2,  {'type': 'work_with'})
+		self.edge(actor2, actor1,  {'type': 'work_with'})
+
+	def void act_in(Actor actor, Movie movie):
+		self.edge(actor, movie, {'type': 'act_in'})
+
+	def void update_movie(str title, str attr, str newvalue):
+		Movie movie = find_movie(title)
+		movie.set_attribute(attr, newvalue)
 
 
-	def void worked_with(Actor Actor_1, Actor Actor_2):
-		self.edge(Actor_1, Actor_2,  {'type': 'work_with'})
-		self.edge(Actor_2, Actor_1,  {'type': 'work_with'})
+def void main():
+    IMDB imdb = IMDB()
 
-	# def void act_in(Actor Actor_1, Movie Movie_1):
-	# 	self.edge(Actor_1, Movie_1, {'type': 'act_in'})
+	Movie western = Movie({'year':'1968', 'rating':'8.6', 'length':'175 mins'}, 'Once Upon a Time in the West')  
 
-	# def void update_movie(str title, str attr, str newvalue):
-	# 	Movie = find_movie(title)
-	# 	Movie.set_attribute(attr, newvalue)
+    imdb.add_node(western)
+    Actor Henry = Actor({'Gender':'male', 'Period' : '1905-1982'}, 'Henry Fonda')
+	Actor Charles = Actor({'Gender':'male', 'Period' : '1921-2003'}, 'Charles Bronson')
 
+	imdb.add_node(Henry)
+	imdb.add_node(Charles)
 
+	imdb.worked_with(Henry, Charles)
+	imdb.act_in(Henry, western)
+	imdb.act_in(Charles, western)
+	
+	Actor target_actor = find_actor('Henry Fonda')
+	EdgeSet target_edges = target_actor.out_edges()
+    for Edge e in target_edges:
+        print e.get_attribute('type')
 
-# def void main():
-#     IMDB imdb = IMDB()
+    imdb.update_movie('Once Upon a Time in the West', 'rating', '7.3')
+    
+	Movie target_movie = find_movie('Once Upon a Time in the West')
+    print targe_movie.get_attribute('rating')   # check this
 
-# 	Movie western = Movie({'year':'1968', 'rating':'8.6', 'length':'175 mins'}, 'Once Upon a Time in the West')  
-
-#     imdb.add_node(western)
-#     Actor Henry = Actor({'Gender':'male', 'Period' : '1905-1982'}, 'Henry Fonda')
-# 	Actor Charles = Actor({'Gender':'male', 'Period' : '1921-2003'}, 'Charles Bronson')
-
-# 	imdb.add_node(Henry)
-# 	imdb.add_node(Chales)
-
-# 	imdb.worked_with(Henry, Charles)
-# 	imdb.act_in(Henry, western)
-# 	imdb.act_in(Charles, western)
-
-# 	imdb.update_movie('Once Upon a Time in the West', 'rating', '7.3')
 
