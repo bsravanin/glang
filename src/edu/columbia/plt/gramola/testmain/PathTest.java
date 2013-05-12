@@ -1,6 +1,7 @@
 package edu.columbia.plt.gramola.testmain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 
 import edu.columbia.plt.gramola.datastruct.Edge;
@@ -15,21 +16,43 @@ public class PathTest {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Graph g = new Graph();
-		Node a = g.Node("name", "a");
-		Node b = g.Node("name", "b");
-		Node c = g.Node("name", "c");
-		Node d = g.Node("name", "d");
-		Node e = g.Node("name", "e");
 		
-		Edge ab = g.Edge(a, b, "type", "test");
-		Edge bd = g.Edge(b, d, "type", "test");
-		Edge de = g.Edge(d, e, "type", "test");
+		HashMap<String, String> varMap = new HashMap<String, String>();
 		
-		Edge ac = g.Edge(a, c, "type", "test");
-		Edge cb = g.Edge(c, b, "type", "test");
-		Edge cd = g.Edge(c, d, "type", "test");
+		varMap.put("name", "a");
+		Node a = g.Node(varMap);
 		
-		ArrayList<ArrayList<Edge>> paths = g.getPaths(a, e, "type", "test");
+		varMap = new HashMap<String, String>();
+		varMap.put("name", "b");
+		Node b = g.Node(varMap);
+		
+		varMap = new HashMap<String, String>();
+		varMap.put("name", "c");
+		Node c = g.Node(varMap);
+		
+		varMap = new HashMap<String, String>();
+		varMap.put("name", "d");
+		Node d = g.Node(varMap);
+		
+		varMap = new HashMap<String, String>();
+		varMap.put("name", "e");
+		Node e = g.Node(varMap);
+		
+		varMap = new HashMap<String, String>();
+		varMap.put("type", "test");
+		Edge ab = g.Edge(a, b, varMap);
+		Edge bd = g.Edge(b, d, varMap);
+		Edge de = g.Edge(d, e, varMap);
+		
+		Edge ac = g.Edge(a, c, varMap);
+		Edge cb = g.Edge(c, b, varMap);
+		Edge cd = g.Edge(c, d, varMap);
+		
+		ArrayList<String> vars = new ArrayList<String>();
+		ArrayList<String> vals = new ArrayList<String>();
+		vars.add("type");
+		vals.add("test");
+		ArrayList<ArrayList<Edge>> paths = g.getPaths(a, e, vars, vals);
 		
 		System.out.println("Total paths: " + paths.size());
 		
@@ -37,7 +60,7 @@ public class PathTest {
 			printPath(tmp, "name", "type");
 		}
 		
-		ArrayList<Edge> shortestPath = g.getShortestPath(a, e, "type", "test");
+		ArrayList<Edge> shortestPath = g.getShortestPath(a, e, vars, vals);
 		System.out.println("Shortest path: " + shortestPath.size());
 		printPath(shortestPath, "name", "type");
 	}

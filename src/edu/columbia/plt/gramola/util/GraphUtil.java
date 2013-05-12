@@ -1,5 +1,6 @@
 package edu.columbia.plt.gramola.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -74,13 +75,13 @@ public class GraphUtil {
 	 * @param vvlist a var-value array with undetermined size
 	 * @return a map containing <var, value> pairs
 	 */
-	public static HashMap<String, Object> createVariableMap(Object vvlist[]) {
+	public static HashMap<String, String> createVariableMap(String vvlist[]) {
 		if (vvlist.length%2 != 0)
 			return null;
 		
-		HashMap<String, Object> variableMap = new HashMap<String, Object>();
+		HashMap<String, String> variableMap = new HashMap<String, String>();
 		String variable;
-		Object value;
+		String value;
 		for (int i = 0; i < vvlist.length; i += 2) {
 			variable = (String)vvlist[i];
 			value = vvlist[i + 1];
@@ -91,8 +92,22 @@ public class GraphUtil {
 		return variableMap;
 	}
 	
-	public static HashMap<String, Object> createVarMap(Object...vvlist) {
+	public static HashMap<String, String> createVarMap(String...vvlist) {
 		return createVariableMap(vvlist);
 	}
-
+	
+	public static <K, V> HashMap<K, V> createVarMap(ArrayList<K> var, ArrayList<V> value) {
+		
+		if (var.size() != value.size()) {
+			GInformer.printMessage("Inconsistent var-value.");
+			return null;
+		}
+		
+		HashMap<K, V> variableMap = new HashMap<K, V>();
+		for (int i = 0; i < var.size(); i++) {
+			variableMap.put(var.get(i), value.get(i));
+		}
+		
+		return variableMap;
+	}
 }

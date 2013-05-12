@@ -7,22 +7,22 @@ import java.util.Set;
 
 import edu.columbia.plt.gramola.abstractdata.GraphElement;
 
-public class Node extends GraphElement{
+public class Node<K, V>  extends GraphElement {
 		
 	int id = -1;
 	
-	private HashMap<String, Object> variableMap;
+	private HashMap<K, V> variableMap;
 	
-	private EdgeSet incoming = new EdgeSet();
+	private EdgeSet<K,V> incoming = new EdgeSet<K,V>();
 	
-	private EdgeSet outgoing = new EdgeSet();
+	private EdgeSet<K,V> outgoing = new EdgeSet<K,V>();
 		
-	public Node(HashMap<String, Object> variableMap, int id) {
+	public Node(HashMap<K, V> variableMap, int id) {
 		this.variableMap = variableMap;
 		this.setId(id);
 	}
 	
-	public Node(HashMap<String, Object> variableMap) {
+	public Node(HashMap<K, V> variableMap) {
 		this.variableMap = variableMap;
 	}
 
@@ -43,28 +43,28 @@ public class Node extends GraphElement{
 	/**
 	 * Get value for specific variable
 	 */
-	public Object getVariableValue(String variable) {
+	public V getVariableValue(K variable) {
 		return this.variableMap.get(variable);
 	}
 	
 	/**
 	 * Set value for specific variable
 	 */
-	public synchronized void setVariableValue(String variable, Object value) {
+	public synchronized void setVariableValue(K variable, V value) {
 		this.variableMap.put(variable, value);
 	}
 	
 	/**
 	 * Get all variables describing Node
 	 */
-	public Set<String> getVariables() {
+	public Set<K> getVariables() {
 		return this.variableMap.keySet();
 	}
 	
 	/**
 	 * Get the variable map containing <varName, varValue> pairs
 	 */
-	public HashMap<String, Object> getVariableMap() {
+	public HashMap<K, V> getVariableMap() {
 		return this.variableMap;
 	}
 	
@@ -72,7 +72,7 @@ public class Node extends GraphElement{
 	 * Set incoming Edge of the current Node
 	 * @param e incoming Edge object
 	 */
-	public synchronized void setInE(Edge e) {
+	public synchronized void setInE(Edge<K,V> e) {
 		this.incoming.add(e);
 	}
 	
@@ -80,7 +80,7 @@ public class Node extends GraphElement{
 	 * Set outgoing Edge from the current Node
 	 * @param e outgoing Edge object
 	 */
-	public synchronized void setOutE(Edge e) {
+	public synchronized void setOutE(Edge<K,V> e) {
 		this.outgoing.add(e);
 	}
 	
@@ -88,7 +88,7 @@ public class Node extends GraphElement{
 	 * Get outgoing Edge(s) from the current Node
 	 * @return an EdgeSet containing all outgoing Edge objects
 	 */
-	public EdgeSet outE() {
+	public EdgeSet<K,V> outE() {
 		return this.outgoing;
 	}
 	
@@ -96,7 +96,7 @@ public class Node extends GraphElement{
 	 * Get incoming Edge(s) of the current Node
 	 * @return an EdgeSet containing all incoming Edge objects
 	 */
-	public EdgeSet inE() {
+	public EdgeSet<K,V> inE() {
 		return this.incoming;
 	}
 	
@@ -105,9 +105,9 @@ public class Node extends GraphElement{
 	 * Current Node is on the end side
 	 * @return a NodeSet containing all Nodes on the start side of incoming Edges
 	 */
-	public NodeSet inNeighbors() {
-		NodeSet ret = new NodeSet();
-		Iterator<Edge> eIT = this.incoming.iterator();
+	public NodeSet<K,V> inNeighbors() {
+		NodeSet<K,V> ret = new NodeSet<K,V>();
+		Iterator<Edge<K,V>> eIT = this.incoming.iterator();
 		
 		while(eIT.hasNext()) {
 			ret.add(eIT.next().inV());
@@ -121,9 +121,9 @@ public class Node extends GraphElement{
 	 * Current Node is on the start side
 	 * @return a NodeSet containing all Nodes on the end side of outgoing Edges
 	 */
-	public NodeSet outNeighbors() {
-		NodeSet ret = new NodeSet();
-		Iterator<Edge> eIT = this.outgoing.iterator();
+	public NodeSet<K,V> outNeighbors() {
+		NodeSet<K,V> ret = new NodeSet<K,V>();
+		Iterator<Edge<K,V>> eIT = this.outgoing.iterator();
 		
 		while(eIT.hasNext()) {
 			ret.add(eIT.next().outV());
@@ -137,7 +137,7 @@ public class Node extends GraphElement{
 	 * @param variable the name of the specific variable
 	 * @param newValue the new value of the specific variable
 	 */
-	public synchronized void update(String variable, Object newValue) {		
+	public synchronized void update(K variable, V newValue) {		
 		this.variableMap.put(variable, newValue);
 	}
 	
@@ -160,7 +160,7 @@ public class Node extends GraphElement{
 		if (!(obj instanceof Node))
 			return false;
 		
-		Node tmp = (Node) obj;
+		Node<K,V> tmp = (Node<K,V>) obj;
 		
 		if (this.getId() == tmp.getId())
 			return true;
