@@ -60,7 +60,6 @@ JAVA_NAME_MAP = {
     '__builtins.union': 'GraphUtil.union',
     '__builtins.draw': 'GraphUtil.draw',
     '__builtins.dump': 'GraphUtil.dump',
-    '__builtins.len': 'GraphUtil.len',
     '__builtins.load': 'GraphUtil.load',
     '__builtins.get_fb': 'GraphUtil.getFB',
     '__builtins.get_fb_friend': 'GraphUtil.getFBFriend',
@@ -73,6 +72,7 @@ JAVA_NAME_MAP = {
     'dict.keys': 'keySet',
     'dict.pop': 'remove',
     'dict.set': 'put',
+    'dict.size': 'size',
     'dict.update': 'putAll',
     'dict.values': 'values',
     'list.append': 'add',
@@ -83,9 +83,7 @@ JAVA_NAME_MAP = {
     'list.insert': 'add',
     'list.pop': 'remove',
     'list.remove': 'remove',
-    # Ideally, we'd support these....
-    #'list.reverse': 'Collections.reverse',
-    #'list.sort': 'Collections.sort',
+    'list.size': 'size',
     'set.add': 'add',
     'set.contains': 'contains',
     'set.copy': 'clone',
@@ -94,6 +92,7 @@ JAVA_NAME_MAP = {
     'set.isempty': 'isEmpty',
     'set.issuperset': 'containsAll',
     'set.remove': 'remove',
+    'set.size': 'size',
     'set.update': 'addAll',
     'str.copy': 'clone',
     'str.endswith': 'endsWith',
@@ -472,7 +471,7 @@ class CodeGenerator(object):
             keys.append(item[0])
             values.append(item[1])
         self.write('GraphUtil.createVarMap(')
-        self.write('Arrays.asList(')
+        self.write('Arrays.<String>asList(')
         interleave(lambda: self.write(', '), self.dispatch, keys)
         self.write('), Arrays.asList(')
         interleave(lambda: self.write(', '), self.dispatch, values)

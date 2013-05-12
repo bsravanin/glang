@@ -1,8 +1,10 @@
 package edu.columbia.plt.gramola.util;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import edu.columbia.plt.gramola.datastruct.Graph;
 
@@ -31,6 +33,20 @@ public class GraphUtil {
 	public static void draw(Graph g, String nodeVar, String edgeVar) {
 		GraphVisualizer gv = new GraphVisualizer(g, nodeVar, edgeVar);
 		gv.draw();
+	}
+
+	public static int len(Collection<?> c) {
+		if (c == null) {
+			return 0;
+		}
+		return c.size();
+	}
+	
+	public static int len(Map<?,?> m) {
+		if (m == null) {
+			return 0;
+		}
+		return m.size();
 	}
 	
 	public static HashSet<String> union(HashSet<String> ns1, HashSet<String> ns2) {

@@ -280,9 +280,6 @@ class Analyzer(object):
             raise InvalidTypeError(
                 '{1}: expected an iterable (list, set), found {0}'.format(
                     symbols.stringify_full_name(t.iterable.type), t.lineno))
-        # TODO: check that iterable's type param is compatible with target type
-        # At compile time, we don't know what element types are in t.iterable,
-        # unless it's a manually constructed list
         for item in getattr(t.iterable, 'elts', []):
             ancestor_types = self._get_ancestor_types(item.type)
             if t.target.type not in ancestor_types:
