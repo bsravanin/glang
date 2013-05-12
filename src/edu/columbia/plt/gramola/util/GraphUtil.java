@@ -76,7 +76,7 @@ public class GraphUtil {
 	 * @param vvlist a var-value array with undetermined size
 	 * @return a map containing <var, value> pairs
 	 */
-	public static HashMap<String, Object> createVariableMap(Object vvlist[]) {
+	/*public static HashMap<String, Object> createVariableMap(Object vvlist[]) {
 		if (vvlist.length%2 != 0)
 			return null;
 		
@@ -95,7 +95,7 @@ public class GraphUtil {
 	
 	public static HashMap<String, Object> createVarMap(Object...vvlist) {
 		return createVariableMap(vvlist);
-	}
+	}*/
 	
 	public static HashMap<String, Object> createVarMap(List<String> var, List<Object> value) {
 		
