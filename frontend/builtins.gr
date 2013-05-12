@@ -124,6 +124,10 @@ class list<object>(object):
 		# ArrayList<Object>.remove
 		return False
 
+	def int size():
+		# ArrayList<Object>.size()
+		return 0
+
 
 class set<object>(object):
 
@@ -161,6 +165,10 @@ class set<object>(object):
 	def bool remove(object obj):
 		# HashSet<Object>.remove
 		return False
+
+	def int size():
+		# HashSet<Object>.size()
+		return 0
 
 	def bool update(set<object> s):
 		# HashSet<Object>.addAll
@@ -200,6 +208,10 @@ class dict<str,object>(object):
 	def object set(str key, object value):
 		# HashMap<String,Object>.put
 		return value
+
+	def int size():
+		# HashMap<String,Object>.size()
+		return 0
 
 	def void update(dict<str,object> d):
 		# HashMap<String,Object>.putAll
@@ -359,9 +371,6 @@ class __builtins(object):
 
 	bool False = bool(0)
 	bool True = bool(1)
-
-	def int len(object obj):
-		return 0
 
 	def Graph load(str path):
 		return Graph()
