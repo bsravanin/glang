@@ -233,6 +233,16 @@ class Parser(object):
                 | parameterized_type'''
         p[0] = p[1]
 
+    def p_name(self, p):
+        'name : NAME'
+        # We resolve this name in a later pass, once it has been declared
+        name_token = p.slice[1]
+        name = name_token.value
+        # We don't yet know the proper namespace for this name, but we store
+        # the current namespace so that we can do a symbol table lookup later
+        p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
+        p[0].lineno = p.slice[1].lineno
+
     def p_bare_type(self, p):
         'bare_type : NAME'
         # We verify validity of this type in a later pass. For all we know, it
@@ -730,16 +740,6 @@ class Parser(object):
                 | number
                 | enclosure'''
         p[0] = p[1]
-
-    def p_name(self, p):
-        'name : NAME'
-        # We resolve this name in a later pass, once it has been declared
-        name_token = p.slice[1]
-        name = name_token.value
-        # We don't yet know the proper namespace for this name, but we store
-        # the current namespace so that we can do a symbol table lookup later
-        p[0] = nodes.NameNode(value=name, namespace=self._cur_namespace)
-        p[0].lineno = p.slice[1].lineno
 
     def p_string_list(self, p):
         '''string_list : STRING
