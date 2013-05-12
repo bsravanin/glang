@@ -257,8 +257,8 @@ class Graph(object):
 	def list<Edge> get_all_edges():
 		return []
 
-	# def list<Edge> get_shortest_path(Node start, Node end, dict<str,object> attr_map):
-	# 	return []
+	def list<Edge> get_shortest_path(Node start, Node end, list<str> vars, list<str> vals):
+		return []
 
 	# def list<object> get_paths(Node start, Node end, dict<str,object> attr_map):
 	# 	# This returns a list of lists
