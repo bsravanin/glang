@@ -10,7 +10,7 @@ import java.util.Set;
  * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
  *
  */
-public class NodeSet implements Set{
+public class NodeSet implements Set<Node>{
 	
 	private HashSet<Node> nodeSet = new HashSet<Node>();
 	
@@ -33,21 +33,17 @@ public class NodeSet implements Set{
 	}
 	
 	@Override
-	public boolean add(Object e) {
+	public boolean add(Node n) {
 		// TODO Auto-generated method stub
-		if (e instanceof Node) {
-			this.nodeSet.add((Node)e);
-			return true;
-		}
-		return false;
+      return this.nodeSet.add(n);
 	}
 
 	@Override
-	public boolean addAll(Collection c) {
+	public boolean addAll(Collection<? extends Node> c) {
 		// TODO Auto-generated method stub
 		Iterator cIT = c.iterator();
 		while(cIT.hasNext()) {
-			if (!this.add(cIT.next())) {
+          if (!this.add((Node)cIT.next())) {
 				nodeSet.clear();
 				return false;
 			}
@@ -72,7 +68,7 @@ public class NodeSet implements Set{
 	}
 
 	@Override
-	public boolean containsAll(Collection c) {
+	public boolean containsAll(Collection<?> c) {
 		// TODO Auto-generated method stub
 		Iterator cIT = c.iterator();
 		
@@ -92,7 +88,7 @@ public class NodeSet implements Set{
 	}
 
 	@Override
-	public Iterator iterator() {
+	public Iterator<Node> iterator() {
 		// TODO Auto-generated method stub
 		return this.nodeSet.iterator();
 	}
@@ -104,13 +100,13 @@ public class NodeSet implements Set{
 	}
 
 	@Override
-	public boolean removeAll(Collection c) {
+	public boolean removeAll(Collection<?> c) {
 		// TODO Auto-generated method stub
 		return this.nodeSet.removeAll(c);
 	}
 
 	@Override
-	public boolean retainAll(Collection c) {
+	public boolean retainAll(Collection<?> c) {
 		// TODO Auto-generated method stub
 		return this.nodeSet.retainAll(c);
 	}

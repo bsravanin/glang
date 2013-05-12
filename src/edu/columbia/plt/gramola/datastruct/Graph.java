@@ -160,6 +160,11 @@ public class Graph{
 	public Node getNode(int id) {
 		return this.nodeList.get(id);
 	}
+
+	public Node getNodeById(int id) {
+		return this.nodeList.get(id);
+	}
+
 	
 	/**
 	 * Return the list containing all Nodes in the Graph
