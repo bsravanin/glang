@@ -106,4 +106,19 @@ public class GraphUtil {
 		}
 		return variableMap;
 	}
+
+	// We probably won't need this, but just in case.
+	public static HashMap<Object,Object> createGenericMap(List<? extends Object> key, List<? extends Object> value) {
+		
+		if (key.size() != value.size()) {
+			GInformer.printMessage("Inconsistent var-value.");
+			return null;
+		}
+		
+		HashMap<Object,Object> genericMap = new HashMap<Object,Object>();
+		for (int i = 0; i < key.size(); i++) {
+			genericMap.put(key.get(i), value.get(i));
+		}
+		return genericMap;
+	}
 }
