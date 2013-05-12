@@ -26,8 +26,8 @@ if [ ! -e ../lib/gramola.jar ]; then
 fi
 
 python codegen.py $SOURCE $JTARGET
-[ -f $TARGET_DIR/*.java ] && rm $TARGET_DIR/*.java
+rm $TARGET_DIR/*.java
 mv *.java $TARGET_DIR
 javac -cp $CLASSPATH ${TARGET_DIR}/*.java
-[ -f $BIN_DIR/*.class ] && rm $BIN_DIR/*.class
+rm $BIN_DIR/*.class
 mv ${TARGET_DIR}/*.class $BIN_DIR
