@@ -97,21 +97,6 @@ public class GraphUtil {
 	public static HashMap<String, Object> createVarMap(Object...vvlist) {
 		return createVariableMap(vvlist);
 	}*/
-	
-	// public static HashMap<String, Object> createVarMap(List<String> var, List<? extends Object> value) {
-		
-	// 	if (var.size() != value.size()) {
-	// 		GInformer.printMessage("Inconsistent var-value.");
-	// 		return null;
-	// 	}
-		
-	// 	HashMap<String, Object> variableMap = new HashMap<String, Object>();
-	// 	for (int i = 0; i < var.size(); i++) {
-	// 		variableMap.put(var.get(i), value.get(i));
-	// 	}
-	// 	return variableMap;
-	// }
-
 
 	public static <T> HashMap<String, T> createVarMap(List<String> var, List<T> value) {
 		
