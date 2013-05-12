@@ -245,7 +245,7 @@ public class GraphDBController {
 		String propertyKey;
 		String propertyVal;
 		int idVal = - 1;
-		HashMap<String, Object> variableMap = new HashMap<String, Object>();
+		HashMap<String, String> variableMap = new HashMap<String, String>();
 		while(pKeys.hasNext()) {
 			propertyKey = pKeys.next();
 			propertyVal = dbNode.getProperty(propertyKey).toString();
@@ -275,7 +275,7 @@ public class GraphDBController {
 		String propertyKey;
 		String propertyVal;
 		int idVal = - 1;
-		HashMap<String, Object> variableMap = new HashMap<String, Object>();
+		HashMap<String, String> variableMap = new HashMap<String, String>();
 		while(pKeys.hasNext()) {
 			propertyKey = pKeys.next();
 			propertyVal = dbRelation.getProperty(propertyKey).toString();

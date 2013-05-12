@@ -21,9 +21,9 @@ public class Edge extends GraphElement{
 	
 	private HashSet<Edge> pathParent = new HashSet<Edge>();
 	
-	private HashMap<String, Object> variableMap;
+	private HashMap<String, String> variableMap;
 	
-	public Edge(Node start, Node end, HashMap<String, Object> variableMap, int id) {
+	public Edge(Node start, Node end, HashMap<String, String> variableMap, int id) {
 		this.start = start;
 		this.end = end;
 		this.variableMap = variableMap;
@@ -71,21 +71,21 @@ public class Edge extends GraphElement{
 	 * Get the variable map containing <varName, varValue> values
 	 * of Edge
 	 */
-	public HashMap<String, Object> getVariableMap() {
+	public HashMap<String, String> getVariableMap() {
 		return this.variableMap;
 	}
 	
 	/**
 	 * Get the value for a specific variable
 	 */
-	public Object getVariableValue(String variable) {
+	public String getVariableValue(String variable) {
 		return this.variableMap.get(variable);
 	}
 	
 	/**
 	 * Set the value for a specific variable
 	 */
-	public synchronized void setVariableValue(String variable, Object value) {
+	public synchronized void setVariableValue(String variable, String value) {
 		this.variableMap.put(variable, value);
 	}
 	

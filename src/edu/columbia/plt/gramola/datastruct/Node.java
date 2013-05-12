@@ -9,24 +9,25 @@ import edu.columbia.plt.gramola.abstractdata.GraphElement;
 /**
  * Node represents a thing with specific attributes
  * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ * @param <T>
  *
  */
-public class Node  extends GraphElement {
+public class Node extends GraphElement {
 		
 	int id = -1;
 	
-	private HashMap<String, Object> variableMap;
+	private HashMap<String, String> variableMap;
 	
 	private EdgeSet incoming = new EdgeSet();
 	
 	private EdgeSet outgoing = new EdgeSet();
 		
-	public Node(HashMap<String, Object> variableMap, int id) {
+	public Node(HashMap<String, String> variableMap, int id) {
 		this.variableMap = variableMap;
 		this.setId(id);
 	}
 	
-	public Node(HashMap<String, Object> variableMap) {
+	public Node(HashMap<String, String> variableMap) {
 		this.variableMap = variableMap;
 	}
 
@@ -47,14 +48,14 @@ public class Node  extends GraphElement {
 	/**
 	 * Get value for specific variable
 	 */
-	public Object getVariableValue(String variable) {
+	public String getVariableValue(String variable) {
 		return this.variableMap.get(variable);
 	}
 	
 	/**
 	 * Set value for specific variable
 	 */
-	public synchronized void setVariableValue(String variable, Object value) {
+	public synchronized void setVariableValue(String variable, String value) {
 		this.variableMap.put(variable, value);
 	}
 	
@@ -68,7 +69,7 @@ public class Node  extends GraphElement {
 	/**
 	 * Get the variable map containing <varName, varValue> pairs
 	 */
-	public HashMap<String, Object> getVariableMap() {
+	public HashMap<String, String> getVariableMap() {
 		return this.variableMap;
 	}
 	
@@ -141,7 +142,7 @@ public class Node  extends GraphElement {
 	 * @param variable the name of the specific variable
 	 * @param newValue the new value of the specific variable
 	 */
-	public synchronized void update(String variable, Object newValue) {		
+	public synchronized void update(String variable, String newValue) {		
 		this.variableMap.put(variable, newValue);
 	}
 	

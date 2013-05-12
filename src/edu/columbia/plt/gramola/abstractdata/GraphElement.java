@@ -6,6 +6,8 @@ import java.util.Set;
 /**
  * The parent of Node and Edge in Gramola
  * @author Fang-Hsiang Su, Gramola, 2013 Spring PLT
+ * @param <T>
+ * @param <T>
  *
  */
 public abstract class GraphElement {
@@ -27,14 +29,15 @@ public abstract class GraphElement {
 	 * @param variable
 	 * @return
 	 */
-	public abstract Object getVariableValue(String variable);
+	public abstract String getVariableValue(String variable);
 	/**
 	 * Set value object for a specific variable
+	 * @param <T>
 	 * @param variable
 	 * @param value
 	 */
 	
-	public abstract void setVariableValue(String variable, Object value);
+	public abstract void setVariableValue(String variable, String value);
 	
 	/**
 	 * Get all variables from a GraphElement
@@ -44,7 +47,8 @@ public abstract class GraphElement {
 	
 	/**
 	 * Get the variable map of a GraphElement
+	 * @param <T>
 	 * @return
 	 */
-	public abstract HashMap<String, Object> getVariableMap();
+	public abstract HashMap<String, String> getVariableMap();
 }
