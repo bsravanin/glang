@@ -228,10 +228,10 @@ class Graph(object):
 	def int get_id():
 		return 0
 
-	def Node node(dict<str,object> attr_dict):
+	def Node node(dict<str,str> attr_dict):
 		return Node({})
 
-	def Edge edge(Node start, Node end, dict<str,object> attr_dict):
+	def Edge edge(Node start, Node end, dict<str,str> attr_dict):
 		return Edge(start, end, attr_dict, 0)
 
 	def void add_node(Node n):
@@ -255,16 +255,16 @@ class Graph(object):
 	def list<Edge> get_all_edges():
 		return []
 
-	def list<Edge> get_shortest_path(Node start, Node end, dict<str,object> attr_map):
+	def list<Edge> get_shortest_path(Node start, Node end, dict<str,str> attr_map):
 		return []
 
-	def list<object> get_paths(Node start, Node end, dict<str,object> attr_map):
+	def list<object> get_paths(Node start, Node end, dict<str,str> attr_map):
 		return []
 
 
 class Node(object):
 
-	def Node __init__(dict<str,object> attr_map):
+	def Node __init__(dict<str,str> attr_map):
 		pass
 
 	def void set_id(int node_id):
@@ -282,7 +282,7 @@ class Node(object):
 	def set<str> get_attributes():
 		return set<str>([])
 
-	def dict<str,object> get_attribute_dict():
+	def dict<str,str> get_attribute_dict():
 		return {}
 
 	def void set_in_edge(Edge e):
@@ -309,7 +309,7 @@ class Node(object):
 
 class Edge(object):
 
-	def Edge __init__(Node start, Node end, dict<str,object> var_map, int edge_id):
+	def Edge __init__(Node start, Node end, dict<str,str> var_map, int edge_id):
 		pass
 
 	def void set_id(int edge_id):
@@ -327,7 +327,7 @@ class Edge(object):
 	def set<str> get_attributes():
 		return set<str>([])
 
-	def dict<str,object> get_attribute_dict():
+	def dict<str,str> get_attribute_dict():
 		return {}
 
 	def str get_attribute(str variable):
