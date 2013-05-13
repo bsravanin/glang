@@ -1,19 +1,19 @@
 def void main():
 	Graph g = Graph()
-	Node a = g.node({'name': 'a'})
-	Node b = g.node({'name': 'b'})   #diff
-	Node c = g.node({'name': 'c'})
-	Node d = g.node({'name': 'd'})   #diff
-	Node e = g.node({'name': 'e'})
+	Node a = g.node({'name': 'Michael'})
+	Node b = g.node({'name': 'Sravan'})   #diff
+	Node c = g.node({'name': 'Jiacheng'})
+	Node d = g.node({'name': 'Chun-Yu'})   #diff
+	Node e = g.node({'name': 'Fang-Hsiang'})
 	
-	g.edge(a, b, {'type': 'test'})
-	g.edge(b, d, {'type': 'test'})
-	g.edge(d, e, {'type': 'test'})
-	g.edge(a, c, {'type': 'test'})
-	g.edge(c, b, {'type': 'test'})
-	g.edge(c, d, {'type': 'test'})
+	g.edge(a, b, {'type': 'friend'})
+	g.edge(b, d, {'type': 'friend'})
+	g.edge(d, e, {'type': 'friend'})
+	g.edge(a, c, {'type': 'friend'})
+	g.edge(c, b, {'type': 'friend'})
+	g.edge(c, d, {'type': 'friend'})
 	list<str> var = ['type']
-	list<str> val = ['test']
+	list<str> val = ['friend']
 
 	list<Edge> ret = g.get_shortest_path(a, e, var, val)
 	for Edge ex in ret:
