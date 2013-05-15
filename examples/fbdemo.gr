@@ -1,7 +1,7 @@
 class Unifriend():
 	Graph fbgraph1
 	Graph fbgraph2
-    
+
 	def set<str> find_uni_friends(str name1, str name2):
 		Node owner1 = fbgraph1.get_node("name", name1)
 		Node owner2 = fbgraph2.get_node("name", name2)
@@ -11,33 +11,31 @@ class Unifriend():
 		set<str> ns2_name = ns2.select('name')
 		set<str> cofriend = union(ns1_name, ns2_name)
 		return cofriend
-          
+
 def void main():
-#Get Facebook token first
+	# Get Facebook token first
 	str token1 = 'CAACEdEose0cBALjIeekTr74xCaI0Q2FTRWbvvuz2Lw5eDsdZC2k8KmZAJnLNSdDKBCoy0lQzKjslgEAA6MPGTGFECBNEZApaDv8MZCvwwJKQnfCYHhnb094MXRGZC6phdZCUZCEPebKkrv5V28isQeQgWa1ZAVfIbz3alY81b3MC6wZDZD'
-	
 	str token2 = 'CAACEdEose0cBADS6QqiLoEQBZBmo6wEtuZCQ9YMHsz57iZBysjon5ObdiOfXJGCz9Tmj1YFfBsbzfO1wogNHczz5ZCB300RwtvZAofZArTxNve8UZBY97izssacbIL69DabOiKWhMCpwUDvDgGjPp2vac6IRUBNnsQZD'
 
-#Get FB databack of PeterLouisTerry, convert it to a Graph, store Graph in Graph DB and then draw
+	# Get FB databack of PeterLouisTerry, convert it to a Graph, store Graph in Graph DB and then draw
 	Graph fb1 = get_fb(token1)
 	draw(fb1, "name", "type")
 	dump(fb1, "PLT")
 
-#Get FB feeds on wall of PeterLouisTerry and traverse it
+	# Get FB feeds on wall of PeterLouisTerry and traverse it
 	print 'Traverse wall feeds of Peter'
 	Graph fbFeed = get_fb_feed(token1)
 	list<Node> feedList = fbFeed.get_all_nodes()
 	for Node fNode in feedList:
 		print fNode.get_attribute('name')
-	
 	print ''
 
-#Use user-defined class to find united-friends between PeterLouisTerry and ApfelpuffJJ
+	# Use user-defined class to find united-friends between PeterLouisTerry and ApfelpuffJJ
 	Unifriend c = Unifriend()
 	c.fbgraph1 = get_fb_friend(token1)
 	c.fbgraph2 = get_fb_friend(token2)
 	set<str> uniFriends = c.find_uni_friends("PeterLouisTerry","ApfelpuffJJ")
-	
+
 	print 'United friends of Peter and Apfelpuff'
 	print uniFriends
 	print ''
