@@ -1,8 +1,8 @@
-class Cofriend():
+class Unifriend():
 	Graph fbgraph1
 	Graph fbgraph2
     
-	def set<str> find_co_friends(str name1, str name2):
+	def set<str> find_uni_friends(str name1, str name2):
 		Node owner1 = fbgraph1.get_node("name", name1)
 		Node owner2 = fbgraph2.get_node("name", name2)
 		NodeSet ns1 = owner1.out_edges().filter('type','friend').out_nodes()
@@ -14,18 +14,35 @@ class Cofriend():
           
 def void main():
 #Get Facebook token first
-	str token1 = 'CAACEdEose0cBANVJYsfVi7C2j2B5yLnvnoUAQEfIU7ns6GE7PcVvX7IMr2DtBwZCItrqxKe3Ys3XPvzVkUSK3G6xeGe8xJlIADpd1B61B4nSuufZAAl2ANeKBlr50JTk4NwuZBYoRRuZBPtARjSmoaX5ZC7FThGcZD'
+	str token1 = 'CAACEdEose0cBALjIeekTr74xCaI0Q2FTRWbvvuz2Lw5eDsdZC2k8KmZAJnLNSdDKBCoy0lQzKjslgEAA6MPGTGFECBNEZApaDv8MZCvwwJKQnfCYHhnb094MXRGZC6phdZCUZCEPebKkrv5V28isQeQgWa1ZAVfIbz3alY81b3MC6wZDZD'
 	
-	str token2 = 'CAACEdEose0cBAPQ8PxLt8WRPFsJ2j7129sMMRVtPbMOd8A8RrzRCNxrqv78l1kl5lVN9I9tKmv1uszsEX2iOzfFvl6iakfDas6ZBNIDP4aWZC6zWhTIS2GZCffZA5qPurRiDJBr7zHBQyI2ZC2rslLtNLsojFkZAAZD'
+	str token2 = 'CAACEdEose0cBADS6QqiLoEQBZBmo6wEtuZCQ9YMHsz57iZBysjon5ObdiOfXJGCz9Tmj1YFfBsbzfO1wogNHczz5ZCB300RwtvZAofZArTxNve8UZBY97izssacbIL69DabOiKWhMCpwUDvDgGjPp2vac6IRUBNnsQZD'
 
-#Get FB databack of PeterLouisTerry, convert it to a Graph and draw
+#Get FB databack of PeterLouisTerry, convert it to a Graph, store Graph in Graph DB and then draw
 	Graph fb1 = get_fb(token1)
 	draw(fb1, "name", "type")
 	dump(fb1, "PLT")
 
-#Use user-defined class to find co-friends between PeterLouisTerry and ApfelpuffJJ
-	Cofriend c = Cofriend()
+#Get FB feeds on wall of PeterLouisTerry and traverse it
+	print 'Traverse wall feeds of Peter'
+	Graph fbFeed = get_fb_feed(token1)
+	list<Node> feedList = fbFeed.get_all_nodes()
+	for Node fNode in feedList:
+		print fNode.get_attribute('name')
+	
+	print ''
+
+#Use user-defined class to find united-friends between PeterLouisTerry and ApfelpuffJJ
+	Unifriend c = Unifriend()
 	c.fbgraph1 = get_fb_friend(token1)
 	c.fbgraph2 = get_fb_friend(token2)
-	set<str> commonFriends = c.find_co_friends("PeterLouisTerry","ApfelpuffJJ")
-	print commonFriends
+	set<str> uniFriends = c.find_uni_friends("PeterLouisTerry","ApfelpuffJJ")
+	
+	print 'United friends of Peter and Apfelpuff'
+	print uniFriends
+	print ''
+
+	print 'Try to traverse uni-friends'
+	for str s in uniFriends:
+		print "uni friends"
+		print s
