@@ -47,6 +47,7 @@ public class PathTest {
 		Edge ac = g.Edge(a, c, varMap);
 		Edge cb = g.Edge(c, b, varMap);
 		Edge cd = g.Edge(c, d, varMap);
+		Edge ce = g.Edge(c, e, varMap);
 		
 		ArrayList<String> vars = new ArrayList<String>();
 		ArrayList<String> vals = new ArrayList<String>();

@@ -209,6 +209,7 @@ public class Graph{
 		
 		for (ArrayList<Edge> tmp: allPaths) {
 			if (tmp.size() < min) {
+				min = tmp.size();
 				shortest = tmp;
 			}
 		}
